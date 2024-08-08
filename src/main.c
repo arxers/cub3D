@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/09 00:59:08 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/09 01:02:05 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	ft_pixel_put(t_img *img, int x, int y, int color)
 
 	if (x < 0 || y < 0 || x > RES_X || y > RES_Y)
 		return ;
-	dst = img->addr + (y * img->line_len + x * (img->bits_per_pixel / 8));
+	dst = img->addr + ((y * img->line_len) + (x * (img->bits_per_pixel / 8)));
 	*(unsigned int *)dst = color;
 }
 
