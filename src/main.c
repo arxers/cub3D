@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/08 18:32:52 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/09 00:59:08 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,15 +30,17 @@ void	ft_pixel_put(t_img *img, int x, int y, int color)
 {
 	char	*dst;
 
+	if (x < 0 || y < 0 || x > RES_X || y > RES_Y)
+		return ;
 	dst = img->addr + (y * img->line_len + x * (img->bits_per_pixel / 8));
 	*(unsigned int *)dst = color;
 }
 
 void	draw_circle(t_img *img, t_point origin, int radius, int color)
 {
-	int	x;
-	int	y;
-	int	angle;
+	int		x;
+	int		y;
+	float	angle;
 
 	angle = 0;
 	while (angle < 360)
@@ -46,7 +48,7 @@ void	draw_circle(t_img *img, t_point origin, int radius, int color)
 		x = origin.x + radius * cos(angle * M_PI / 180);
 		y = origin.y + radius * sin(angle * M_PI / 180);
 		ft_pixel_put(img, x, y, color);
-		angle++;
+		angle += 0.1;
 	}
 }
 
@@ -77,12 +79,7 @@ int	main(int ac, char **av)
 			&cub3d.img.line_len, &cub3d.img.endian);
 	// ft_pixel_put(&cub3d.img, 5, 5, 0x00FF00);
 	// ft_pixel_put(&cub3d.img, 10, 10, 0x00FF00);
-	int	i = 0;
-	while (i < 100)
-	{
-		draw_circle(&cub3d.img, (t_point){.x = 500 + i, .y = 500}, 10, 0x00FF00);
-		i += 10;
-	}
+	draw_circle(&cub3d.img, (t_point){.x = (RES_X / 2), .y = (RES_Y / 2)}, 100, 0xFF00FF);
 	mlx_put_image_to_window(cub3d.mlx, cub3d.mlx_win, cub3d.img.img, 0, 0);
 	mlx_loop(cub3d.mlx);
 	(void)av;
