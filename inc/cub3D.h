@@ -5,10 +5,11 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/08 11:51:12 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/12 21:40:48 by jaslim           ###   ########.fr       */
+/*   Created: Invalid date        by                   #+#    #+#             */
+/*   Updated: 2024/08/12 23:11:05 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #ifndef CUB3D_H
 # define CUB3D_H
@@ -56,7 +57,6 @@ typedef struct s_game
 	void		*mlx_ptr;
 	void		*win_ptr;
 	int			arrow_keys[4];
-	t_player	player;
 	t_img		mlx_win_img;
 	t_img		bg;
 	t_sprites	sprites;
