@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:51:12 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/10 14:40:15 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/12 21:40:48 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,13 @@
 
 # include "../libft/libft.h"
 # include "../mlx/mlx.h"
+# include <X11/keysym.h>
+# include <X11/X.h>
 # include <math.h>
 
-# define RES_X 1280
-# define RES_Y 720
+// resolution
+# define RES_X 1024
+# define RES_Y 512
 # define WALL 64
 
 typedef struct s_point
@@ -42,11 +45,20 @@ typedef struct s_sprites
 	t_img		wall[4];
 }				t_sprites;
 
+typedef struct s_player
+{
+	float		px;
+	float		py;
+}				t_player;
+
 typedef struct s_game
 {
 	void		*mlx_ptr;
 	void		*win_ptr;
+	int			arrow_keys[4];
+	t_player	player;
 	t_img		mlx_win_img;
+	t_img		bg;
 	t_sprites	sprites;
 }				t_game;
 
