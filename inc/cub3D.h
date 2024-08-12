@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2024/08/12 23:11:05 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/12 23:13:30 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ typedef struct s_game
 	void		*mlx_ptr;
 	void		*win_ptr;
 	int			arrow_keys[4];
+	t_player	player;
 	t_img		mlx_win_img;
 	t_img		bg;
 	t_sprites	sprites;
