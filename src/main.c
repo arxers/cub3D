@@ -6,25 +6,43 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/12 23:12:45 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/13 18:59:23 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3D.h"
 
-int	map[10][10] =
-{
+int	g_map_x = 10;
+int	g_map_y = 10;
+int	g_map[10][10] = {
 	{1,1,1,1,1,1,1,1,1,1},
 	{1,0,0,0,0,0,0,0,0,1},
 	{1,0,0,0,0,0,0,0,0,1},
 	{1,0,0,0,0,0,0,0,0,1},
+	{1,0,0,0,1,1,0,0,0,1},
+	{1,0,0,0,1,0,0,0,0,1},
 	{1,0,0,0,0,0,0,0,0,1},
-	{1,0,0,0,0,0,0,0,0,1},
-	{1,0,0,0,0,0,0,0,0,1},
-	{1,0,0,0,0,0,0,0,0,1},
-	{1,0,0,0,0,0,0,0,0,1},
+	{1,0,1,0,0,0,0,0,0,1},
+	{1,0,1,0,0,0,0,0,0,1},
 	{1,1,1,1,1,1,1,1,1,1}
 };
+
+t_img	init_img(void *mlx_ptr, int width, int height)
+{
+	t_img	img;
+
+	img.img = mlx_new_image(mlx_ptr, width, height);
+	if (img.img == NULL)
+	{
+		img.addr = NULL;
+		return (img);
+	}
+	img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel,
+			&img.line_len, &img.endian);
+	img.size.x = width;
+	img.size.y = height;
+	return (img);
+}
 
 void	set_pixel(t_img *img, int x, int y, unsigned int color)
 {
@@ -65,17 +83,6 @@ void	img_to_img(t_point origin, t_point size, t_img *src, t_img *dst)
 	}
 }
 
-void	transparency_test(t_game *cub3d)
-{
-	t_img	test_alpha;
-	t_point	size;
-
-	test_alpha.img = mlx_xpm_file_to_image(cub3d->mlx_ptr, "textures/alpha_test.xpm", &size.x, &size.y);
-	test_alpha.addr = mlx_get_data_addr(test_alpha.img, &test_alpha.bits_per_pixel,
-			&test_alpha.line_len, &test_alpha.endian);
-	img_to_img((t_point){RES_X / 2 - (size.x / 2), RES_Y / 2 - (size.y / 2)}, size, &test_alpha, &cub3d->mlx_win_img);
-}
-
 int	load_xpm(void *mlx, char *path, t_img *img)
 {
 	img->img = mlx_xpm_file_to_image(mlx, path, &img->size.x, &img->size.y);
@@ -85,15 +92,15 @@ int	load_xpm(void *mlx, char *path, t_img *img)
 	return (0);
 }
 
-int	load_xpms(t_game *cub3d)
+int	load_xpms(t_game *game)
 {
-	if (load_xpm(cub3d->mlx_ptr, "textures/wall/wall1.xpm", &cub3d->sprites.wall[0]) == -1)
+	if (load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->sprites.wall[0]) == -1)
 		return (-1);
-	img_to_img((t_point){RES_X / 2 - (cub3d->sprites.wall[0].size.x / 2), RES_Y / 2 - (cub3d->sprites.wall[0].size.y / 2)}, cub3d->sprites.wall[0].size, &cub3d->sprites.wall[0], &cub3d->mlx_win_img);
+	img_to_img((t_point){RES_X / 2 - (game->sprites.wall[0].size.x / 2), RES_Y / 2 - (game->sprites.wall[0].size.y / 2)}, game->sprites.wall[0].size, &game->sprites.wall[0], &game->mlx_win_img);
 	return (0);
 }
 
-void	draw_rectangle(t_img *img, t_point origin, t_point size, unsigned int color)
+void	draw_rectangle(t_img *dst, t_point origin, t_point size, unsigned int color)
 {
 	int	x;
 	int	y;
@@ -104,14 +111,14 @@ void	draw_rectangle(t_img *img, t_point origin, t_point size, unsigned int color
 		x = 0;
 		while (x < size.x)
 		{
-			set_pixel(img, x + origin.x, y + origin.y, color);
+			set_pixel(dst, x + origin.x, y + origin.y, color);
 			x++;
 		}
 		y++;
 	}
 }
 
-void	draw_filled_circle(t_img *img, t_point origin, int radius, unsigned int color)
+void	draw_circle(t_img *dst, t_point origin, int radius, unsigned int color)
 {
 	int		r_sq;
 	t_point	p;
@@ -127,14 +134,14 @@ void	draw_filled_circle(t_img *img, t_point origin, int radius, unsigned int col
 			d.x = p.x - origin.x;
 			d.y = p.y - origin.y;
 			if ((d.x * d.x) + (d.y * d.y) <= r_sq)
-				set_pixel(img, p.x, p.y, color);
+				set_pixel(dst, p.x, p.y, color);
 			p.x++;
 		}
 		p.y++;
 	}
 }
 
-void	draw_circle(t_img *img, t_point origin, int radius, unsigned int color)
+void	draw_circle_outline(t_img *img, t_point origin, int radius, unsigned int color)
 {
 	int		x;
 	int		y;
@@ -143,21 +150,24 @@ void	draw_circle(t_img *img, t_point origin, int radius, unsigned int color)
 	angle = 0;
 	while (angle < 360)
 	{
-		x = origin.x + radius * cos(angle * M_PI / 180);
-		y = origin.y + radius * sin(angle * M_PI / 180);
+		x = origin.x + radius * cos(angle * PI / 180);
+		y = origin.y + radius * sin(angle * PI / 180);
 		set_pixel(img, x, y, color);
 		angle += 0.1;
 	}
 }
-void	draw_player(t_img *img, t_player p)
+void	draw_map_player(t_img *img, t_player p)
 {
-	draw_filled_circle(img, (t_point){(int)p.px, (int)p.py}, 10, 0xFFFFFF);
-	draw_filled_circle(img, (t_point){(int)p.px - 20, (int)p.py}, 10, 0xFFFFFF);
-	draw_filled_circle(img, (t_point){(int)p.px - 10, (int)p.py - 10}, 10, 0xFFFFFF);
-	draw_filled_circle(img, (t_point){(int)p.px - 10, (int)p.py - 20}, 10, 0xFFFFFF);
-	draw_filled_circle(img, (t_point){(int)p.px - 10, (int)p.py - 30}, 10, 0xFFFFFF);
-	draw_filled_circle(img, (t_point){(int)p.px - 10, (int)p.py - 40}, 10, 0xFFFFFF);
-	draw_filled_circle(img, (t_point){(int)p.px - 10, (int)p.py - 50}, 11, 0xFFFFFF);
+	float	d;
+	float	r;
+	t_point	pointer;
+
+	draw_circle(img, (t_point){(int)p.x, (int)p.y}, CELL / 4, WHITE);
+	d = CELL / 2;
+	r = CELL / 8;
+	pointer.x = (int)(p.x + p.dx * d);
+	pointer.y = (int)(p.y + p.dy * d);
+	draw_circle(img, pointer, r, WHITE);
 }
 
 int	input_validation(int ac, char **av)
@@ -174,13 +184,14 @@ int	input_validation(int ac, char **av)
 	return (0);
 }
 
-int	cleanup(t_game *cub3d)
+int	cleanup(t_game *game)
 {
-	mlx_destroy_image(cub3d->mlx_ptr, cub3d->sprites.wall[0].img);
-	mlx_destroy_image(cub3d->mlx_ptr, cub3d->mlx_win_img.img);
-	mlx_destroy_window(cub3d->mlx_ptr, cub3d->win_ptr);
-	mlx_destroy_display(cub3d->mlx_ptr);
-	free(cub3d->mlx_ptr);
+	mlx_destroy_image(game->mlx_ptr, game->mlx_win_img.img);
+	mlx_destroy_image(game->mlx_ptr, game->map.img);
+	mlx_destroy_image(game->mlx_ptr, game->bg.img);
+	mlx_destroy_window(game->mlx_ptr, game->win_ptr);
+	mlx_destroy_display(game->mlx_ptr);
+	free(game->mlx_ptr);
 	exit(0);
 }
 
@@ -191,19 +202,59 @@ t_point	center(t_point origin, t_point size)
 	return (origin);
 }
 
-t_img	create_bg(void *mlx_ptr)
+t_img	init_bg(void *mlx_ptr)
 {
 	t_img	bg;
 
-	bg.img = mlx_new_image(mlx_ptr, RES_X, RES_Y);
-	bg.addr = mlx_get_data_addr(bg.img, &bg.bits_per_pixel, &bg.line_len, &bg.endian);
+	bg = init_img(mlx_ptr, RES_X, RES_Y);
+	if (bg.img == NULL)
+		;//handle it
 	draw_rectangle(&bg, (t_point){0, 0}, (t_point){RES_X, RES_Y / 2}, 0x171B22);
 	draw_rectangle(&bg, (t_point){0, RES_Y / 2}, (t_point){RES_X, RES_Y / 2}, 0x404856);
 	return (bg);
 }
 
-int	handle_esc(void)
+void	draw_map_tiles(t_img *map)
 {
+	t_point	count;
+	t_point	origin;
+
+	count.y = 0;
+	origin.y = 0;
+	while (count.y < g_map_y)
+	{
+		origin.x = 0;
+		count.x = 0;
+		while (count.x < g_map_x)
+		{
+			if (g_map[count.y][count.x] == 1)
+				draw_rectangle(map, origin, (t_point){CELL, CELL}, MAP_COLOR);
+			else if (g_map[count.y][count.x] == 0)
+				draw_rectangle(map, origin, (t_point){CELL, CELL}, BLACK);
+			count.x++;
+			origin.x += CELL + 1;
+		}
+		count.y++;
+		origin.y += CELL + 1;
+	}
+}
+
+t_img	init_map(t_game *game, t_point map_grid_size)
+{
+	t_img	map;
+	t_point	map_size;
+
+	map_size.x = (map_grid_size.x * (CELL + 1)) - 1;
+	map_size.y = (map_grid_size.y * (CELL + 1)) - 1;
+	map = init_img(game->mlx_ptr, map_size.x, map_size.y);
+	draw_rectangle(&map, (t_point){0, 0}, map_size, MAP_COLOR);
+	draw_map_tiles(&map);
+	return (map);
+}
+
+int	key_esc(t_game *game)
+{
+	cleanup(game);
 	ft_printf("exit\n");
 	exit(0);
 	return (0);
@@ -211,56 +262,89 @@ int	handle_esc(void)
 
 int	key_release(unsigned int key, t_game *game)
 {
-	if (key == XK_Up)
-		game->arrow_keys[0] = 0;
-	if (key == XK_Left)
-		game->arrow_keys[1] = 0;
-	if (key == XK_Down)
-		game->arrow_keys[2] = 0;
-	if (key == XK_Right)
-		game->arrow_keys[3] = 0;
+	if (key == XK_Up || key == XK_w)
+		game->move_keys[UP] = 0;
+	if (key == XK_Down || key == XK_s)
+		game->move_keys[DOWN] = 0;
+	if (key == XK_Left || key == XK_a)
+		game->move_keys[LEFT] = 0;
+	if (key == XK_Right || key == XK_d)
+		game->move_keys[RIGHT] = 0;
 	return (0);
 }
 
 int	key_press(unsigned int key, t_game *game)
 {
 	if (key == XK_Escape)
-		handle_esc();
-	if (key == XK_Up)
-		game->arrow_keys[0] = 1;
-	if (key == XK_Left)
-		game->arrow_keys[1] = 1;
-	if (key == XK_Down)
-		game->arrow_keys[2] = 1;
-	if (key == XK_Right)
-		game->arrow_keys[3] = 1;
+		key_esc(game);
+	if (key == XK_Up || key == XK_w)
+		game->move_keys[UP] = 1;
+	if (key == XK_Down || key == XK_s)
+		game->move_keys[DOWN] = 1;
+	if (key == XK_Left || key == XK_a)
+		game->move_keys[LEFT] = 1;
+	if (key == XK_Right || key == XK_d)
+		game->move_keys[RIGHT] = 1;
 	return (0);
 }
 
 int	handle_keys(t_game *game)
 {
-	if (game->arrow_keys[0])
+	if (game->move_keys[LEFT])
 	{
-		game->player.py--;
-		ft_printf("up\n");
+		game->player.angle -= 0.05;
+		if (game->player.angle < 0)
+			game->player.angle += 2 * PI;
+		game->player.dx = cos(game->player.angle);
+		game->player.dy = sin(game->player.angle);
 	}
-	if (game->arrow_keys[1])
+	if (game->move_keys[RIGHT])
 	{
-		game->player.px--;
-		ft_printf("left\n");
+		game->player.angle += 0.05;
+		if (game->player.angle > 2 * PI)
+			game->player.angle -= 2 * PI;
+		game->player.dx = cos(game->player.angle);
+		game->player.dy = sin(game->player.angle);
 	}
-	if (game->arrow_keys[2])
+	if (game->move_keys[UP])
 	{
-		game->player.py++;
-		ft_printf("down\n");
+		game->player.x += game->player.dx;
+		game->player.y += game->player.dy;
 	}
-	if (game->arrow_keys[3])
+	if (game->move_keys[DOWN])
 	{
-		game->player.px++;
-		ft_printf("right\n");
+		game->player.x -= game->player.dx;
+		game->player.y -= game->player.dy;
 	}
 	return (0);
 }
+
+// int	handle_keys(t_game *game)
+// {
+// 	float	move_x;
+// 	float	move_y;
+// 	float	move_speed;
+
+// 	move_x = 0;
+// 	move_y = 0;
+// 	move_speed = MOV_SPD;
+// 	if (game->move_keys[UP])
+// 		move_y -= move_speed;
+// 	if (game->move_keys[DOWN])
+// 		move_y += move_speed;
+// 	if (game->move_keys[LEFT])
+// 		move_x -= move_speed;
+// 	if (game->move_keys[RIGHT])
+// 		move_x += move_speed;
+// 	if (move_x != 0 && move_y != 0)
+// 	{
+// 		move_x /= 1.41421;
+// 		move_y /= 1.41421;
+// 	}
+// 	game->player.x += move_x;
+// 	game->player.y += move_y;
+// 	return (0);
+// }
 
 void	init_keys(t_game *game)
 {
@@ -269,7 +353,7 @@ void	init_keys(t_game *game)
 	i = 0;
 	while (i < 4)
 	{
-		game->arrow_keys[i] = 0;
+		game->move_keys[i] = 0;
 		i++;
 	}
 }
@@ -278,9 +362,19 @@ int	render_frame(t_game *game)
 {
 	handle_keys(game);
 	img_to_img((t_point){0, 0}, (t_point){RES_X, RES_Y}, &game->bg, &game->mlx_win_img);
-	draw_player(&game->mlx_win_img, game->player);
+	img_to_img((t_point){50, 50}, game->map.size, &game->map, &game->mlx_win_img);
+	draw_map_player(&game->mlx_win_img, game->player);
 	mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->mlx_win_img.img, 0, 0);
 	return (0);
+}
+
+void	init_player_pos(t_game *game)
+{
+	game->player.x = RES_X / 2;
+	game->player.y = RES_Y / 2;
+	game->player.angle = 0;
+	game->player.dx = cos(game->player.angle);
+	game->player.dy = sin(game->player.angle);
 }
 
 int	main(int ac, char **av)
@@ -291,24 +385,15 @@ int	main(int ac, char **av)
 		return (1);
 	game.mlx_ptr = mlx_init();
 	game.win_ptr = mlx_new_window(game.mlx_ptr, RES_X, RES_Y, "cub3D");
-	game.mlx_win_img.img = mlx_new_image(game.mlx_ptr, RES_X, RES_Y);
-	game.mlx_win_img.addr = mlx_get_data_addr(game.mlx_win_img.img, &game.mlx_win_img.bits_per_pixel,
-			&game.mlx_win_img.line_len, &game.mlx_win_img.endian);
-	game.bg = create_bg(game.mlx_ptr);
-	
-	// draw_filled_circle(&game.mlx_win_img, (t_point){RES_X / 2, RES_Y / 2}, 50, 0xFF00FF);
-	// draw_filled_circle(&game.mlx_win_img, (t_point){RES_X / 2, RES_Y / 2}, 300, 0xFF00FF);
-	// transparency_test(&game);
-	
-	// cleanup(&cub3d);
+	game.mlx_win_img = init_img(game.mlx_ptr, RES_X, RES_Y);
+	game.bg = init_bg(game.mlx_ptr);
+	game.map = init_map(&game, (t_point){g_map_x, g_map_y});
 
 	init_keys(&game);
-	game.player.px = 0;
-	game.player.py = 0;
-	
+	init_player_pos(&game);
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win_ptr, KeyRelease, KeyReleaseMask, &key_release, &game);
-	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &handle_esc, NULL);
+	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &key_esc, NULL);
 	mlx_loop_hook(game.mlx_ptr, &render_frame, &game);
 	mlx_loop(game.mlx_ptr);
 	(void)av;
