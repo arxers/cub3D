@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/13 18:47:28 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/14 19:21:35 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,14 @@
 # define MAP_COLOR 0x0ADAF3
 
 // movement
-# define MOV_SPD 0.2
+# define MOV_SPD 0.5
+# define ROT_SPD 0.2
 # define UP 0
 # define DOWN 1
 # define LEFT 2
 # define RIGHT 3
+# define ROT_L 4
+# define ROT_R 5
 
 // colors
 # define BLACK 0x000000
@@ -75,7 +78,7 @@ typedef struct s_game
 {
 	void		*mlx_ptr;
 	void		*win_ptr;
-	int			move_keys[4];
+	int			move_keys[6];
 	t_player	player;
 	t_img		mlx_win_img;
 	t_img		map;

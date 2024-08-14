@@ -6,7 +6,7 @@
 #    By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/09/16 17:49:27 by jaslim            #+#    #+#              #
-#    Updated: 2024/08/07 19:14:00 by jaslim           ###   ########.fr        #
+#    Updated: 2024/08/14 18:30:29 by jaslim           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -66,6 +66,7 @@ SRC =	src/ft_atoi.c \
 	src/ft_count_strings.c \
 	src/ft_print_fd.c \
 	src/ft_only_c.c \
+	src/ft_abs.c \
 	src_printf/ft_printf.c \
 	src_printf/ft_printf_alnum.c \
 	src_printf/ft_printf_hex.c \

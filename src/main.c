@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/13 18:59:23 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/14 19:41:59 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ t_img	init_img(void *mlx_ptr, int width, int height)
 void	set_pixel(t_img *img, int x, int y, unsigned int color)
 {
 	char			*dst;
-	
+
 	if (x < 0 || y < 0 || x > RES_X || y > RES_Y || (color >> 24) & 0xFF)
 		return ;
 	dst = img->addr + ((y * img->line_len) + (x * (img->bits_per_pixel / 8)));
@@ -156,6 +156,46 @@ void	draw_circle_outline(t_img *img, t_point origin, int radius, unsigned int co
 		angle += 0.1;
 	}
 }
+
+void	brasenham(int *err, t_point *start, t_point d, t_point s)
+{
+	if (2 * *err > -d.x)
+	{
+		*err -= d.y;
+		start->x += s.x;
+	}
+	if (2 * *err < d.y)
+	{
+		*err += d.x;
+		start->y += s.y;
+	}
+}
+
+void	draw_line(t_img *img, t_point start, t_point end, unsigned int color)
+{
+	t_point	d;
+	t_point	s;
+	int		err;
+
+	d.x = ft_abs(end.x - start.x);
+	d.y = ft_abs(end.y - start.y);
+	s.x = -1;
+	s.y = -1;
+	if (start.x < end.x)
+		s.x = 1;
+	if (start.y < end.y)
+		s.y = 1;
+	err = -d.y;
+	if (d.x > d.y)
+		err = d.x;
+	err /= 2;
+	while (start.x != end.x || start.y != end.y)
+	{
+		brasenham(&err, &start, d, s);
+		set_pixel(img, start.x, start.y, color);
+	}
+}
+
 void	draw_map_player(t_img *img, t_player p)
 {
 	float	d;
@@ -266,10 +306,14 @@ int	key_release(unsigned int key, t_game *game)
 		game->move_keys[UP] = 0;
 	if (key == XK_Down || key == XK_s)
 		game->move_keys[DOWN] = 0;
-	if (key == XK_Left || key == XK_a)
+	if (key == XK_a)
 		game->move_keys[LEFT] = 0;
-	if (key == XK_Right || key == XK_d)
+	if (key == XK_d)
 		game->move_keys[RIGHT] = 0;
+	if (key == XK_Left || key == XK_q)
+		game->move_keys[ROT_L] = 0;
+	if (key == XK_Right || key == XK_e)
+		game->move_keys[ROT_R] = 0;
 	return (0);
 }
 
@@ -281,41 +325,90 @@ int	key_press(unsigned int key, t_game *game)
 		game->move_keys[UP] = 1;
 	if (key == XK_Down || key == XK_s)
 		game->move_keys[DOWN] = 1;
-	if (key == XK_Left || key == XK_a)
+	if (key == XK_a)
 		game->move_keys[LEFT] = 1;
-	if (key == XK_Right || key == XK_d)
+	if (key == XK_d)
 		game->move_keys[RIGHT] = 1;
+	if (key == XK_Left || key == XK_q)
+		game->move_keys[ROT_L] = 1;
+	if (key == XK_Right || key == XK_e)
+		game->move_keys[ROT_R] = 1;
 	return (0);
 }
 
-int	handle_keys(t_game *game)
+void	handle_rotation(t_game *game, float speed)
 {
-	if (game->move_keys[LEFT])
+	if (game->move_keys[ROT_L])
 	{
-		game->player.angle -= 0.05;
+		game->player.angle -= 0.1 * speed;
 		if (game->player.angle < 0)
 			game->player.angle += 2 * PI;
 		game->player.dx = cos(game->player.angle);
 		game->player.dy = sin(game->player.angle);
 	}
-	if (game->move_keys[RIGHT])
+	if (game->move_keys[ROT_R])
 	{
-		game->player.angle += 0.05;
+		game->player.angle += 0.1 * speed;
 		if (game->player.angle > 2 * PI)
 			game->player.angle -= 2 * PI;
 		game->player.dx = cos(game->player.angle);
 		game->player.dy = sin(game->player.angle);
 	}
+}
+
+void	calculate_movement(t_game *game, float *move_x, float *move_y)
+{
 	if (game->move_keys[UP])
 	{
-		game->player.x += game->player.dx;
-		game->player.y += game->player.dy;
+		*move_x += game->player.dx;
+		*move_y += game->player.dy;
 	}
 	if (game->move_keys[DOWN])
 	{
-		game->player.x -= game->player.dx;
-		game->player.y -= game->player.dy;
+		*move_x -= game->player.dx ;
+		*move_y -= game->player.dy;
 	}
+	if (game->move_keys[LEFT])
+	{
+		*move_x += cos(game->player.angle - PI / 2);
+		*move_y += sin(game->player.angle - PI / 2);
+	}
+	if (game->move_keys[RIGHT])
+	{
+		*move_x -= cos(game->player.angle - PI / 2);
+		*move_y -= sin(game->player.angle - PI / 2);
+	}
+}
+
+void	normalize_movement(float *move_x, float *move_y)
+{
+	float	length;
+
+	length = sqrt(*move_x * *move_x + *move_y * *move_y);
+	if (length > 0)
+	{
+		*move_x /= length;
+		*move_y /= length;
+	}
+}
+
+void	handle_movement(t_game *game, float speed)
+{
+	float	move_x;
+	float	move_y;
+
+	move_x = 0.0;
+	move_y = 0.0;
+	calculate_movement(game, &move_x, &move_y);
+	normalize_movement(&move_x, &move_y);
+	game->player.x += move_x * speed;
+	game->player.y += move_y * speed;
+}
+
+int	handle_keys(t_game *game)
+{
+	handle_rotation(game, ROT_SPD);
+	handle_movement(game, MOV_SPD);
 	return (0);
 }
 
@@ -351,7 +444,7 @@ void	init_keys(t_game *game)
 	int	i;
 
 	i = 0;
-	while (i < 4)
+	while (i < 6)
 	{
 		game->move_keys[i] = 0;
 		i++;
@@ -362,8 +455,10 @@ int	render_frame(t_game *game)
 {
 	handle_keys(game);
 	img_to_img((t_point){0, 0}, (t_point){RES_X, RES_Y}, &game->bg, &game->mlx_win_img);
-	img_to_img((t_point){50, 50}, game->map.size, &game->map, &game->mlx_win_img);
+	img_to_img((t_point){RES_X - game->map.size.x, 0}, game->map.size, &game->map, &game->mlx_win_img);
 	draw_map_player(&game->mlx_win_img, game->player);
+	draw_line(&game->mlx_win_img, (t_point){0, 0}, (t_point){RES_X, RES_Y}, 0xFFFFFF);
+	draw_line(&game->mlx_win_img, (t_point){0, RES_Y}, (t_point){RES_X, 0}, 0xFFFFFF);
 	mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->mlx_win_img.img, 0, 0);
 	return (0);
 }

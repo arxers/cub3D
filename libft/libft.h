@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/16 10:46:11 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/07 19:13:44 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/14 18:30:14 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,5 +116,6 @@ char				*ft_strtok_dup(char *str, const char *delim);
 void				ft_print_fd(int fd);
 int					ft_count_strings(char **array);
 int					ft_only_c(char *s, char c);
+int					ft_abs(int n);
 
 #endif

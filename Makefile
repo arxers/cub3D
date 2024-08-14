@@ -42,7 +42,7 @@ fclean: clean
 
 re: fclean all
 
-debug: CFLAGS += -g
+debug: CFLAGS += -g -fsanitize=address
 debug: LIBFLAG += debug
 debug: re
 
@@ -50,6 +50,6 @@ gdb: debug
 	gdb -tui ./$(NAME)
 
 valgrind: debug
-	valgrind --leak-check=full --track-fds=yes ./$(NAME)
+	valgrind --leak-check=full ./$(NAME)
 
 .PHONY: all clean fclean re debug gdb valgrind
