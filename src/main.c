@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/14 19:41:59 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/14 20:48:47 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,6 +196,17 @@ void	draw_line(t_img *img, t_point start, t_point end, unsigned int color)
 	}
 }
 
+void draw_triangle(t_img *img, t_point origin, int angle, unsigned int color)
+{
+	t_point	v1;asdasfagds
+	t_point	v2;
+	t_point	v3;
+
+    draw_line(img, v1, v2, color);
+    draw_line(img, v2, v3, color);
+    draw_line(img, v3, v1, color);
+}
+
 void	draw_map_player(t_img *img, t_player p)
 {
 	float	d;
@@ -203,7 +214,7 @@ void	draw_map_player(t_img *img, t_player p)
 	t_point	pointer;
 
 	draw_circle(img, (t_point){(int)p.x, (int)p.y}, CELL / 4, WHITE);
-	d = CELL / 2;
+	d = CELL / 3;
 	r = CELL / 8;
 	pointer.x = (int)(p.x + p.dx * d);
 	pointer.y = (int)(p.y + p.dy * d);
