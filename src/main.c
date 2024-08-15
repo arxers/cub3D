@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/15 16:59:38 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/15 18:14:58 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -384,18 +384,18 @@ void	calculate_movement(t_game *game, float *move_x, float *move_y)
 	}
 	if (game->move_keys[DOWN])
 	{
-		*move_x -= game->player.dx ;
+		*move_x -= game->player.dx;
 		*move_y -= game->player.dy;
 	}
 	if (game->move_keys[LEFT])
 	{
-		*move_x += cos(game->player.angle - PI / 2);
-		*move_y += sin(game->player.angle - PI / 2);
+		*move_x += game->player.dy;
+		*move_y -= game->player.dx;
 	}
 	if (game->move_keys[RIGHT])
 	{
-		*move_x -= cos(game->player.angle - PI / 2);
-		*move_y -= sin(game->player.angle - PI / 2);
+		*move_x -= game->player.dy;
+		*move_y += game->player.dx;
 	}
 }
 
@@ -426,8 +426,8 @@ void	handle_movement(t_game *game, float speed)
 
 int	handle_keys(t_game *game)
 {
-	handle_rotation(game, ROT_SPD * FRAME_TIME_MS);
-	handle_movement(game, MOV_SPD * FRAME_TIME_MS);
+	handle_rotation(game, ROT_SPD * 1000 / FRAME_RATE);
+	handle_movement(game, MOV_SPD * 1000 / FRAME_RATE);
 	return (0);
 }
 
@@ -477,7 +477,7 @@ int	should_render_frame(t_game *game)
 	gettimeofday(&game->current_frame, NULL);
 	elapsed = (game->current_frame.tv_sec - game->last_frame.tv_sec) * 1000
 		+ (game->current_frame.tv_usec - game->last_frame.tv_usec) / 1000;
-	if (elapsed >= FRAME_TIME_MS)
+	if (elapsed >= 1000 / FRAME_RATE)
 	{
 		write(1, "now\n", 4);
 		game->last_frame = game->current_frame;

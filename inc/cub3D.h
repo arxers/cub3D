@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/15 16:56:06 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/15 18:04:10 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@
 # include <sys/time.h>
 
 # define FRAME_RATE 60
-# define FRAME_TIME_MS 16.66
 
 // resolution
 # define RES_X 1280
