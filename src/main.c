@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/14 20:48:47 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/15 16:21:04 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,22 +196,30 @@ void	draw_line(t_img *img, t_point start, t_point end, unsigned int color)
 	}
 }
 
-void draw_triangle(t_img *img, t_point origin, int angle, unsigned int color)
+void draw_triangle(t_img *img, t_triangle t, unsigned int color)
 {
-	t_point	v1;asdasfagds
-	t_point	v2;
-	t_point	v3;
+	t_point		v1;
+	t_point		v2;
+	t_point		v3;
+	int			half_size;
 
-    draw_line(img, v1, v2, color);
-    draw_line(img, v2, v3, color);
-    draw_line(img, v3, v1, color);
+	half_size = t.size / 2;
+	v1.x = t.origin.x + half_size * cos(t.angle * PI / 180);
+	v1.y = t.origin.y + half_size * sin(t.angle * PI / 180);
+	v2.x = t.origin.x + half_size * cos((t.angle + 120) * PI / 180);
+	v2.y = t.origin.y + half_size * sin((t.angle + 120) * PI / 180);
+	v3.x = t.origin.x + half_size * cos((t.angle + 240) * PI / 180);
+	v3.y = t.origin.y + half_size * sin((t.angle + 240) * PI / 180);
+	draw_line(img, v1, v2, color);
+	draw_line(img, v2, v3, color);
+	draw_line(img, v3, v1, color);
 }
 
 void	draw_map_player(t_img *img, t_player p)
 {
-	float	d;
-	float	r;
-	t_point	pointer;
+	float		d;
+	float		r;
+	t_point		pointer;
 
 	draw_circle(img, (t_point){(int)p.x, (int)p.y}, CELL / 4, WHITE);
 	d = CELL / 3;
@@ -418,8 +426,15 @@ void	handle_movement(t_game *game, float speed)
 
 int	handle_keys(t_game *game)
 {
+	struct timeval	now;
+
+	gettimeofday(&now, NULL);
+	printf("last_frame: %ld\n", (game->last_frame.tv_sec * 1000) + (game->last_frame.tv_usec / 1000));
+	printf("now: %ld\n",  (now.tv_sec * 1000) + (now.tv_usec / 1000));
+	printf("its the same..\n");
 	handle_rotation(game, ROT_SPD);
 	handle_movement(game, MOV_SPD);
+	game->last_frame = now;
 	return (0);
 }
 
@@ -462,15 +477,36 @@ void	init_keys(t_game *game)
 	}
 }
 
+int	should_render_frame(t_game *game)
+{
+	struct timeval	now;
+	long			elapsed;
+
+	gettimeofday(&now, NULL);
+	elapsed = (now.tv_sec - game->last_frame.tv_sec) * 1000
+		+ (now.tv_usec - game->last_frame.tv_usec) / 1000;
+	if (elapsed >= FRAME_TIME_MS)
+	{
+		write(1, "now\n", 4);
+		game->last_frame = now;
+		return (1);
+	}
+	return (0);
+}
+
 int	render_frame(t_game *game)
 {
-	handle_keys(game);
-	img_to_img((t_point){0, 0}, (t_point){RES_X, RES_Y}, &game->bg, &game->mlx_win_img);
-	img_to_img((t_point){RES_X - game->map.size.x, 0}, game->map.size, &game->map, &game->mlx_win_img);
-	draw_map_player(&game->mlx_win_img, game->player);
-	draw_line(&game->mlx_win_img, (t_point){0, 0}, (t_point){RES_X, RES_Y}, 0xFFFFFF);
-	draw_line(&game->mlx_win_img, (t_point){0, RES_Y}, (t_point){RES_X, 0}, 0xFFFFFF);
-	mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->mlx_win_img.img, 0, 0);
+	if (should_render_frame(game))
+	{
+		handle_keys(game);
+		img_to_img((t_point){0, 0}, (t_point){RES_X, RES_Y}, &game->bg, &game->mlx_win_img);
+		img_to_img((t_point){RES_X - game->map.size.x, 0}, game->map.size, &game->map, &game->mlx_win_img);
+		draw_map_player(&game->mlx_win_img, game->player);
+		draw_line(&game->mlx_win_img, (t_point){0, 0}, (t_point){RES_X, RES_Y}, 0xFFFFFF);
+		draw_line(&game->mlx_win_img, (t_point){0, RES_Y}, (t_point){RES_X, 0}, 0xFFFFFF);
+		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->mlx_win_img.img, 0, 0);
+	}
+	// gettimeofday(&game->last_frame, NULL);
 	return (0);
 }
 
@@ -497,6 +533,7 @@ int	main(int ac, char **av)
 
 	init_keys(&game);
 	init_player_pos(&game);
+	gettimeofday(&game.last_frame, NULL);
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win_ptr, KeyRelease, KeyReleaseMask, &key_release, &game);
 	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &key_esc, NULL);
