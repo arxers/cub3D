@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/15 16:21:04 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/15 16:59:38 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -426,15 +426,8 @@ void	handle_movement(t_game *game, float speed)
 
 int	handle_keys(t_game *game)
 {
-	struct timeval	now;
-
-	gettimeofday(&now, NULL);
-	printf("last_frame: %ld\n", (game->last_frame.tv_sec * 1000) + (game->last_frame.tv_usec / 1000));
-	printf("now: %ld\n",  (now.tv_sec * 1000) + (now.tv_usec / 1000));
-	printf("its the same..\n");
-	handle_rotation(game, ROT_SPD);
-	handle_movement(game, MOV_SPD);
-	game->last_frame = now;
+	handle_rotation(game, ROT_SPD * FRAME_TIME_MS);
+	handle_movement(game, MOV_SPD * FRAME_TIME_MS);
 	return (0);
 }
 
@@ -479,16 +472,15 @@ void	init_keys(t_game *game)
 
 int	should_render_frame(t_game *game)
 {
-	struct timeval	now;
 	long			elapsed;
 
-	gettimeofday(&now, NULL);
-	elapsed = (now.tv_sec - game->last_frame.tv_sec) * 1000
-		+ (now.tv_usec - game->last_frame.tv_usec) / 1000;
+	gettimeofday(&game->current_frame, NULL);
+	elapsed = (game->current_frame.tv_sec - game->last_frame.tv_sec) * 1000
+		+ (game->current_frame.tv_usec - game->last_frame.tv_usec) / 1000;
 	if (elapsed >= FRAME_TIME_MS)
 	{
 		write(1, "now\n", 4);
-		game->last_frame = now;
+		game->last_frame = game->current_frame;
 		return (1);
 	}
 	return (0);
@@ -506,7 +498,6 @@ int	render_frame(t_game *game)
 		draw_line(&game->mlx_win_img, (t_point){0, RES_Y}, (t_point){RES_X, 0}, 0xFFFFFF);
 		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->mlx_win_img.img, 0, 0);
 	}
-	// gettimeofday(&game->last_frame, NULL);
 	return (0);
 }
 

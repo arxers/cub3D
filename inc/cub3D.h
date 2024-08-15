@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/15 15:56:56 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/15 16:56:06 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@
 # include <stdio.h>
 # include <sys/time.h>
 
-# define FRAME_RATE 1
-# define FRAME_TIME_MS 1000
+# define FRAME_RATE 60
+# define FRAME_TIME_MS 16.66
 
 // resolution
 # define RES_X 1280
@@ -34,8 +34,8 @@
 # define MAP_COLOR 0x0ADAF3
 
 // movement
-# define MOV_SPD 0.5
-# define ROT_SPD 0.2
+# define MOV_SPD 0.1
+# define ROT_SPD 0.1
 # define UP 0
 # define DOWN 1
 # define LEFT 2
