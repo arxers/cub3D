@@ -66,11 +66,12 @@ void	img_to_img(t_point origin, t_point size, t_img *src, t_img *dst)
 {
 	int		x;
 	int		y;
+
 	y = 0;
 	if (origin.x < 0 || origin.y < 0
 		|| (origin.x + size.x) > (dst->line_len / (dst->bits_per_pixel / 8))
 		|| (origin.y + size.y) > (dst->line_len / (dst->bits_per_pixel / 8)))
-        return;
+		return ;
 	while (y < size.y)
 	{
 		x = 0;
@@ -88,7 +89,8 @@ int	load_xpm(void *mlx, char *path, t_img *img)
 	img->img = mlx_xpm_file_to_image(mlx, path, &img->size.x, &img->size.y);
 	if (!img->img)
 		return (-1);
-	img->addr = mlx_get_data_addr(img->img, &img->bits_per_pixel, &img->line_len, &img->endian);
+	img->addr = mlx_get_data_addr(img->img, &img->bits_per_pixel,
+			&img->line_len, &img->endian);
 	return (0);
 }
 
@@ -265,11 +267,15 @@ t_img	init_bg(void *mlx_ptr)
 {
 	t_img	bg;
 
+	t_point	size;
+
+	size.x = RES_X;
+	size.y = RES_Y / 2;
 	bg = init_img(mlx_ptr, RES_X, RES_Y);
-	if (bg.img == NULL)
-		;//handle it
-	draw_rectangle(&bg, (t_point){0, 0}, (t_point){RES_X, RES_Y / 2}, 0x171B22);
-	draw_rectangle(&bg, (t_point){0, RES_Y / 2}, (t_point){RES_X, RES_Y / 2}, 0x404856);
+	// if (bg.img == NULL)
+	// 	;//handle it
+	draw_rectangle(&bg, (t_point){0, 0}, size, 0x171B22);
+	draw_rectangle(&bg, (t_point){0, RES_Y / 2}, size, 0x404856);
 	return (bg);
 }
 
@@ -277,9 +283,12 @@ void	draw_map_tiles(t_img *map)
 {
 	t_point	count;
 	t_point	origin;
+	t_point	size;
 
 	count.y = 0;
 	origin.y = 0;
+	size.x = CELL;
+	size.y = CELL;
 	while (count.y < g_map_y)
 	{
 		origin.x = 0;
@@ -287,9 +296,9 @@ void	draw_map_tiles(t_img *map)
 		while (count.x < g_map_x)
 		{
 			if (g_map[count.y][count.x] == 1)
-				draw_rectangle(map, origin, (t_point){CELL, CELL}, MAP_COLOR);
+				draw_rectangle(map, origin, size, MAP_COLOR);
 			else if (g_map[count.y][count.x] == 0)
-				draw_rectangle(map, origin, (t_point){CELL, CELL}, BLACK);
+				draw_rectangle(map, origin, size, BLACK);
 			count.x++;
 			origin.x += CELL + 1;
 		}
@@ -426,37 +435,10 @@ void	handle_movement(t_game *game, float speed)
 
 int	handle_keys(t_game *game)
 {
-	handle_rotation(game, ROT_SPD * 1000 / FRAME_RATE);
-	handle_movement(game, MOV_SPD * 1000 / FRAME_RATE);
+	handle_rotation(game, ROT_SPD * (1000 / FRAME_RATE));
+	handle_movement(game, MOV_SPD * (1000 / FRAME_RATE));
 	return (0);
 }
-
-// int	handle_keys(t_game *game)
-// {
-// 	float	move_x;
-// 	float	move_y;
-// 	float	move_speed;
-
-// 	move_x = 0;
-// 	move_y = 0;
-// 	move_speed = MOV_SPD;
-// 	if (game->move_keys[UP])
-// 		move_y -= move_speed;
-// 	if (game->move_keys[DOWN])
-// 		move_y += move_speed;
-// 	if (game->move_keys[LEFT])
-// 		move_x -= move_speed;
-// 	if (game->move_keys[RIGHT])
-// 		move_x += move_speed;
-// 	if (move_x != 0 && move_y != 0)
-// 	{
-// 		move_x /= 1.41421;
-// 		move_y /= 1.41421;
-// 	}
-// 	game->player.x += move_x;
-// 	game->player.y += move_y;
-// 	return (0);
-// }
 
 void	init_keys(t_game *game)
 {
@@ -479,7 +461,6 @@ int	should_render_frame(t_game *game)
 		+ (game->current_frame.tv_usec - game->last_frame.tv_usec) / 1000;
 	if (elapsed >= 1000 / FRAME_RATE)
 	{
-		write(1, "now\n", 4);
 		game->last_frame = game->current_frame;
 		return (1);
 	}
@@ -494,8 +475,6 @@ int	render_frame(t_game *game)
 		img_to_img((t_point){0, 0}, (t_point){RES_X, RES_Y}, &game->bg, &game->mlx_win_img);
 		img_to_img((t_point){RES_X - game->map.size.x, 0}, game->map.size, &game->map, &game->mlx_win_img);
 		draw_map_player(&game->mlx_win_img, game->player);
-		draw_line(&game->mlx_win_img, (t_point){0, 0}, (t_point){RES_X, RES_Y}, 0xFFFFFF);
-		draw_line(&game->mlx_win_img, (t_point){0, RES_Y}, (t_point){RES_X, 0}, 0xFFFFFF);
 		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->mlx_win_img.img, 0, 0);
 	}
 	return (0);
@@ -521,7 +500,6 @@ int	main(int ac, char **av)
 	game.mlx_win_img = init_img(game.mlx_ptr, RES_X, RES_Y);
 	game.bg = init_bg(game.mlx_ptr);
 	game.map = init_map(&game, (t_point){g_map_x, g_map_y});
-
 	init_keys(&game);
 	init_player_pos(&game);
 	gettimeofday(&game.last_frame, NULL);
