@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/19 15:45:23 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/19 18:37:09 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -502,57 +502,45 @@ int	should_render_frame(t_game *game)
 
 void	draw_rays(t_game *game)
 {
-	int	r;
-	int	mx;
-	int	my;
-	int	dof;
-
 	t_ray	h;
-	h.ra = game->player.angle;
 
-	dof = 0;
-	h.atan = -1 / tan(h.ra);
-	r = 0;
-	while (r < 1)
+	h.ray_angle = game->player.angle;
+	h.atan = -1 / tan(h.ray_angle);
+	if (h.ray_angle > PI)
 	{
-		if (h.ra > PI)
-		{
-			h.ry = (((int)(game->player.y) / CELL) * CELL) - 0.0001;
-			h.rx = (game->player.y - h.ry) * h.atan + game->player.x;
-			h.yo = -CELL;
-			h.xo = -h.yo * h.atan;
-		}
-		if (h.ra < PI)
-		{
-			h.ry = (((int)(game->player.y) / CELL) * CELL) + CELL;
-			h.rx = (game->player.y - h.ry) * h.atan + game->player.x;
-			h.yo = CELL;
-			h.xo = -h.yo * h.atan;
-		}
-		if (h.ra == 0 || h.ra == PI)
-		{
-			h.rx = game->player.x;
-			h.ry = game->player.y;
-			dof = 8;
-		}
-		while (dof < 8)
-		{
-			mx = (int)h.rx / CELL;
-			my = (int)h.ry / CELL;
-			if (my < 0 || my > RES_Y
-				|| mx < 0 || mx > RES_Y
-				|| g_map[my][mx] == 1)
-				dof = 8;
-			else
-			{
-				h.rx += h.xo;
-				h.ry += h.yo;
-				dof++;
-			}
-		}
-		draw_line(&game->mlx_win_img, (t_point){game->player.x, game->player.y}, (t_point){(int)h.rx + g_map_x, (int)h.ry + g_map_y}, WHITE);
-		r++;
+		h.ray.y = (((int)(game->player.y) / CELL) * CELL) - 0.0001;
+		h.origin.y = -CELL;
 	}
+	else if (h.ray_angle < PI)
+	{
+		h.ray.y = (((int)(game->player.y) / CELL) * CELL) + CELL;
+		h.origin.y = CELL;
+	}
+	h.ray.x = (game->player.y - h.ray.y) * h.atan + game->player.x;
+	h.origin.x = -h.origin.y * h.atan;
+	h.dof = 0;
+	if (h.ray_angle == 0 || h.ray_angle == PI)
+	{
+		h.ray.x = game->player.x;
+		h.ray.y = game->player.y;
+		h.dof = 8;
+	}
+	while (h.dof < 8)
+	{
+		h.map.x = (int)h.ray.x / CELL;
+		h.map.y = (int)h.ray.y / CELL;
+		if (h.map.y < 0 || h.map.y >= g_map_x || h.map.x < 0 || h.map.x >= g_map_x)
+			h.dof = 8;
+		else if (g_map[h.map.y][h.map.x] == 1)
+			h.dof = 8;
+		else
+		{
+			h.ray.x += h.origin.x;
+			h.ray.y += h.origin.y;
+			h.dof++;
+		}
+	}
+	draw_line(&game->mlx_win_img, (t_point){game->player.x, game->player.y}, (t_point){(int)h.ray.x + g_map_x, (int)h.ray.y + g_map_y}, WHITE);
 }
 
 // void	draw_rays(t_game *game)
@@ -644,6 +632,11 @@ void	init_player_pos(t_game *game)
 	game->player.angle = 0;
 	game->player.dx = cos(game->player.angle);
 	game->player.dy = sin(game->player.angle);
+}
+
+void	exit_button()
+{
+
 }
 
 int	main(int ac, char **av)

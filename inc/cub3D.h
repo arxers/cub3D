@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/19 16:50:03 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/19 18:09:10 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,12 +93,12 @@ typedef struct s_player
 
 typedef struct s_ray
 {
-	float	rx;
-	float	ry;
-	float	ra;
-	float	xo;
-	float	yo;
-	float	atan;
+	int			dof;
+	t_point		map;
+	t_fpoint	ray;
+	t_fpoint	origin;
+	float		ray_angle;
+	float		atan;
 }					t_ray;
 
 typedef struct s_game
