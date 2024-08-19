@@ -507,58 +507,115 @@ void	draw_rays(t_game *game)
 	int	my;
 	int	dof;
 
-	float	rx;
-	float	ry;
-	float	ra;
-	float	xo;
-	float	yo;
-	float	atan;
-	ra = game->player.angle;
+	t_ray	h;
+	h.ra = game->player.angle;
 
 	dof = 0;
-	atan = -1 / tan(ra);
+	h.atan = -1 / tan(h.ra);
 	r = 0;
 	while (r < 1)
 	{
-		if (ra > PI)
+		if (h.ra > PI)
 		{
-			ry = (((int)(game->player.y) / CELL) * CELL) - 0.0001;
-			rx = (game->player.y - ry) * atan + game->player.x;
-			yo = -CELL;
-			xo = -yo * atan;
+			h.ry = (((int)(game->player.y) / CELL) * CELL) - 0.0001;
+			h.rx = (game->player.y - h.ry) * h.atan + game->player.x;
+			h.yo = -CELL;
+			h.xo = -h.yo * h.atan;
 		}
-		if (ra < PI)
+		if (h.ra < PI)
 		{
-			ry = (((int)(game->player.y) / CELL) * CELL) + CELL;
-			rx = (game->player.y - ry) * atan + game->player.x;
-			yo = CELL;
-			xo = -yo * atan;
+			h.ry = (((int)(game->player.y) / CELL) * CELL) + CELL;
+			h.rx = (game->player.y - h.ry) * h.atan + game->player.x;
+			h.yo = CELL;
+			h.xo = -h.yo * h.atan;
 		}
-		if (ra == 0 || ra == PI)
+		if (h.ra == 0 || h.ra == PI)
 		{
-			rx = game->player.x;
-			ry = game->player.y;
+			h.rx = game->player.x;
+			h.ry = game->player.y;
 			dof = 8;
 		}
 		while (dof < 8)
 		{
-			mx = (int)rx / CELL;
-			my = (int)ry / CELL;
+			mx = (int)h.rx / CELL;
+			my = (int)h.ry / CELL;
 			if (my < 0 || my > RES_Y
 				|| mx < 0 || mx > RES_Y
 				|| g_map[my][mx] == 1)
 				dof = 8;
 			else
 			{
-				rx += xo;
-				ry += yo;
+				h.rx += h.xo;
+				h.ry += h.yo;
 				dof++;
 			}
 		}
-		draw_line(&game->mlx_win_img, (t_point){game->player.x, game->player.y}, (t_point){(int)rx + g_map_x, (int)ry + g_map_y}, WHITE);
+		draw_line(&game->mlx_win_img, (t_point){game->player.x, game->player.y}, (t_point){(int)h.rx + g_map_x, (int)h.ry + g_map_y}, WHITE);
 		r++;
 	}
 }
+
+// void	draw_rays(t_game *game)
+// {
+// 	int	r;
+// 	int	mx;
+// 	int	my;
+// 	int	dof;
+
+// 	float	rx;
+// 	float	ry;
+// 	float	ra;
+// 	float	xo;
+// 	float	yo;
+// 	float	atan;
+
+// 	t_ray	horizontal;
+// 	ra = game->player.angle;
+
+// 	dof = 0;
+// 	atan = -1 / tan(ra);
+// 	r = 0;
+// 	while (r < 1)
+// 	{
+// 		if (ra > PI)
+// 		{
+// 			ry = (((int)(game->player.y) / CELL) * CELL) - 0.0001;
+// 			rx = (game->player.y - ry) * atan + game->player.x;
+// 			yo = -CELL;
+// 			xo = -yo * atan;
+// 		}
+// 		if (ra < PI)
+// 		{
+// 			ry = (((int)(game->player.y) / CELL) * CELL) + CELL;
+// 			rx = (game->player.y - ry) * atan + game->player.x;
+// 			yo = CELL;
+// 			xo = -yo * atan;
+// 		}
+// 		if (ra == 0 || ra == PI)
+// 		{
+// 			rx = game->player.x;
+// 			ry = game->player.y;
+// 			dof = 8;
+// 		}
+// 		while (dof < 8)
+// 		{
+// 			mx = (int)rx / CELL;
+// 			my = (int)ry / CELL;
+// 			if (my < 0 || my > RES_Y
+// 				|| mx < 0 || mx > RES_Y
+// 				|| g_map[my][mx] == 1)
+// 				dof = 8;
+// 			else
+// 			{
+// 				rx += xo;
+// 				ry += yo;
+// 				dof++;
+// 			}
+// 		}
+// 		draw_line(&game->mlx_win_img, (t_point){game->player.x, game->player.y}, (t_point){(int)rx + g_map_x, (int)ry + g_map_y}, WHITE);
+// 		r++;
+// 	}
+// }
 
 int	render_frame(t_game *game)
 {
