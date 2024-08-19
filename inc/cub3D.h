@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/19 10:26:41 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/19 11:12:50 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,7 @@ typedef struct s_game
 	t_player		player;
 	t_img			mlx_win_img;
 	t_img			map;
+	t_point			map_offset;
 	t_img			bg;
 	t_sprites		sprites;
 }					t_game;
