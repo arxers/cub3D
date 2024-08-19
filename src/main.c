@@ -173,6 +173,7 @@ void	brasenham(int *err, t_point *start, t_point d, t_point s)
 
 void	draw_line(t_img *img, t_point start, t_point end, unsigned int color)
 {
+	int		max;
 	t_point	d;
 	t_point	s;
 	int		err;
@@ -189,10 +190,13 @@ void	draw_line(t_img *img, t_point start, t_point end, unsigned int color)
 	if (d.x > d.y)
 		err = d.x;
 	err /= 2;
-	while (start.x != end.x || start.y != end.y)
+	max = 1000;
+	while ((start.x != end.x || start.y != end.y) && max > 0)
 	{
 		brasenham(&err, &start, d, s);
 		set_pixel(img, start.x, start.y, color);
+		max--;
+
 	}
 }
 

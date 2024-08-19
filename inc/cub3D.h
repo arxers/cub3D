@@ -29,7 +29,7 @@
 # define WALL 64
 
 // map
-# define CELL 32
+# define CELL 16
 # define MAP_COLOR 0x0ADAF3
 
 // movement
