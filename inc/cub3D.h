@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/19 12:12:48 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/19 16:50:03 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 # define WALL 64
 
 // map
-# define CELL 16
+# define CELL 64
 # define MAP_COLOR 0x0ADAF3
 
 // movement
@@ -47,6 +47,12 @@
 # define WHITE 0xFFFFFF
 
 # define PI 3.14159265358979323846
+
+typedef struct s_fpoint
+{
+	float			x;
+	float			y;
+}					t_fpoint;
 
 typedef struct s_point
 {
@@ -84,6 +90,16 @@ typedef struct s_player
 	float			dy;
 	float			angle;
 }					t_player;
+
+typedef struct s_ray
+{
+	float	rx;
+	float	ry;
+	float	ra;
+	float	xo;
+	float	yo;
+	float	atan;
+}					t_ray;
 
 typedef struct s_game
 {

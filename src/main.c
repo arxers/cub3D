@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/19 12:18:25 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/19 15:45:23 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -222,16 +222,15 @@ void draw_triangle(t_img *img, t_triangle t, unsigned int color)
 // RES_X - game->map.size.x, 0}
 void	draw_map_player(t_img *img, t_player p, t_point origin)
 {
-	float		d;
-	float		r;
-	t_point		pointer;
-
+	// float		d;
+	// float		r;
+	// t_point		pointer;
 	draw_circle(img, (t_point){(int)p.x + origin.x, (int)p.y + origin.y}, CELL / 4, WHITE);
-	d = CELL / 3;
-	r = CELL / 8;
-	pointer.x = (int)(p.x + p.dx * d) + origin.x;
-	pointer.y = (int)(p.y + p.dy * d) + origin.y;
-	draw_circle(img, pointer, r, WHITE);
+	// d = CELL / 3;
+	// r = CELL / 8;
+	// pointer.x = (int)(p.x + p.dx * d) + origin.x;
+	// pointer.y = (int)(p.y + p.dy * d) + origin.y;
+	// draw_circle(img, pointer, r, WHITE);
 }
 
 int	input_validation(int ac, char **av)
@@ -556,7 +555,7 @@ void	draw_rays(t_game *game)
 				dof++;
 			}
 		}
-		draw_line(&game->mlx_win_img, (t_point){game->player.x, game->player.y}, (t_point){(int)rx, (int)ry}, WHITE);
+		draw_line(&game->mlx_win_img, (t_point){game->player.x, game->player.y}, (t_point){(int)rx + g_map_x, (int)ry + g_map_y}, WHITE);
 		r++;
 	}
 }
