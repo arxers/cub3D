@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/19 10:14:29 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/19 10:26:29 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -452,9 +452,31 @@ void	init_keys(t_game *game)
 	}
 }
 
+int	a_second_has_passed(void)
+{
+	static struct timeval	start_time;
+	struct timeval			current_time;
+	long					seconds_elapsed;
+
+	if (start_time.tv_sec == 0 && start_time.tv_usec == 0)
+	{
+		gettimeofday(&start_time, NULL);
+		return (0);
+	}
+	gettimeofday(&current_time, NULL);
+	seconds_elapsed = current_time.tv_sec - start_time.tv_sec;
+	if (seconds_elapsed >= 1)
+	{
+		start_time = current_time;
+		return (1);
+	}
+	return (0);
+}
+
 int	should_render_frame(t_game *game)
 {
 	static int	frame_time = 1000 / FRAME_RATE;
+	static int	fps = 0;
 	long		elapsed;
 
 	gettimeofday(&game->current_frame, NULL);
@@ -462,7 +484,15 @@ int	should_render_frame(t_game *game)
 		+ (game->current_frame.tv_usec - game->last_frame.tv_usec) / 1000;
 	if (elapsed >= frame_time)
 	{
+		fps++;
 		game->last_frame = game->current_frame;
+		if (a_second_has_passed())
+		{
+			write(1, "fps: ", 5);
+			ft_putnbr_fd(fps, 1);
+			write(1, "\n", 1);
+			fps = 0;
+		}
 		return (1);
 	}
 	return (0);
@@ -472,6 +502,7 @@ int	render_frame(t_game *game)
 {
 	if (should_render_frame(game))
 	{
+		a_second_has_passed();
 		handle_keys(game);
 		img_to_img((t_point){0, 0}, (t_point){RES_X, RES_Y}, &game->bg, &game->mlx_win_img);
 		img_to_img((t_point){RES_X - game->map.size.x, 0}, game->map.size, &game->map, &game->mlx_win_img);
