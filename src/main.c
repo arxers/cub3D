@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/15 18:14:58 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/19 10:14:29 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -454,12 +454,13 @@ void	init_keys(t_game *game)
 
 int	should_render_frame(t_game *game)
 {
-	long			elapsed;
+	static int	frame_time = 1000 / FRAME_RATE;
+	long		elapsed;
 
 	gettimeofday(&game->current_frame, NULL);
 	elapsed = (game->current_frame.tv_sec - game->last_frame.tv_sec) * 1000
 		+ (game->current_frame.tv_usec - game->last_frame.tv_usec) / 1000;
-	if (elapsed >= 1000 / FRAME_RATE)
+	if (elapsed >= frame_time)
 	{
 		game->last_frame = game->current_frame;
 		return (1);
