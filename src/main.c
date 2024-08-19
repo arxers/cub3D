@@ -6,25 +6,23 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/19 11:18:48 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/19 12:18:25 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3D.h"
 
-int	g_map_x = 10;
-int	g_map_y = 10;
+int	g_map_x = 8;
+int	g_map_y = 8;
 int	g_map[10][10] = {
-	{1,1,1,1,1,1,1,1,1,1},
-	{1,0,0,0,0,0,0,0,0,1},
-	{1,0,0,0,0,0,0,0,0,1},
-	{1,0,0,0,0,0,0,0,0,1},
-	{1,0,0,0,1,1,0,0,0,1},
-	{1,0,0,0,1,0,0,0,0,1},
-	{1,0,0,0,0,0,0,0,0,1},
-	{1,0,1,0,0,0,0,0,0,1},
-	{1,0,1,0,0,0,0,0,0,1},
-	{1,1,1,1,1,1,1,1,1,1}
+	{1,1,1,1,1,1,1,1},
+	{1,0,1,0,0,0,0,1},
+	{1,0,1,0,0,0,0,1},
+	{1,0,1,0,0,0,0,1},
+	{1,0,0,0,0,0,0,1},
+	{1,0,0,0,0,1,0,1},
+	{1,0,0,0,0,0,0,1},
+	{1,1,1,1,1,1,1,1}
 };
 
 t_img	init_img(void *mlx_ptr, int width, int height)
@@ -513,23 +511,24 @@ void	draw_rays(t_game *game)
 	float	yo;
 	float	atan;
 	ra = game->player.angle;
+
+	dof = 0;
+	atan = -1 / tan(ra);
 	r = 0;
 	while (r < 1)
 	{
-		dof = 0;
-		atan = -1 / tan(ra);
 		if (ra > PI)
 		{
-			ry = (((int)(game->player.y) >> 6) << 6) - 0.0001;
-			rx = (game->player.y - ra) * atan + game->player.x;
-			yo = -64;
+			ry = (((int)(game->player.y) / CELL) * CELL) - 0.0001;
+			rx = (game->player.y - ry) * atan + game->player.x;
+			yo = -CELL;
 			xo = -yo * atan;
 		}
 		if (ra < PI)
 		{
-			ry = (((int)(game->player.y) >> 6) << 6) + 64;
-			rx = (game->player.y - ra) * atan + game->player.x;
-			yo = 64;
+			ry = (((int)(game->player.y) / CELL) * CELL) + CELL;
+			rx = (game->player.y - ry) * atan + game->player.x;
+			yo = CELL;
 			xo = -yo * atan;
 		}
 		if (ra == 0 || ra == PI)
@@ -540,14 +539,17 @@ void	draw_rays(t_game *game)
 		}
 		while (dof < 8)
 		{
-			mx = (int)rx >> 6;
-			my = (int)ry >> 6;
-			if (g_map[my][mx] == 1)
+			mx = (int)rx / CELL;
+			my = (int)ry / CELL;
+			if (my < 0 || my > RES_Y
+				|| mx < 0 || mx > RES_Y
+				|| g_map[my][mx] == 1)
 				dof = 8;
 			else
 			{
 				rx += xo;
 				ry += yo;
+				dof++;
 			}
 		}
 		draw_line(&game->mlx_win_img, (t_point){game->player.x, game->player.y}, (t_point){(int)rx, (int)ry}, WHITE);
@@ -571,8 +573,12 @@ int	render_frame(t_game *game)
 
 void	init_player_pos(t_game *game)
 {
-	game->player.x = game->map_offset.x;
-	game->player.y = game->map_offset.y;
+	t_point	pos;
+
+	pos.x = 4;
+	pos.y = 4;
+	game->player.x = game->map_offset.x + pos.x * (CELL + 1) + (CELL / 2);
+	game->player.y = game->map_offset.y + pos.y * (CELL + 1) + (CELL / 2);
 	// game->player.x = RES_X / 2;
 	// game->player.y = RES_Y / 2;
 	game->player.angle = 0;

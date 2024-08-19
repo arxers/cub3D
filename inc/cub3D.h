@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/19 11:12:50 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/19 12:12:48 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,12 @@
 # define FRAME_RATE 60
 
 // resolution
-# define RES_X 1280
-# define RES_Y 720
+# define RES_X 1024
+# define RES_Y 512
 # define WALL 64
 
 // map
-# define CELL 16
+# define CELL 32
 # define MAP_COLOR 0x0ADAF3
 
 // movement
