@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/19 18:37:09 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/20 12:23:07 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ unsigned int	get_pixel(t_img *img, int x, int y)
 	return (*(unsigned int *)src);
 }
 
-void	img_to_img(t_point origin, t_point size, t_img *src, t_img *dst)
+void	put_img(t_point origin, t_point size, t_img *src, t_img *dst)
 {
 	int		x;
 	int		y;
@@ -96,7 +96,7 @@ int	load_xpms(t_game *game)
 {
 	if (load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->sprites.wall[0]) == -1)
 		return (-1);
-	img_to_img((t_point){RES_X / 2 - (game->sprites.wall[0].size.x / 2), RES_Y / 2 - (game->sprites.wall[0].size.y / 2)}, game->sprites.wall[0].size, &game->sprites.wall[0], &game->win_img);
+	put_img((t_point){RES_X / 2 - (game->sprites.wall[0].size.x / 2), RES_Y / 2 - (game->sprites.wall[0].size.y / 2)}, game->sprites.wall[0].size, &game->sprites.wall[0], &game->win);
 	return (0);
 }
 
@@ -196,7 +196,6 @@ void	draw_line(t_img *img, t_point start, t_point end, unsigned int color)
 		brasenham(&err, &start, d, s);
 		set_pixel(img, start.x, start.y, color);
 		max--;
-
 	}
 }
 
@@ -249,7 +248,7 @@ int	input_validation(int ac, char **av)
 
 int	cleanup(t_game *game)
 {
-	mlx_destroy_image(game->mlx_ptr, game->win_img.img);
+	mlx_destroy_image(game->mlx_ptr, game->win.img);
 	mlx_destroy_image(game->mlx_ptr, game->map.img);
 	mlx_destroy_image(game->mlx_ptr, game->bg.img);
 	mlx_destroy_window(game->mlx_ptr, game->win_ptr);
@@ -268,7 +267,6 @@ t_point	center(t_point origin, t_point size)
 t_img	init_bg(void *mlx_ptr)
 {
 	t_img	bg;
-
 	t_point	size;
 
 	size.x = RES_X;
@@ -500,12 +498,21 @@ int	should_render_frame(t_game *game)
 	return (0);
 }
 
-void	draw_rays(t_game *game)
+float	distance_from_player(t_fpoint a, t_fpoint b, float angle)
 {
-	t_ray	h;
+	return (sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)));
+}
 
+t_ray	draw_h_rays(t_game *game)
+{
+	t_ray_calculation	h;
+	t_ray				result;
+
+	result.dist = 1000000;
+	result.pos.x = game->player.x;
+	result.pos.y = game->player.y;
 	h.ray_angle = game->player.angle;
-	h.atan = -1 / tan(h.ray_angle);
+	h.tan = -1 / tan(h.ray_angle);
 	if (h.ray_angle > PI)
 	{
 		h.ray.y = (((int)(game->player.y) / CELL) * CELL) - 0.0001;
@@ -516,8 +523,8 @@ void	draw_rays(t_game *game)
 		h.ray.y = (((int)(game->player.y) / CELL) * CELL) + CELL;
 		h.origin.y = CELL;
 	}
-	h.ray.x = (game->player.y - h.ray.y) * h.atan + game->player.x;
-	h.origin.x = -h.origin.y * h.atan;
+	h.ray.x = (game->player.y - h.ray.y) * h.tan + game->player.x;
+	h.origin.x = -h.origin.y * h.tan;
 	h.dof = 0;
 	if (h.ray_angle == 0 || h.ray_angle == PI)
 	{
@@ -539,82 +546,68 @@ void	draw_rays(t_game *game)
 			h.dof++;
 		}
 	}
-	draw_line(&game->win_img, (t_point){game->player.x + (int)game->map_offset.x, game->player.y + (int)game->map_offset.y},
-		(t_point){(int)h.ray.x + (int)game->map_offset.x, (int)h.ray.y + (int)game->map_offset.y}, WHITE);
+	draw_line(&game->win, (t_point){game->player.x + (int)game->map_offset.x - 1, game->player.y + (int)game->map_offset.y},
+		(t_point){(int)h.ray.x + (int)game->map_offset.x - 1, (int)h.ray.y + (int)game->map_offset.y}, WHITE);
+	return (result);
 }
 
-// void	draw_rays(t_game *game)
-// {
-// 	int	r;
-// 	int	mx;
-// 	int	my;
-// 	int	dof;
+void	draw_v_rays(t_game *game)
+{
+	t_ray_calculation	v;
 
-// 	float	rx;
-// 	float	ry;
-// 	float	ra;
-// 	float	xo;
-// 	float	yo;
-// 	float	atan;
-
-// 	t_ray	horizontal;
-// 	ra = game->player.angle;
-
-// 	dof = 0;
-// 	atan = -1 / tan(ra);
-// 	r = 0;
-// 	while (r < 1)
-// 	{
-// 		if (ra > PI)
-// 		{
-// 			ry = (((int)(game->player.y) / CELL) * CELL) - 0.0001;
-// 			rx = (game->player.y - ry) * atan + game->player.x;
-// 			yo = -CELL;
-// 			xo = -yo * atan;
-// 		}
-// 		if (ra < PI)
-// 		{
-// 			ry = (((int)(game->player.y) / CELL) * CELL) + CELL;
-// 			rx = (game->player.y - ry) * atan + game->player.x;
-// 			yo = CELL;
-// 			xo = -yo * atan;
-// 		}
-// 		if (ra == 0 || ra == PI)
-// 		{
-// 			rx = game->player.x;
-// 			ry = game->player.y;
-// 			dof = 8;
-// 		}
-// 		while (dof < 8)
-// 		{
-// 			mx = (int)rx / CELL;
-// 			my = (int)ry / CELL;
-// 			if (my < 0 || my > RES_Y
-// 				|| mx < 0 || mx > RES_Y
-// 				|| g_map[my][mx] == 1)
-// 				dof = 8;
-// 			else
-// 			{
-// 				rx += xo;
-// 				ry += yo;
-// 				dof++;
-// 			}
-// 		}
-// 		draw_line(&game->mlx_win_img, (t_point){game->player.x, game->player.y}, (t_point){(int)rx + g_map_x, (int)ry + g_map_y}, WHITE);
-// 		r++;
-// 	}
-// }
+	v.ray_angle = game->player.angle;
+	v.tan = -1 * tan(v.ray_angle);
+	if (v.ray_angle > P2 && v.ray_angle < P3)
+	{
+		v.ray.x = (((int)(game->player.x) / CELL) * CELL) - 0.0001;
+		v.origin.x = -CELL;
+	}
+	else if (v.ray_angle < P2 || v.ray_angle > P3)
+	{
+		v.ray.x = (((int)(game->player.x) / CELL) * CELL) + CELL;
+		v.origin.x = CELL;
+	}
+	v.ray.y = (game->player.x - v.ray.x) * v.tan + game->player.y;
+	v.origin.y = -v.origin.x * v.tan;
+	v.dof = 0;
+	if (v.ray_angle == 0 || v.ray_angle == PI)
+	{
+		v.ray.x = game->player.x;
+		v.ray.y = game->player.y;
+		v.dof = 8;
+	}
+	while (v.dof < 8)
+	{
+		v.map.x = (int)v.ray.x / CELL;
+		v.map.y = (int)v.ray.y / CELL;
+		if (v.map.y < 0 || v.map.y >= g_map_x || v.map.x < 0
+			|| v.map.x >= g_map_x || g_map[v.map.y][v.map.x] == 1)
+			v.dof = 8;
+		else
+		{
+			v.ray.x += v.origin.x;
+			v.ray.y += v.origin.y;
+			v.dof++;
+		}
+	}
+	draw_line(&game->win, (t_point){game->player.x + (int)game->map_offset.x + 1, game->player.y + (int)game->map_offset.y},
+		(t_point){(int)v.ray.x + (int)game->map_offset.x + 1, (int)v.ray.y + (int)game->map_offset.y}, RED);
+}
 
 int	render_frame(t_game *game)
 {
 	if (should_render_frame(game))
 	{
 		handle_keys(game);
-		img_to_img((t_point){0, 0}, (t_point){RES_X, RES_Y}, &game->bg, &game->win_img);
-		img_to_img(game->map_offset, game->map.size, &game->map, &game->win_img);
-		draw_map_player(&game->win_img, game->player, (t_point){game->map_offset.x, game->map_offset.y});
-		draw_rays(game);
-		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->win_img.img, 0, 0);
+		put_img((t_point){0, 0}, (t_point){RES_X, RES_Y},
+			&game->bg, &game->win);
+		put_img(game->map_offset, game->map.size, &game->map, &game->win);
+		draw_map_player(&game->win, game->player,
+			(t_point){game->map_offset.x, game->map_offset.y});
+		draw_h_rays(game);
+		draw_v_rays(game);
+		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
+			game->win.img, 0, 0);
 	}
 	return (0);
 }
@@ -645,10 +638,9 @@ int	main(int ac, char **av)
 		return (1);
 	game.mlx_ptr = mlx_init();
 	game.win_ptr = mlx_new_window(game.mlx_ptr, RES_X, RES_Y, "cub3D");
-	game.win_img = init_img(game.mlx_ptr, RES_X, RES_Y);
+	game.win = init_img(game.mlx_ptr, RES_X, RES_Y);
 	game.bg = init_bg(game.mlx_ptr);
 	game.map = init_map(&game, (t_point){g_map_x, g_map_y});
-	// game.map_offset.x = 200;
 	game.map_offset.x = RES_X - game.map.size.x;
 	game.map_offset.y = 0;
 	init_keys(&game);

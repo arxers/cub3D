@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/19 18:09:10 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/20 12:21:48 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,10 +43,16 @@
 # define ROT_R 5
 
 // colors
+# define RED 0xFF0000
+# define GREEN 0x00FF00
+# define BLUE 0x0000FF
 # define BLACK 0x000000
 # define WHITE 0xFFFFFF
 
+// math
 # define PI 3.14159265358979323846
+# define P2 1.57079632679
+# define P3 4.71238898038
 
 typedef struct s_fpoint
 {
@@ -93,13 +99,19 @@ typedef struct s_player
 
 typedef struct s_ray
 {
-	int			dof;
-	t_point		map;
-	t_fpoint	ray;
-	t_fpoint	origin;
-	float		ray_angle;
-	float		atan;
+	float			dist;
+	t_fpoint		pos;
 }					t_ray;
+
+typedef struct s_ray_calculation
+{
+	int				dof;
+	t_point			map;
+	t_fpoint		ray;
+	t_fpoint		origin;
+	float			ray_angle;
+	float			tan;
+}					t_ray_calculation;
 
 typedef struct s_game
 {
@@ -110,7 +122,7 @@ typedef struct s_game
 	void			*win_ptr;
 	int				move_keys[6];
 	t_player		player;
-	t_img			win_img;
+	t_img			win;
 	t_img			map;
 	t_point			map_offset;
 	t_img			bg;
