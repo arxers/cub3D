@@ -29,7 +29,7 @@
 # define WALL 64
 
 // map
-# define CELL 32
+# define CELL 16
 # define MAP_COLOR 0x0ADAF3
 
 // movement
@@ -124,6 +124,7 @@ typedef struct s_game
 	t_player		player;
 	t_img			win;
 	t_img			map;
+	int				map_toggle;
 	t_point			map_offset;
 	t_img			bg;
 	t_sprites		sprites;

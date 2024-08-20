@@ -16,12 +16,12 @@ int	g_map_x = 8;
 int	g_map_y = 8;
 int	g_map[10][10] = {
 	{1,1,1,1,1,1,1,1},
-	{1,0,1,0,0,0,0,1},
-	{1,0,1,0,0,0,0,1},
-	{1,0,1,0,0,0,0,1},
-	{1,0,0,0,0,0,0,1},
-	{1,0,0,0,0,1,0,1},
-	{1,0,0,0,0,0,0,1},
+	{1,0,1,0,1,0,0,1},
+	{1,0,1,0,1,0,0,1},
+	{1,0,1,0,1,0,0,1},
+	{1,0,0,0,1,0,0,1},
+	{1,1,1,1,1,1,1,1},
+	{1,0,0,0,1,1,0,1},
 	{1,1,1,1,1,1,1,1}
 };
 
@@ -287,8 +287,7 @@ void	draw_map_tiles(t_img *map)
 
 	count.y = 0;
 	origin.y = 0;
-	size.x = CELL - 1;
-	size.y = CELL - 1;
+	size = (t_point){CELL - 1, CELL - 1};
 	while (count.y < g_map_y)
 	{
 		origin.x = 0;
@@ -312,8 +311,8 @@ t_img	init_map(t_game *game, t_point map_grid_size)
 	t_img	map;
 	t_point	map_size;
 
-	map_size.x = (map_grid_size.x * (CELL)) - 1;
-	map_size.y = (map_grid_size.y * (CELL)) - 1;
+	map_size.x = map_grid_size.x * CELL;
+	map_size.y = map_grid_size.y * CELL;
 	map = init_img(game->mlx_ptr, map_size.x, map_size.y);
 	draw_rectangle(&map, (t_point){0, 0}, map_size, MAP_COLOR);
 	draw_map_tiles(&map);
@@ -361,6 +360,8 @@ int	key_press(unsigned int key, t_game *game)
 		game->move_keys[ROT_L] = 1;
 	if (key == XK_Right || key == XK_e)
 		game->move_keys[ROT_R] = 1;
+	if (key == XK_m)
+		game->map_toggle *= -1;
 	return (0);
 }
 
@@ -445,11 +446,12 @@ void	init_keys(t_game *game)
 	int	i;
 
 	i = 0;
-	while (i < 6)
+	while (i < 7)
 	{
 		game->move_keys[i] = 0;
 		i++;
 	}
+	game->map_toggle = 1;
 }
 
 int	a_second_has_passed(void)
@@ -498,7 +500,7 @@ int	should_render_frame(t_game *game)
 	return (0);
 }
 
-float	distance_from_player(t_fpoint a, t_fpoint b, float angle)
+float	get_ray_dist(t_fpoint a, t_fpoint b)
 {
 	return (sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)));
 }
@@ -506,11 +508,11 @@ float	distance_from_player(t_fpoint a, t_fpoint b, float angle)
 t_ray	draw_h_rays(t_game *game)
 {
 	t_ray_calculation	h;
-	t_ray				result;
+	t_ray				ray;
 
-	result.dist = 1000000;
-	result.pos.x = game->player.x;
-	result.pos.y = game->player.y;
+	ray.dist = 1000000;
+	ray.pos.x = game->player.x;
+	ray.pos.y = game->player.y;
 	h.ray_angle = game->player.angle;
 	h.tan = -1 / tan(h.ray_angle);
 	if (h.ray_angle > PI)
@@ -538,7 +540,11 @@ t_ray	draw_h_rays(t_game *game)
 		h.map.y = (int)h.ray.y / CELL;
 		if (h.map.y < 0 || h.map.y >= g_map_x || h.map.x < 0
 			|| h.map.x >= g_map_x || g_map[h.map.y][h.map.x] == 1)
+		{
 			h.dof = 8;
+			ray.pos = h.ray;
+			ray.dist = get_ray_dist((t_fpoint){game->player.x, game->player.y}, ray.pos);
+		}
 		else
 		{
 			h.ray.x += h.origin.x;
@@ -546,15 +552,19 @@ t_ray	draw_h_rays(t_game *game)
 			h.dof++;
 		}
 	}
-	draw_line(&game->win, (t_point){game->player.x + (int)game->map_offset.x - 1, game->player.y + (int)game->map_offset.y},
-		(t_point){(int)h.ray.x + (int)game->map_offset.x - 1, (int)h.ray.y + (int)game->map_offset.y}, WHITE);
-	return (result);
+	// draw_line(&game->win, (t_point){game->player.x + (int)game->map_offset.x - 1, game->player.y + (int)game->map_offset.y},
+	// 	(t_point){(int)h.ray.x + (int)game->map_offset.x - 1, (int)h.ray.y + (int)game->map_offset.y}, WHITE);
+	return (ray);
 }
 
-void	draw_v_rays(t_game *game)
+t_ray	draw_v_rays(t_game *game)
 {
 	t_ray_calculation	v;
+	t_ray				ray;
 
+	ray.dist = 1000000;
+	ray.pos.x = game->player.x;
+	ray.pos.y = game->player.y;
 	v.ray_angle = game->player.angle;
 	v.tan = -1 * tan(v.ray_angle);
 	if (v.ray_angle > P2 && v.ray_angle < P3)
@@ -582,7 +592,11 @@ void	draw_v_rays(t_game *game)
 		v.map.y = (int)v.ray.y / CELL;
 		if (v.map.y < 0 || v.map.y >= g_map_x || v.map.x < 0
 			|| v.map.x >= g_map_x || g_map[v.map.y][v.map.x] == 1)
+		{
 			v.dof = 8;
+			ray.pos = v.ray;
+			ray.dist = get_ray_dist((t_fpoint){game->player.x, game->player.y}, ray.pos);
+		}
 		else
 		{
 			v.ray.x += v.origin.x;
@@ -590,8 +604,33 @@ void	draw_v_rays(t_game *game)
 			v.dof++;
 		}
 	}
-	draw_line(&game->win, (t_point){game->player.x + (int)game->map_offset.x + 1, game->player.y + (int)game->map_offset.y},
-		(t_point){(int)v.ray.x + (int)game->map_offset.x + 1, (int)v.ray.y + (int)game->map_offset.y}, RED);
+	// draw_line(&game->win, (t_point){game->player.x + (int)game->map_offset.x + 1, game->player.y + (int)game->map_offset.y},
+	// 	(t_point){(int)v.ray.x + (int)game->map_offset.x + 1, (int)v.ray.y + (int)game->map_offset.y}, RED);
+	return (ray);
+}
+
+void	draw_map(t_game *game)
+{
+	t_ray	h;
+	t_ray	v;
+
+	put_img(game->map_offset, game->map.size, &game->map, &game->win);
+	draw_map_player(&game->win, game->player,
+		(t_point){game->map_offset.x, game->map_offset.y});
+	h = draw_h_rays(game);
+	v = draw_v_rays(game);
+	if (h.dist > v.dist)
+		draw_line(&game->win,
+			(t_point){game->player.x + (int)game->map_offset.x,
+			game->player.y + (int)game->map_offset.y},
+			(t_point){(int)v.pos.x + (int)game->map_offset.x,
+			(int)v.pos.y + (int)game->map_offset.y}, RED);
+	if (h.dist < v.dist)
+		draw_line(&game->win,
+			(t_point){game->player.x + (int)game->map_offset.x,
+			game->player.y + (int)game->map_offset.y},
+			(t_point){(int)h.pos.x + (int)game->map_offset.x,
+			(int)h.pos.y + (int)game->map_offset.y}, RED);
 }
 
 int	render_frame(t_game *game)
@@ -601,11 +640,8 @@ int	render_frame(t_game *game)
 		handle_keys(game);
 		put_img((t_point){0, 0}, (t_point){RES_X, RES_Y},
 			&game->bg, &game->win);
-		put_img(game->map_offset, game->map.size, &game->map, &game->win);
-		draw_map_player(&game->win, game->player,
-			(t_point){game->map_offset.x, game->map_offset.y});
-		draw_h_rays(game);
-		draw_v_rays(game);
+		if (game->map_toggle == 1)
+			draw_map(game);
 		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
 			game->win.img, 0, 0);
 	}
@@ -625,11 +661,6 @@ void	init_player_pos(t_game *game)
 	game->player.dy = sin(game->player.angle);
 }
 
-void	exit_button()
-{
-
-}
-
 int	main(int ac, char **av)
 {
 	t_game	game;
@@ -641,8 +672,8 @@ int	main(int ac, char **av)
 	game.win = init_img(game.mlx_ptr, RES_X, RES_Y);
 	game.bg = init_bg(game.mlx_ptr);
 	game.map = init_map(&game, (t_point){g_map_x, g_map_y});
-	game.map_offset.x = RES_X - game.map.size.x;
-	game.map_offset.y = 0;
+	game.map_offset.x = RES_X - game.map.size.x - RES_X / 50;
+	game.map_offset.y = RES_X / 50;
 	init_keys(&game);
 	init_player_pos(&game);
 	gettimeofday(&game.last_frame, NULL);
