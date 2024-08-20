@@ -24,12 +24,12 @@
 # define FRAME_RATE 60
 
 // resolution
-# define RES_X 1024
-# define RES_Y 512
+# define RES_X 1280
+# define RES_Y 720
 # define WALL 64
 
 // map
-# define CELL 64
+# define CELL 32
 # define MAP_COLOR 0x0ADAF3
 
 // movement
@@ -110,7 +110,7 @@ typedef struct s_game
 	void			*win_ptr;
 	int				move_keys[6];
 	t_player		player;
-	t_img			mlx_win_img;
+	t_img			win_img;
 	t_img			map;
 	t_point			map_offset;
 	t_img			bg;
