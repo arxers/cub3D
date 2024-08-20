@@ -324,8 +324,8 @@ t_img	init_map(t_game *game, t_point map_grid_size)
 
 int	key_esc(t_game *game)
 {
-	cleanup(game);
 	ft_printf("exit\n");
+	cleanup(game);
 	exit(0);
 	return (0);
 }
@@ -658,7 +658,7 @@ int	main(int ac, char **av)
 	gettimeofday(&game.last_frame, NULL);
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win_ptr, KeyRelease, KeyReleaseMask, &key_release, &game);
-	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &key_esc, NULL);
+	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &key_esc, &game);
 	mlx_loop_hook(game.mlx_ptr, &render_frame, &game);
 	mlx_loop(game.mlx_ptr);
 	(void)av;
