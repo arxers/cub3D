@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/20 12:23:07 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/21 00:42:37 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -621,13 +621,13 @@ void	draw_map(t_game *game)
 	draw_map_player(&game->win, game->player,
 		(t_point){game->map_offset.x, game->map_offset.y});
 	rays = 0;
-	ray_angle = game->player.angle - DR * 30;
+	ray_angle = game->player.angle - DR * (RES_X / 2);
 	if (ray_angle < 0)
 		ray_angle += 2 * PI;
 	if (ray_angle > 2 * PI)
 		ray_angle -= 2 * PI;
-	draw_rectangle(&game->view, (t_point){0,0}, game->view.size, BLACK);
-	while (rays < 60)
+	put_img((t_point){0, 0}, game->bg.size, &game->bg, &game->view);
+	while (rays < RES_X)
 	{
 		h = draw_h_rays(game, &ray_angle);
 		v = draw_v_rays(game, &ray_angle);
@@ -657,18 +657,13 @@ void	draw_map(t_game *game)
 			ray_angle += 2 * PI;
 		if (ray_angle > 2 * PI)
 			ray_angle -= 2 * PI;
-		line_height = (g_map_x * g_map_y * CELL) / dist;
+		line_height = (g_map_x * g_map_y * RES_Y) * 1.5 / dist;
 		if (line_height > RES_Y)
 			line_height = RES_Y;
 		// printf("dist: %f\n", dist);
-		int	i = 0;
-		while (i <= 4)
-		{
-			draw_line(&game->view,
-				(t_point){rays * 5 + i , 160 - line_height / 2},
-				(t_point){rays * 5 + i, line_height + 160 - line_height / 2}, color);
-			i++;
-		}
+		draw_line(&game->view,
+			(t_point){rays, RES_Y / 2 - line_height / 2},
+			(t_point){rays, line_height + RES_Y / 2 - line_height / 2}, color);
 	}
 }
 
@@ -677,10 +672,9 @@ int	render_frame(t_game *game)
 	if (should_render_frame(game))
 	{
 		handle_keys(game);
-		put_img((t_point){0, 0}, game->bg.size, &game->bg, &game->win);
 		if (game->map_toggle == 1)
 			draw_map(game);
-		put_img((t_point){530, 0}, game->view.size, &game->view, &game->win);
+		put_img((t_point){0, 0}, game->view.size, &game->view, &game->win);
 		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
 			game->win.img, 0, 0);
 	}
@@ -709,7 +703,7 @@ int	main(int ac, char **av)
 	game.mlx_ptr = mlx_init();
 	game.win_ptr = mlx_new_window(game.mlx_ptr, RES_X, RES_Y, "cub3D");
 	game.win = init_img(game.mlx_ptr, RES_X, RES_Y);
-	game.view = init_img(game.mlx_ptr, 320, 320);
+	game.view = init_img(game.mlx_ptr, RES_X, RES_Y);
 	game.bg = init_bg(game.mlx_ptr);
 	game.map = init_map(&game, (t_point){g_map_x, g_map_y});
 	// game.map_offset.x = RES_X - game.map.size.x - RES_X / 50;
