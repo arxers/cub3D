@@ -29,7 +29,7 @@
 # define WALL 64
 
 // map
-# define CELL 16
+# define CELL 64
 # define MAP_COLOR 0x0ADAF3
 
 // movement
@@ -53,6 +53,7 @@
 # define PI 3.14159265358979323846
 # define P2 1.57079632679
 # define P3 4.71238898038
+# define DR 0.0174533
 
 typedef struct s_fpoint
 {
@@ -109,7 +110,6 @@ typedef struct s_ray_calculation
 	t_point			map;
 	t_fpoint		ray;
 	t_fpoint		origin;
-	float			ray_angle;
 	float			tan;
 }					t_ray_calculation;
 
@@ -123,6 +123,7 @@ typedef struct s_game
 	int				move_keys[6];
 	t_player		player;
 	t_img			win;
+	t_img			view;
 	t_img			map;
 	int				map_toggle;
 	t_point			map_offset;

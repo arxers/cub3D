@@ -17,11 +17,11 @@ int	g_map_y = 8;
 int	g_map[10][10] = {
 	{1,1,1,1,1,1,1,1},
 	{1,0,1,0,1,0,0,1},
-	{1,0,1,0,1,0,0,1},
-	{1,0,1,0,1,0,0,1},
-	{1,0,0,0,1,0,0,1},
-	{1,1,1,1,1,1,1,1},
-	{1,0,0,0,1,1,0,1},
+	{1,0,0,0,0,0,0,1},
+	{1,0,0,0,0,0,0,1},
+	{1,0,0,1,0,0,0,1},
+	{1,0,1,0,0,1,1,1},
+	{1,0,0,0,0,0,0,1},
 	{1,1,1,1,1,1,1,1}
 };
 
@@ -505,7 +505,7 @@ float	get_ray_dist(t_fpoint a, t_fpoint b)
 	return (sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)));
 }
 
-t_ray	draw_h_rays(t_game *game)
+t_ray	draw_h_rays(t_game *game, float *ray_angle)
 {
 	t_ray_calculation	h;
 	t_ray				ray;
@@ -513,14 +513,13 @@ t_ray	draw_h_rays(t_game *game)
 	ray.dist = 1000000;
 	ray.pos.x = game->player.x;
 	ray.pos.y = game->player.y;
-	h.ray_angle = game->player.angle;
-	h.tan = -1 / tan(h.ray_angle);
-	if (h.ray_angle > PI)
+	h.tan = -1 / tan(*ray_angle);
+	if (*ray_angle > PI)
 	{
 		h.ray.y = (((int)(game->player.y) / CELL) * CELL) - 0.0001;
 		h.origin.y = -CELL;
 	}
-	else if (h.ray_angle < PI)
+	else if (*ray_angle < PI)
 	{
 		h.ray.y = (((int)(game->player.y) / CELL) * CELL) + CELL;
 		h.origin.y = CELL;
@@ -528,7 +527,7 @@ t_ray	draw_h_rays(t_game *game)
 	h.ray.x = (game->player.y - h.ray.y) * h.tan + game->player.x;
 	h.origin.x = -h.origin.y * h.tan;
 	h.dof = 0;
-	if (h.ray_angle == 0 || h.ray_angle == PI)
+	if (*ray_angle == 0 || *ray_angle == PI)
 	{
 		h.ray.x = game->player.x;
 		h.ray.y = game->player.y;
@@ -557,7 +556,7 @@ t_ray	draw_h_rays(t_game *game)
 	return (ray);
 }
 
-t_ray	draw_v_rays(t_game *game)
+t_ray	draw_v_rays(t_game *game, float *ray_angle)
 {
 	t_ray_calculation	v;
 	t_ray				ray;
@@ -565,14 +564,13 @@ t_ray	draw_v_rays(t_game *game)
 	ray.dist = 1000000;
 	ray.pos.x = game->player.x;
 	ray.pos.y = game->player.y;
-	v.ray_angle = game->player.angle;
-	v.tan = -1 * tan(v.ray_angle);
-	if (v.ray_angle > P2 && v.ray_angle < P3)
+	v.tan = -1 * tan(*ray_angle);
+	if (*ray_angle > P2 && *ray_angle < P3)
 	{
 		v.ray.x = (((int)(game->player.x) / CELL) * CELL) - 0.0001;
 		v.origin.x = -CELL;
 	}
-	else if (v.ray_angle < P2 || v.ray_angle > P3)
+	else if (*ray_angle < P2 || *ray_angle > P3)
 	{
 		v.ray.x = (((int)(game->player.x) / CELL) * CELL) + CELL;
 		v.origin.x = CELL;
@@ -580,7 +578,7 @@ t_ray	draw_v_rays(t_game *game)
 	v.ray.y = (game->player.x - v.ray.x) * v.tan + game->player.y;
 	v.origin.y = -v.origin.x * v.tan;
 	v.dof = 0;
-	if (v.ray_angle == 0 || v.ray_angle == PI)
+	if (*ray_angle == 0 || *ray_angle == PI)
 	{
 		v.ray.x = game->player.x;
 		v.ray.y = game->player.y;
@@ -613,24 +611,65 @@ void	draw_map(t_game *game)
 {
 	t_ray	h;
 	t_ray	v;
+	int		rays;
+	float	ray_angle;
+	float	dist;
+	float	line_height;
+	int		color;
 
 	put_img(game->map_offset, game->map.size, &game->map, &game->win);
 	draw_map_player(&game->win, game->player,
 		(t_point){game->map_offset.x, game->map_offset.y});
-	h = draw_h_rays(game);
-	v = draw_v_rays(game);
-	if (h.dist > v.dist)
-		draw_line(&game->win,
-			(t_point){game->player.x + (int)game->map_offset.x,
-			game->player.y + (int)game->map_offset.y},
-			(t_point){(int)v.pos.x + (int)game->map_offset.x,
-			(int)v.pos.y + (int)game->map_offset.y}, RED);
-	if (h.dist < v.dist)
-		draw_line(&game->win,
-			(t_point){game->player.x + (int)game->map_offset.x,
-			game->player.y + (int)game->map_offset.y},
-			(t_point){(int)h.pos.x + (int)game->map_offset.x,
-			(int)h.pos.y + (int)game->map_offset.y}, RED);
+	rays = 0;
+	ray_angle = game->player.angle - DR * 30;
+	if (ray_angle < 0)
+		ray_angle += 2 * PI;
+	if (ray_angle > 2 * PI)
+		ray_angle -= 2 * PI;
+	draw_rectangle(&game->view, (t_point){0,0}, game->view.size, BLACK);
+	while (rays < 60)
+	{
+		h = draw_h_rays(game, &ray_angle);
+		v = draw_v_rays(game, &ray_angle);
+		if (h.dist > v.dist)
+		{
+			draw_line(&game->win,
+				(t_point){game->player.x + (int)game->map_offset.x,
+				game->player.y + (int)game->map_offset.y},
+				(t_point){(int)v.pos.x + (int)game->map_offset.x,
+				(int)v.pos.y + (int)game->map_offset.y}, RED);
+			dist = v.dist;
+			color = 0x888888;
+		}
+		else
+		{
+			draw_line(&game->win,
+				(t_point){game->player.x + (int)game->map_offset.x,
+				game->player.y + (int)game->map_offset.y},
+				(t_point){(int)h.pos.x + (int)game->map_offset.x,
+				(int)h.pos.y + (int)game->map_offset.y}, RED);
+			dist = h.dist;
+			color = 0xAAAAAA;
+		}
+		rays++;
+		ray_angle += DR;
+		if (ray_angle < 0)
+			ray_angle += 2 * PI;
+		if (ray_angle > 2 * PI)
+			ray_angle -= 2 * PI;
+		line_height = (g_map_x * g_map_y * CELL) / dist;
+		if (line_height > RES_Y)
+			line_height = RES_Y;
+		// printf("dist: %f\n", dist);
+		int	i = 0;
+		while (i <= 4)
+		{
+			draw_line(&game->view,
+				(t_point){rays * 5 + i , 160 - line_height / 2},
+				(t_point){rays * 5 + i, line_height + 160 - line_height / 2}, color);
+			i++;
+		}
+	}
 }
 
 int	render_frame(t_game *game)
@@ -638,10 +677,10 @@ int	render_frame(t_game *game)
 	if (should_render_frame(game))
 	{
 		handle_keys(game);
-		put_img((t_point){0, 0}, (t_point){RES_X, RES_Y},
-			&game->bg, &game->win);
+		put_img((t_point){0, 0}, game->bg.size, &game->bg, &game->win);
 		if (game->map_toggle == 1)
 			draw_map(game);
+		put_img((t_point){530, 0}, game->view.size, &game->view, &game->win);
 		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
 			game->win.img, 0, 0);
 	}
@@ -670,10 +709,13 @@ int	main(int ac, char **av)
 	game.mlx_ptr = mlx_init();
 	game.win_ptr = mlx_new_window(game.mlx_ptr, RES_X, RES_Y, "cub3D");
 	game.win = init_img(game.mlx_ptr, RES_X, RES_Y);
+	game.view = init_img(game.mlx_ptr, 320, 320);
 	game.bg = init_bg(game.mlx_ptr);
 	game.map = init_map(&game, (t_point){g_map_x, g_map_y});
-	game.map_offset.x = RES_X - game.map.size.x - RES_X / 50;
-	game.map_offset.y = RES_X / 50;
+	// game.map_offset.x = RES_X - game.map.size.x - RES_X / 50;
+	// game.map_offset.y = RES_X / 50;
+	game.map_offset.x = 0;
+	game.map_offset.y = 0;
 	init_keys(&game);
 	init_player_pos(&game);
 	gettimeofday(&game.last_frame, NULL);
