@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/21 00:42:37 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/21 17:32:48 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,7 +275,7 @@ t_img	init_bg(void *mlx_ptr)
 	// if (bg.img == NULL)
 	// 	;//handle it
 	draw_rectangle(&bg, (t_point){0, 0}, size, 0x171B22);
-	draw_rectangle(&bg, (t_point){0, RES_Y / 2}, size, 0x404856);
+	draw_rectangle(&bg, (t_point){0, RES_Y / 2}, size, 0x3B3E44);
 	return (bg);
 }
 
@@ -616,12 +616,17 @@ void	draw_map(t_game *game)
 	float	dist;
 	float	line_height;
 	int		color;
+	float	fov;
+	float	dr;
+
+	fov = FOV * PI / 180;
+	dr = fov / RES_X;
 
 	put_img(game->map_offset, game->map.size, &game->map, &game->win);
 	draw_map_player(&game->win, game->player,
 		(t_point){game->map_offset.x, game->map_offset.y});
 	rays = 0;
-	ray_angle = game->player.angle - DR * (RES_X / 2);
+	ray_angle = game->player.angle - dr * (RES_X / 2);
 	if (ray_angle < 0)
 		ray_angle += 2 * PI;
 	if (ray_angle > 2 * PI)
@@ -639,7 +644,7 @@ void	draw_map(t_game *game)
 				(t_point){(int)v.pos.x + (int)game->map_offset.x,
 				(int)v.pos.y + (int)game->map_offset.y}, RED);
 			dist = v.dist;
-			color = 0x888888;
+			color = 0x34363C;
 		}
 		else
 		{
@@ -649,21 +654,21 @@ void	draw_map(t_game *game)
 				(t_point){(int)h.pos.x + (int)game->map_offset.x,
 				(int)h.pos.y + (int)game->map_offset.y}, RED);
 			dist = h.dist;
-			color = 0xAAAAAA;
+			color = 0x41434B;
 		}
 		rays++;
-		ray_angle += DR;
+		ray_angle += dr;
 		if (ray_angle < 0)
 			ray_angle += 2 * PI;
 		if (ray_angle > 2 * PI)
 			ray_angle -= 2 * PI;
-		line_height = (g_map_x * g_map_y * RES_Y) * 1.5 / dist;
+		line_height = (WALL * RES_Y) / dist;
 		if (line_height > RES_Y)
 			line_height = RES_Y;
 		// printf("dist: %f\n", dist);
 		draw_line(&game->view,
 			(t_point){rays, RES_Y / 2 - line_height / 2},
-			(t_point){rays, line_height + RES_Y / 2 - line_height / 2}, color);
+			(t_point){rays, RES_Y / 2 + line_height / 2}, color);
 	}
 }
 

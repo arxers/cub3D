@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/21 00:28:35 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/21 19:34:30 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@
 
 // movement
 # define MOV_SPD 0.1
-# define ROT_SPD 0.1
+# define ROT_SPD 0.05
 # define UP 0
 # define DOWN 1
 # define LEFT 2
@@ -50,11 +50,10 @@
 # define WHITE 0xFFFFFF
 
 // math
-# define PI 3.14159265358979323846
+# define PI 3.14159265358
 # define P2 1.57079632679
 # define P3 4.71238898038
-# define FOV 1.0471975512
-# define DR 0.00081812308
+# define FOV 90
 
 typedef struct s_fpoint
 {
