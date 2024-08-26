@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/21 19:34:30 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/26 14:52:09 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@
 # define WALL 64
 
 // map
-# define CELL 64
+# define MAP_CELL 64
+# define MINIMAP_CELL 32
 # define MAP_COLOR 0x0ADAF3
 
 // movement

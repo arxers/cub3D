@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/21 17:32:48 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/26 14:52:54 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,15 +221,20 @@ void draw_triangle(t_img *img, t_triangle t, unsigned int color)
 // RES_X - game->map.size.x, 0}
 void	draw_map_player(t_img *img, t_player p, t_point origin)
 {
-	// float		d;
-	// float		r;
-	// t_point		pointer;
-	draw_circle(img, (t_point){(int)p.x + origin.x, (int)p.y + origin.y}, CELL / 4, WHITE);
-	// d = CELL / 3;
-	// r = CELL / 8;
-	// pointer.x = (int)(p.x + p.dx * d) + origin.x;
-	// pointer.y = (int)(p.y + p.dy * d) + origin.y;
-	// draw_circle(img, pointer, r, WHITE);
+	static float	scale = (float)MINIMAP_CELL / MAP_CELL;
+	t_point			player_circle;
+	t_point			pointer_circle;
+	float			d;
+	float			r;
+
+	player_circle.x = (int)((p.x * scale) + origin.x);
+	player_circle.y = (int)((p.y * scale) + origin.y);
+	draw_circle(img, player_circle, MINIMAP_CELL / 4 * scale, WHITE);
+	d = MINIMAP_CELL / 3;
+	r = MINIMAP_CELL / 8 * scale;
+	pointer_circle.x = (int)((p.x + p.dx * d) * scale) + origin.x;
+	pointer_circle.y = (int)((p.y + p.dy * d) * scale) + origin.y;
+	draw_circle(img, pointer_circle, r, WHITE);
 }
 
 int	input_validation(int ac, char **av)
@@ -287,7 +292,7 @@ void	draw_map_tiles(t_img *map)
 
 	count.y = 0;
 	origin.y = 0;
-	size = (t_point){CELL - 1, CELL - 1};
+	size = (t_point){MINIMAP_CELL - 1, MINIMAP_CELL - 1};
 	while (count.y < g_map_y)
 	{
 		origin.x = 0;
@@ -299,10 +304,10 @@ void	draw_map_tiles(t_img *map)
 			else if (g_map[count.y][count.x] == 0)
 				draw_rectangle(map, origin, size, BLACK);
 			count.x++;
-			origin.x += CELL;
+			origin.x += MINIMAP_CELL;
 		}
 		count.y++;
-		origin.y += CELL;
+		origin.y += MINIMAP_CELL;
 	}
 }
 
@@ -311,8 +316,8 @@ t_img	init_map(t_game *game, t_point map_grid_size)
 	t_img	map;
 	t_point	map_size;
 
-	map_size.x = map_grid_size.x * CELL;
-	map_size.y = map_grid_size.y * CELL;
+	map_size.x = map_grid_size.x * MINIMAP_CELL;
+	map_size.y = map_grid_size.y * MINIMAP_CELL;
 	map = init_img(game->mlx_ptr, map_size.x, map_size.y);
 	draw_rectangle(&map, (t_point){0, 0}, map_size, MAP_COLOR);
 	draw_map_tiles(&map);
@@ -516,13 +521,13 @@ t_ray	draw_h_rays(t_game *game, float *ray_angle)
 	h.tan = -1 / tan(*ray_angle);
 	if (*ray_angle > PI)
 	{
-		h.ray.y = (((int)(game->player.y) / CELL) * CELL) - 0.0001;
-		h.origin.y = -CELL;
+		h.ray.y = (((int)(game->player.y) / MAP_CELL) * MAP_CELL) - 0.0001;
+		h.origin.y = -MAP_CELL;
 	}
 	else if (*ray_angle < PI)
 	{
-		h.ray.y = (((int)(game->player.y) / CELL) * CELL) + CELL;
-		h.origin.y = CELL;
+		h.ray.y = (((int)(game->player.y) / MAP_CELL) * MAP_CELL) + 64;
+		h.origin.y = MAP_CELL;
 	}
 	h.ray.x = (game->player.y - h.ray.y) * h.tan + game->player.x;
 	h.origin.x = -h.origin.y * h.tan;
@@ -535,8 +540,8 @@ t_ray	draw_h_rays(t_game *game, float *ray_angle)
 	}
 	while (h.dof < 8)
 	{
-		h.map.x = (int)h.ray.x / CELL;
-		h.map.y = (int)h.ray.y / CELL;
+		h.map.x = (int)h.ray.x / MAP_CELL;
+		h.map.y = (int)h.ray.y / MAP_CELL;
 		if (h.map.y < 0 || h.map.y >= g_map_x || h.map.x < 0
 			|| h.map.x >= g_map_x || g_map[h.map.y][h.map.x] == 1)
 		{
@@ -567,13 +572,13 @@ t_ray	draw_v_rays(t_game *game, float *ray_angle)
 	v.tan = -1 * tan(*ray_angle);
 	if (*ray_angle > P2 && *ray_angle < P3)
 	{
-		v.ray.x = (((int)(game->player.x) / CELL) * CELL) - 0.0001;
-		v.origin.x = -CELL;
+		v.ray.x = (((int)(game->player.x) / MAP_CELL) * MAP_CELL) - 0.0001;
+		v.origin.x = -MAP_CELL;
 	}
 	else if (*ray_angle < P2 || *ray_angle > P3)
 	{
-		v.ray.x = (((int)(game->player.x) / CELL) * CELL) + CELL;
-		v.origin.x = CELL;
+		v.ray.x = (((int)(game->player.x) / MAP_CELL) * MAP_CELL) + 64;
+		v.origin.x = MAP_CELL;
 	}
 	v.ray.y = (game->player.x - v.ray.x) * v.tan + game->player.y;
 	v.origin.y = -v.origin.x * v.tan;
@@ -586,8 +591,8 @@ t_ray	draw_v_rays(t_game *game, float *ray_angle)
 	}
 	while (v.dof < 8)
 	{
-		v.map.x = (int)v.ray.x / CELL;
-		v.map.y = (int)v.ray.y / CELL;
+		v.map.x = (int)v.ray.x / MAP_CELL;
+		v.map.y = (int)v.ray.y / MAP_CELL;
 		if (v.map.y < 0 || v.map.y >= g_map_x || v.map.x < 0
 			|| v.map.x >= g_map_x || g_map[v.map.y][v.map.x] == 1)
 		{
@@ -621,10 +626,6 @@ void	draw_map(t_game *game)
 
 	fov = FOV * PI / 180;
 	dr = fov / RES_X;
-
-	put_img(game->map_offset, game->map.size, &game->map, &game->win);
-	draw_map_player(&game->win, game->player,
-		(t_point){game->map_offset.x, game->map_offset.y});
 	rays = 0;
 	ray_angle = game->player.angle - dr * (RES_X / 2);
 	if (ray_angle < 0)
@@ -677,9 +678,13 @@ int	render_frame(t_game *game)
 	if (should_render_frame(game))
 	{
 		handle_keys(game);
-		if (game->map_toggle == 1)
-			draw_map(game);
+		draw_map(game);
 		put_img((t_point){0, 0}, game->view.size, &game->view, &game->win);
+		if (game->map_toggle == 1)
+		{
+			put_img(game->map_offset, game->map.size, &game->map, &game->win);
+			draw_map_player(&game->win, game->player, (t_point){game->map_offset.x, game->map_offset.y});
+		}
 		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
 			game->win.img, 0, 0);
 	}
@@ -692,8 +697,8 @@ void	init_player_pos(t_game *game)
 
 	pos.x = 4;
 	pos.y = 4;
-	game->player.x = pos.x * (CELL + 1) + (CELL / 2);
-	game->player.y = pos.y * (CELL + 1) + (CELL / 2);
+	game->player.x = pos.x * (MINIMAP_CELL + 1) + (MINIMAP_CELL / 2);
+	game->player.y = pos.y * (MINIMAP_CELL + 1) + (MINIMAP_CELL / 2);
 	game->player.angle = 0;
 	game->player.dx = cos(game->player.angle);
 	game->player.dy = sin(game->player.angle);
@@ -711,10 +716,10 @@ int	main(int ac, char **av)
 	game.view = init_img(game.mlx_ptr, RES_X, RES_Y);
 	game.bg = init_bg(game.mlx_ptr);
 	game.map = init_map(&game, (t_point){g_map_x, g_map_y});
-	// game.map_offset.x = RES_X - game.map.size.x - RES_X / 50;
-	// game.map_offset.y = RES_X / 50;
-	game.map_offset.x = 0;
-	game.map_offset.y = 0;
+	game.map_offset.x = RES_X - game.map.size.x - RES_X / 50;
+	game.map_offset.y = RES_X / 50;
+	// game.map_offset.x = 0;
+	// game.map_offset.y = 0;
 	init_keys(&game);
 	init_player_pos(&game);
 	gettimeofday(&game.last_frame, NULL);
