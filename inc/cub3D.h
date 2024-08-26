@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/26 14:52:09 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/26 15:01:31 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@
 
 // map
 # define MAP_CELL 64
-# define MINIMAP_CELL 32
+# define MINIMAP_CELL 64
 # define MAP_COLOR 0x0ADAF3
 
 // movement
