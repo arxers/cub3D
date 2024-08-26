@@ -42,7 +42,7 @@ fclean: clean
 
 re: fclean all
 
-debug: CFLAGS += -g
+debug: CFLAGS += -g -fsanitize=address
 debug: LIBFLAG += debug
 debug: re
 

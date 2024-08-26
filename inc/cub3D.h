@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/26 15:01:31 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/26 20:28:34 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,16 +24,17 @@
 # define FRAME_RATE 60
 
 // resolution
-# define RES_X 1280
+# define RES_X 1080
 # define RES_Y 720
 # define WALL 64
 
 // map
 # define MAP_CELL 64
-# define MINIMAP_CELL 64
+# define MINIMAP_CELL 16
 # define MAP_COLOR 0x0ADAF3
 
 // movement
+# define MOUSE_SEN 0.005
 # define MOV_SPD 0.1
 # define ROT_SPD 0.05
 # define UP 0
@@ -52,6 +53,7 @@
 
 // math
 # define PI 3.14159265358
+# define PI2 6.28318530718
 # define P2 1.57079632679
 # define P3 4.71238898038
 # define FOV 90
