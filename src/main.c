@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/26 20:31:03 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/27 21:37:09 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,8 @@ int	load_xpms(t_game *game)
 	return (0);
 }
 
-void	draw_rectangle(t_img *dst, t_point origin, t_point size, unsigned int color)
+void	draw_rectangle(t_img *dst, t_point origin, t_point size,
+	unsigned int color)
 {
 	int	x;
 	int	y;
@@ -141,7 +142,8 @@ void	draw_circle(t_img *dst, t_point origin, int radius, unsigned int color)
 	}
 }
 
-void	draw_circle_outline(t_img *img, t_point origin, int radius, unsigned int color)
+void	draw_circle_outline(t_img *img, t_point origin, int radius,
+	unsigned int color)
 {
 	int		x;
 	int		y;
@@ -237,7 +239,6 @@ void	draw_map_player(t_img *img, t_player p, t_point origin)
 	draw_circle(img, pointer_pos, pointer_radius, WHITE);
 }
 
-
 int	input_validation(int ac, char **av)
 {
 	if (ac != 2)
@@ -257,9 +258,11 @@ int	cleanup(t_game *game)
 	mlx_destroy_image(game->mlx_ptr, game->win.img);
 	mlx_destroy_image(game->mlx_ptr, game->map.img);
 	mlx_destroy_image(game->mlx_ptr, game->bg.img);
+	mlx_destroy_image(game->mlx_ptr, game->view.img);
 	mlx_destroy_window(game->mlx_ptr, game->win_ptr);
 	mlx_destroy_display(game->mlx_ptr);
-	free(game->mlx_ptr);
+	ft_free(&game->mlx_ptr);
+	ft_free(&game->fps);
 	exit(0);
 }
 
@@ -329,7 +332,6 @@ int	key_esc(t_game *game)
 {
 	ft_printf("exit\n");
 	cleanup(game);
-	exit(0);
 	return (0);
 }
 
@@ -496,9 +498,8 @@ int	should_render_frame(t_game *game)
 		game->last_frame = game->current_frame;
 		if (a_second_has_passed())
 		{
-			write(1, "fps: ", 5);
-			ft_putnbr_fd(fps, 1);
-			write(1, "\n", 1);
+			ft_free(&game->fps);
+			game->fps = ft_itoa(fps);
 			fps = 0;
 		}
 		return (1);
@@ -658,7 +659,6 @@ void	draw_map(t_game *game)
 			dist = h.dist;
 			color = 0x41434B;
 		}
-		dist = dist * cos(ray_angle - game->player.angle);
 		line_height = (WALL * RES_Y) / dist;
 		if (line_height > RES_Y)
 			line_height = RES_Y;
@@ -714,6 +714,9 @@ int	game_loop(t_game *game)
 			draw_minimap(game);
 		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->win.img,
 			0, 0);
+		if (game->fps)
+			mlx_string_put(game->mlx_ptr, game->win_ptr, 1, 11, WHITE,
+				game->fps);
 	}
 	return (0);
 }
@@ -745,6 +748,7 @@ int	main(int ac, char **av)
 	game.map = init_map(&game, (t_point){g_map_x, g_map_y});
 	game.map_offset.x = RES_X - game.map.size.x - RES_X / 50;
 	game.map_offset.y = RES_X / 50;
+	game.fps = NULL;
 	init_keys(&game);
 	init_player_pos(&game);
 	gettimeofday(&game.last_frame, NULL);

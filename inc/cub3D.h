@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/26 20:28:34 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/27 21:01:00 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 # define FRAME_RATE 60
 
 // resolution
-# define RES_X 1080
+# define RES_X 1280
 # define RES_Y 720
 # define WALL 64
 
@@ -34,7 +34,7 @@
 # define MAP_COLOR 0x0ADAF3
 
 // movement
-# define MOUSE_SEN 0.005
+# define MOUSE_SEN 0.004
 # define MOV_SPD 0.1
 # define ROT_SPD 0.05
 # define UP 0
@@ -120,6 +120,7 @@ typedef struct s_game
 {
 	struct timeval	current_frame;
 	struct timeval	last_frame;
+	char			*fps;
 	long			elapsed;
 	void			*mlx_ptr;
 	void			*win_ptr;
