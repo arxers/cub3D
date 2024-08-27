@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/27 21:39:43 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/28 00:40:01 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -673,6 +673,38 @@ void	draw_map(t_game *game)
 			ray_angle -= 2 * PI;
 	}
 }
+
+// void	draw_map_new(t_game *game)
+// {
+// 	int			rays;
+// 	int			dof;
+// 	float		delta_x;
+// 	float		dist;
+// 	float		line_height;
+// 	float		camera;
+// 	float		proj_dist;
+// 	t_fpoint	dir;
+
+// 	rays = 0;
+// 	dof = 10;
+// 	delta_x = (float)2 / RES_X;
+// 	camera = -1;
+// 	dir = game->player.angle;
+// 	proj_dist = (float)RES_X / 2;
+// 	// dof = longer side of the map
+// 	while (rays < RES_X)
+// 	{
+// 		dist = draw_rays(game, proj_dist);
+// 		line_height = (WALL * RES_Y) / dist;
+// 		if (line_height > RES_Y)
+// 			line_height = RES_Y;
+// 		draw_line(&game->view,
+// 			(t_point){rays, RES_Y / 2 - line_height / 2},
+// 			(t_point){rays, RES_Y / 2 + line_height / 2}, WHITE);
+// 		rays++;
+// 		camera += delta_x;
+// 	}
+// }
 
 void	draw_minimap(t_game *game)
 {
