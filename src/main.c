@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/27 21:37:09 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/27 21:39:43 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,7 +261,7 @@ int	cleanup(t_game *game)
 	mlx_destroy_image(game->mlx_ptr, game->view.img);
 	mlx_destroy_window(game->mlx_ptr, game->win_ptr);
 	mlx_destroy_display(game->mlx_ptr);
-	ft_free(&game->mlx_ptr);
+	ft_free_void(&game->mlx_ptr);
 	ft_free(&game->fps);
 	exit(0);
 }
