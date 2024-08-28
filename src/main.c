@@ -6,23 +6,40 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/28 00:40:01 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/28 21:09:07 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3D.h"
 
-int	g_map_x = 8;
-int	g_map_y = 8;
-int	g_map[10][10] = {
-	{1,1,1,1,1,1,1,1},
-	{1,0,1,0,1,0,0,1},
-	{1,0,0,0,0,0,0,1},
-	{1,0,0,0,0,0,0,1},
-	{1,0,0,1,0,0,0,1},
-	{1,0,1,0,0,1,1,1},
-	{1,0,0,0,0,0,0,1},
-	{1,1,1,1,1,1,1,1}
+int	g_map_x = 24;
+int	g_map_y = 24;
+int	g_map[24][24] =
+{
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,2,2,2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
+  {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1},
+  {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
 t_img	init_img(void *mlx_ptr, int width, int height)
@@ -223,19 +240,19 @@ void draw_triangle(t_img *img, t_triangle t, unsigned int color)
 // RES_X - game->map.size.x, 0}
 void	draw_map_player(t_img *img, t_player p, t_point origin)
 {
-	static float	scale = (float)MINIMAP_CELL / MAP_CELL;
+	static float	scale = (float)MINIMAP_CELL;
 	t_point			player_pos;
 	t_point			pointer_pos;
 	float			pointer_radius;
 	float			pointer_dist;
 
-	player_pos.x = (int)((p.x * scale) + origin.x);
-	player_pos.y = (int)((p.y * scale) + origin.y);
+	player_pos.x = (int)((p.pos.x * scale) + origin.x);
+	player_pos.y = (int)((p.pos.y * scale) + origin.y);
 	draw_circle(img, player_pos, MINIMAP_CELL * 0.25, WHITE);
 	pointer_radius = MINIMAP_CELL * 0.15;
-	pointer_dist = MAP_CELL * 0.25;
-	pointer_pos.x = (int)((p.x + (p.dx * pointer_dist)) * scale) + origin.x;
-	pointer_pos.y = (int)((p.y + (p.dy * pointer_dist)) * scale) + origin.y;
+	pointer_dist = 0.25;
+	pointer_pos.x = (int)((p.pos.x + (p.dir.x * pointer_dist)) * scale) + origin.x;
+	pointer_pos.y = (int)((p.pos.y + (p.dir.y * pointer_dist)) * scale) + origin.y;
 	draw_circle(img, pointer_pos, pointer_radius, WHITE);
 }
 
@@ -373,47 +390,70 @@ int	key_press(unsigned int key, t_game *game)
 	return (0);
 }
 
-void	handle_rotation(t_game *game, float speed)
+void	handle_rotation(t_game *game)
 {
+	t_fpoint	old_dir;
+	t_fpoint	old_plane;
+
+	old_dir = game->player.dir;
+	old_plane = game->player.plane;
 	if (game->move_keys[ROT_L])
 	{
-		game->player.angle -= 0.05 * speed;
-		if (game->player.angle < 0)
-			game->player.angle += 2 * PI;
-		game->player.dx = cos(game->player.angle);
-		game->player.dy = sin(game->player.angle);
+		game->player.dir.x = game->player.dir.x * cos(ROT_SPD) - game->player.dir.y * sin(ROT_SPD);
+     	game->player.dir.y = old_dir.x * sin(ROT_SPD) + game->player.dir.y * cos(ROT_SPD);
+		game->player.plane.x = game->player.plane.x * cos(ROT_SPD) - game->player.plane.y * sin(ROT_SPD);
+		game->player.plane.y = old_plane.y * sin(ROT_SPD) + game->player.plane.y * cos(ROT_SPD);
 	}
 	if (game->move_keys[ROT_R])
 	{
-		game->player.angle += 0.05 * speed;
-		if (game->player.angle > 2 * PI)
-			game->player.angle -= 2 * PI;
-		game->player.dx = cos(game->player.angle);
-		game->player.dy = sin(game->player.angle);
+		game->player.dir.x = game->player.dir.x * cos(-ROT_SPD) - game->player.dir.y * sin(-ROT_SPD);
+     	game->player.dir.y = old_dir.x * sin(-ROT_SPD) + game->player.dir.y * cos(-ROT_SPD);
+		game->player.plane.x = game->player.plane.x * cos(-ROT_SPD) - game->player.plane.y * sin(-ROT_SPD);
+		game->player.plane.y = old_plane.y * sin(-ROT_SPD) + game->player.plane.y * cos(-ROT_SPD);
 	}
 }
+
+// void	handle_rotation(t_game *game, float speed)
+// {
+// 	if (game->move_keys[ROT_L])
+// 	{
+// 		game->player.angle -= 0.05 * speed;
+// 		if (game->player.angle < 0)
+// 			game->player.angle += 2 * PI;
+// 		game->player.dir.x = cos(game->player.angle);
+// 		game->player.dir.y = sin(game->player.angle);
+// 	}
+// 	if (game->move_keys[ROT_R])
+// 	{
+// 		game->player.angle += 0.05 * speed;
+// 		if (game->player.angle > 2 * PI)
+// 			game->player.angle -= 2 * PI;
+// 		game->player.dir.x = cos(game->player.angle);
+// 		game->player.dir.y = sin(game->player.angle);
+// 	}
+// }
 
 void	calculate_movement(t_game *game, float *move_x, float *move_y)
 {
 	if (game->move_keys[UP])
 	{
-		*move_x += game->player.dx;
-		*move_y += game->player.dy;
+		*move_x += game->player.dir.x;
+		*move_y += game->player.dir.y;
 	}
 	if (game->move_keys[DOWN])
 	{
-		*move_x -= game->player.dx;
-		*move_y -= game->player.dy;
+		*move_x -= game->player.dir.x;
+		*move_y -= game->player.dir.y;
 	}
 	if (game->move_keys[LEFT])
 	{
-		*move_x += game->player.dy;
-		*move_y -= game->player.dx;
+		*move_x += game->player.dir.y;
+		*move_y -= game->player.dir.x;
 	}
 	if (game->move_keys[RIGHT])
 	{
-		*move_x -= game->player.dy;
-		*move_y += game->player.dx;
+		*move_x -= game->player.dir.y;
+		*move_y += game->player.dir.x;
 	}
 }
 
@@ -438,13 +478,13 @@ void	handle_movement(t_game *game, float speed)
 	move_y = 0.0;
 	calculate_movement(game, &move_x, &move_y);
 	normalize_movement(&move_x, &move_y);
-	game->player.x += move_x * speed;
-	game->player.y += move_y * speed;
+	game->player.pos.x += move_x * speed;
+	game->player.pos.y += move_y * speed;
 }
 
 int	handle_keys(t_game *game)
 {
-	handle_rotation(game, ROT_SPD * (1000 / FRAME_RATE));
+	handle_rotation(game/* , ROT_SPD * (1000 / FRAME_RATE) */);
 	handle_movement(game, MOV_SPD * (1000 / FRAME_RATE));
 	return (0);
 }
@@ -512,197 +552,159 @@ float	get_ray_dist(t_fpoint a, t_fpoint b)
 	return (sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)));
 }
 
-t_ray	draw_h_rays(t_game *game, float *ray_angle)
-{
-	t_ray_calculation	h;
-	t_ray				ray;
-
-	ray.dist = 1000000;
-	ray.pos.x = game->player.x;
-	ray.pos.y = game->player.y;
-	h.tan = -1 / tan(*ray_angle);
-	if (*ray_angle > PI)
-	{
-		h.ray.y = (((int)(game->player.y) / MAP_CELL) * MAP_CELL) - 0.0001;
-		h.origin.y = -MAP_CELL;
-	}
-	else if (*ray_angle < PI)
-	{
-		h.ray.y = (((int)(game->player.y) / MAP_CELL) * MAP_CELL) + 64;
-		h.origin.y = MAP_CELL;
-	}
-	h.ray.x = (game->player.y - h.ray.y) * h.tan + game->player.x;
-	h.origin.x = -h.origin.y * h.tan;
-	h.dof = 0;
-	if (*ray_angle == 0 || *ray_angle == PI)
-	{
-		h.ray.x = game->player.x;
-		h.ray.y = game->player.y;
-		h.dof = 8;
-	}
-	while (h.dof < 8)
-	{
-		h.map.x = (int)h.ray.x / MAP_CELL;
-		h.map.y = (int)h.ray.y / MAP_CELL;
-		if (h.map.y < 0 || h.map.y >= g_map_x || h.map.x < 0
-			|| h.map.x >= g_map_x || g_map[h.map.y][h.map.x] == 1)
-		{
-			h.dof = 8;
-			ray.pos = h.ray;
-			ray.dist = get_ray_dist((t_fpoint){game->player.x, game->player.y}, ray.pos);
-		}
-		else
-		{
-			h.ray.x += h.origin.x;
-			h.ray.y += h.origin.y;
-			h.dof++;
-		}
-	}
-	// draw_line(&game->win, (t_point){game->player.x + (int)game->map_offset.x - 1, game->player.y + (int)game->map_offset.y},
-	// 	(t_point){(int)h.ray.x + (int)game->map_offset.x - 1, (int)h.ray.y + (int)game->map_offset.y}, WHITE);
-	return (ray);
-}
-
-t_ray	draw_v_rays(t_game *game, float *ray_angle)
-{
-	t_ray_calculation	v;
-	t_ray				ray;
-
-	ray.dist = 1000000;
-	ray.pos.x = game->player.x;
-	ray.pos.y = game->player.y;
-	v.tan = -1 * tan(*ray_angle);
-	if (*ray_angle > P2 && *ray_angle < P3)
-	{
-		v.ray.x = (((int)(game->player.x) / MAP_CELL) * MAP_CELL) - 0.0001;
-		v.origin.x = -MAP_CELL;
-	}
-	else if (*ray_angle < P2 || *ray_angle > P3)
-	{
-		v.ray.x = (((int)(game->player.x) / MAP_CELL) * MAP_CELL) + 64;
-		v.origin.x = MAP_CELL;
-	}
-	v.ray.y = (game->player.x - v.ray.x) * v.tan + game->player.y;
-	v.origin.y = -v.origin.x * v.tan;
-	v.dof = 0;
-	if (*ray_angle == 0 || *ray_angle == PI)
-	{
-		v.ray.x = game->player.x;
-		v.ray.y = game->player.y;
-		v.dof = 8;
-	}
-	while (v.dof < 8)
-	{
-		v.map.x = (int)v.ray.x / MAP_CELL;
-		v.map.y = (int)v.ray.y / MAP_CELL;
-		if (v.map.y < 0 || v.map.y >= g_map_x || v.map.x < 0
-			|| v.map.x >= g_map_x || g_map[v.map.y][v.map.x] == 1)
-		{
-			v.dof = 8;
-			ray.pos = v.ray;
-			ray.dist = get_ray_dist((t_fpoint){game->player.x, game->player.y}, ray.pos);
-		}
-		else
-		{
-			v.ray.x += v.origin.x;
-			v.ray.y += v.origin.y;
-			v.dof++;
-		}
-	}
-	// draw_line(&game->win, (t_point){game->player.x + (int)game->map_offset.x + 1, game->player.y + (int)game->map_offset.y},
-	// 	(t_point){(int)v.ray.x + (int)game->map_offset.x + 1, (int)v.ray.y + (int)game->map_offset.y}, RED);
-	return (ray);
-}
-
-void	draw_map(t_game *game)
-{
-	t_ray	h;
-	t_ray	v;
-	int		rays;
-	float	ray_angle;
-	float	dist;
-	float	line_height;
-	int		color;
-	float	fov;
-	float	dr;
-
-	fov = FOV * PI / 180;
-	dr = fov / RES_X;
-	ray_angle = game->player.angle - (dr * (RES_X / 2));
-	if (ray_angle < 0)
-		ray_angle += 2 * PI;
-	if (ray_angle > 2 * PI)
-		ray_angle -= 2 * PI;
-	put_img((t_point){0, 0}, game->bg.size, &game->bg, &game->view);
-	rays = 0;
-	while (rays < RES_X)
-	{
-		h = draw_h_rays(game, &ray_angle);
-		v = draw_v_rays(game, &ray_angle);
-		if (h.dist > v.dist)
-		{
-			draw_line(&game->win,
-				(t_point){game->player.x + (int)game->map_offset.x,
-				game->player.y + (int)game->map_offset.y},
-				(t_point){(int)v.pos.x + (int)game->map_offset.x,
-				(int)v.pos.y + (int)game->map_offset.y}, RED);
-			dist = v.dist;
-			color = 0x34363C;
-		}
-		else
-		{
-			draw_line(&game->win,
-				(t_point){game->player.x + (int)game->map_offset.x,
-				game->player.y + (int)game->map_offset.y},
-				(t_point){(int)h.pos.x + (int)game->map_offset.x,
-				(int)h.pos.y + (int)game->map_offset.y}, RED);
-			dist = h.dist;
-			color = 0x41434B;
-		}
-		line_height = (WALL * RES_Y) / dist;
-		if (line_height > RES_Y)
-			line_height = RES_Y;
-		draw_line(&game->view,
-			(t_point){rays, RES_Y / 2 - line_height / 2},
-			(t_point){rays, RES_Y / 2 + line_height / 2}, color);
-		rays++;
-		ray_angle += dr;
-		if (ray_angle < 0)
-			ray_angle += 2 * PI;
-		if (ray_angle > 2 * PI)
-			ray_angle -= 2 * PI;
-	}
-}
-
-// void	draw_map_new(t_game *game)
+// t_ray	draw_h_rays(t_game *game, float ray_angle)
 // {
-// 	int			rays;
-// 	int			dof;
-// 	float		delta_x;
-// 	float		dist;
-// 	float		line_height;
-// 	float		camera;
-// 	float		proj_dist;
-// 	t_fpoint	dir;
+// 	t_ray_calculation	h;
+// 	t_ray				ray;
 
+// 	ray.dist = 1000000;
+// 	h.tan = -1 / tan(ray_angle);
+// 	if (ray_angle > PI)
+// 	{
+// 		h.ray.y = (((int)(game->player.y) / MAP_CELL) * MAP_CELL) - 0.0001;
+// 		h.origin.y = -MAP_CELL;
+// 	}
+// 	else if (ray_angle < PI)
+// 	{
+// 		h.ray.y = (((int)(game->player.y) / MAP_CELL) * MAP_CELL) + 64;
+// 		h.origin.y = MAP_CELL;
+// 	}
+// 	h.ray.x = (game->player.y - h.ray.y) * h.tan + game->player.x;
+// 	h.origin.x = -h.origin.y * h.tan;
+// 	h.dof = 0;
+// 	if (ray_angle == 0 || ray_angle == PI)
+// 	{
+// 		h.ray.x = game->player.x;
+// 		h.ray.y = game->player.y;
+// 		h.dof = 10;
+// 	}
+// 	while (h.dof < 10)
+// 	{
+// 		h.map.x = (int)h.ray.x / MAP_CELL;
+// 		h.map.y = (int)h.ray.y / MAP_CELL;
+// 		if (h.map.y < 0 || h.map.y >= g_map_x || h.map.x < 0
+// 			|| h.map.x >= g_map_x || g_map[h.map.y][h.map.x] == 1)
+// 		{
+// 			h.dof = 10;
+// 			ray.pos.x = h.ray.x;
+// 			ray.pos.y = h.ray.y;
+// 			ray.dist = get_ray_dist((t_fpoint){game->player.x, game->player.y}, ray.pos);
+// 		}
+// 		else
+// 		{
+// 			h.ray.x += h.origin.x;
+// 			h.ray.y += h.origin.y;
+// 			h.dof++;
+// 		}
+// 	}
+// 	return (ray);
+// }
+
+// t_ray	draw_v_rays(t_game *game, float ray_angle)
+// {
+// 	t_ray_calculation	v;
+// 	t_ray				ray;
+
+// 	ray.dist = 1000000;
+// 	v.tan = -1 * tan(ray_angle);
+// 	if (ray_angle > P2 && ray_angle < P3)
+// 	{
+// 		v.ray.x = (((int)(game->player.x) / MAP_CELL) * MAP_CELL) - 0.0001;
+// 		v.origin.x = -MAP_CELL;
+// 	}
+// 	else if (ray_angle < P2 || ray_angle > P3)
+// 	{
+// 		v.ray.x = (((int)(game->player.x) / MAP_CELL) * MAP_CELL) + 64;
+// 		v.origin.x = MAP_CELL;
+// 	}
+// 	v.ray.y = (game->player.x - v.ray.x) * v.tan + game->player.y;
+// 	v.origin.y = -v.origin.x * v.tan;
+// 	v.dof = 0;
+// 	if (ray_angle == 0 || ray_angle == PI)
+// 	{
+// 		v.ray.x = game->player.x;
+// 		v.ray.y = game->player.y;
+// 		v.dof = 10;
+// 	}
+// 	while (v.dof < 10)
+// 	{
+// 		v.map.x = (int)v.ray.x / MAP_CELL;
+// 		v.map.y = (int)v.ray.y / MAP_CELL;
+// 		if (v.map.y < 0 || v.map.y >= g_map_x || v.map.x < 0
+// 			|| v.map.x >= g_map_x || g_map[v.map.y][v.map.x] == 1)
+// 		{
+// 			v.dof = 10;
+// 			ray.pos.x = v.ray.x;
+// 			ray.pos.y = v.ray.y;
+// 			ray.dist = get_ray_dist((t_fpoint){game->player.x, game->player.y}, ray.pos);
+// 		}
+// 		else
+// 		{
+// 			v.ray.x += v.origin.x;
+// 			v.ray.y += v.origin.y;
+// 			v.dof++;
+// 		}
+// 	}
+// 	return (ray);
+// }
+
+// void	draw_map(t_game *game)
+// {
+// 	t_ray	h;
+// 	t_ray	v;
+// 	int		rays;
+// 	float	ray_angle;
+// 	float	dist;
+// 	float	line_height;
+// 	int		color;
+// 	float	fov;
+// 	float	dr;
+
+// 	fov = FOV * PI / 180;
+// 	dr = fov / RES_X;
+// 	ray_angle = game->player.angle - (dr * (RES_X / 2));
+// 	if (ray_angle < 0)
+// 		ray_angle += 2 * PI;
+// 	if (ray_angle > 2 * PI)
+// 		ray_angle -= 2 * PI;
+// 	put_img((t_point){0, 0}, game->bg.size, &game->bg, &game->view);
 // 	rays = 0;
-// 	dof = 10;
-// 	delta_x = (float)2 / RES_X;
-// 	camera = -1;
-// 	dir = game->player.angle;
-// 	proj_dist = (float)RES_X / 2;
-// 	// dof = longer side of the map
 // 	while (rays < RES_X)
 // 	{
-// 		dist = draw_rays(game, proj_dist);
+// 		h = draw_h_rays(game, ray_angle);
+// 		v = draw_v_rays(game, ray_angle);
+// 		if (h.dist > v.dist)
+// 		{
+// 			draw_line(&game->win,
+// 				(t_point){game->player.x + (int)game->map_offset.x,
+// 				game->player.y + (int)game->map_offset.y},
+// 				(t_point){(int)v.pos.x + (int)game->map_offset.x,
+// 				(int)v.pos.y + (int)game->map_offset.y}, RED);
+// 			dist = v.dist;
+// 			color = 0x34363C;
+// 		}
+// 		else
+// 		{
+// 			draw_line(&game->win,
+// 				(t_point){game->player.x + (int)game->map_offset.x,
+// 				game->player.y + (int)game->map_offset.y},
+// 				(t_point){(int)h.pos.x + (int)game->map_offset.x,
+// 				(int)h.pos.y + (int)game->map_offset.y}, RED);
+// 			dist = h.dist;
+// 			color = 0x41434B;
+// 		}
 // 		line_height = (WALL * RES_Y) / dist;
 // 		if (line_height > RES_Y)
 // 			line_height = RES_Y;
 // 		draw_line(&game->view,
 // 			(t_point){rays, RES_Y / 2 - line_height / 2},
-// 			(t_point){rays, RES_Y / 2 + line_height / 2}, WHITE);
+// 			(t_point){rays, RES_Y / 2 + line_height / 2}, color);
 // 		rays++;
-// 		camera += delta_x;
+// 		ray_angle += dr;
+// 		if (ray_angle < 0)
+// 			ray_angle += 2 * PI;
+// 		if (ray_angle > 2 * PI)
+// 			ray_angle -= 2 * PI;
 // 	}
 // }
 
@@ -713,34 +715,134 @@ void	draw_minimap(t_game *game)
 		(t_point){game->map_offset.x, game->map_offset.y});
 }
 
-void	handle_mouse(t_game *game)
-{
-	static t_point	center = {RES_X / 2, RES_Y / 2};
-	int				delta_x;
-	t_point			mouse;
+// void	handle_mouse(t_game *game)
+// {
+// 	static t_point	center = {RES_X / 2, RES_Y / 2};
+// 	int				delta_x;
+// 	t_point			mouse;
 
-	mlx_mouse_get_pos(game->mlx_ptr, game->win_ptr, &mouse.x, &mouse.y);
-	delta_x = mouse.x - center.x;
-	if (delta_x != 0)
+// 	mlx_mouse_get_pos(game->mlx_ptr, game->win_ptr, &mouse.x, &mouse.y);
+// 	delta_x = mouse.x - center.x;
+// 	if (delta_x != 0)
+// 	{
+// 		game->player.angle += delta_x * MOUSE_SEN;
+// 		if (game->player.angle < 0)
+// 			game->player.angle += PI2;
+// 		else if (game->player.angle > PI2)
+// 			game->player.angle -= PI2;
+// 		game->player.dir.x = cos(game->player.angle);
+// 		game->player.dir.y = sin(game->player.angle);
+// 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
+// 	}
+// }
+
+int	not_out_of_bounds(t_point map)
+{
+	if (map.x < 0 || map.y < 0 || map.x > g_map_x || map.y > g_map_y)
+		return (0);
+	return (1);
+}
+
+void	lodev(t_game *game)
+{
+	int				x;
+	float			camera_x;
+	t_point			map;
+	t_fpoint		ray_dir;
+	t_fpoint		side_dist;
+	t_fpoint		delta_dist;
+	float			perp_wall_dist;
+	t_point			step;
+	int				hit;
+	int				side;
+	int				line_height;
+	int				draw_start;
+	int				draw_end;
+	unsigned int	color;
+
+	x = 0;
+	while (x < RES_X)
 	{
-		game->player.angle += delta_x * MOUSE_SEN;
-		if (game->player.angle < 0)
-			game->player.angle += PI2;
-		else if (game->player.angle > PI2)
-			game->player.angle -= PI2;
-		game->player.dx = cos(game->player.angle);
-		game->player.dy = sin(game->player.angle);
-		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
+		camera_x = 2 * x / (float)RES_X - 1;
+		ray_dir.x = game->player.dir.x + game->player.plane.x * camera_x;
+		ray_dir.y = game->player.dir.y + game->player.plane.y * camera_x;
+		map.x = (int)game->player.pos.x;
+		map.y = (int)game->player.pos.y;
+		if (ray_dir.x == 0)
+			delta_dist.x = 1;
+		else
+			delta_dist.x = fabsf(1 / ray_dir.x);
+		if (ray_dir.y == 0)
+			delta_dist.y = 1;
+		else
+			delta_dist.y = fabsf(1 / ray_dir.y);
+		hit = 0;
+		if (ray_dir.x < 0)
+		{
+			step.x = -1;
+			side_dist.x = (game->player.pos.x - map.x) * delta_dist.x;
+		}
+		else
+		{
+			step.x = 1;
+			side_dist.x = (map.x + 1.0 - game->player.pos.x) * delta_dist.x;
+		}
+		if (ray_dir.y < 0)
+		{
+			step.y = -1;
+			side_dist.y = (game->player.pos.y - map.y) * delta_dist.y;
+		}
+		else
+		{
+			step.y = 1;
+			side_dist.y = (map.y + 1.0 - game->player.pos.y) * delta_dist.y;
+		}
+		while (hit == 0)
+		{
+			if (side_dist.x < side_dist.y)
+			{
+				side_dist.x += delta_dist.x;
+				map.x += step.x;
+				side = 0;
+			}
+			else
+			{
+				side_dist.y += delta_dist.y;
+				map.y += step.y;
+				side = 1;
+			}
+			if (g_map[map.x][map.y] > 0)
+				hit = 1;
+		}
+		if (side == 0)
+			perp_wall_dist = (side_dist.x - delta_dist.x);
+		else
+			perp_wall_dist = (side_dist.y - delta_dist.y);
+		line_height = (int)RES_Y / perp_wall_dist;
+		draw_start = -line_height / 2 + RES_Y / 2;
+		if (draw_start < 0)
+			draw_start = 0;
+		draw_end = line_height / 2 + RES_Y / 2;
+		if (draw_end >= RES_Y)
+			draw_end = RES_Y - 1;
+		color = 0xAAAAAA;
+		if (side == 1)
+			color = 0x888888;
+		draw_line(&game->view,
+			(t_point){x, draw_start},
+			(t_point){x, draw_end}, color);
+		x++;
 	}
 }
 
 int	game_loop(t_game *game)
 {
-	handle_mouse(game);
+	// handle_mouse(game);
 	if (should_render_frame(game))
 	{
 		handle_keys(game);
-		draw_map(game);
+		put_img((t_point){0, 0}, game->bg.size, &game->bg, &game->view);
+		lodev(game);
 		put_img((t_point){0, 0}, game->view.size, &game->view, &game->win);
 		if (game->map_toggle == 1)
 			draw_minimap(game);
@@ -757,13 +859,19 @@ void	init_player_pos(t_game *game)
 {
 	t_point	pos;
 
-	pos.x = 4;
-	pos.y = 4;
-	game->player.x = pos.x * MAP_CELL - 1 + (MAP_CELL / 2);
-	game->player.y = pos.y * MAP_CELL - 1 + (MAP_CELL / 2);
-	game->player.angle = 0;
-	game->player.dx = cos(game->player.angle);
-	game->player.dy = sin(game->player.angle);
+	pos.x = 22;
+	pos.y = 12;
+	game->player.pos.x = pos.x + 0.5;
+	game->player.pos.y = pos.y + 0.5;
+	// game->player.angle = 0;
+	game->player.dir.x = 1;
+	game->player.dir.y = 0;
+	printf("player dir x:%f\n", game->player.dir.x);
+	printf("player dir y:%f\n", game->player.dir.y);
+	game->player.plane.x = game->player.dir.x * 0.66;
+	game->player.plane.y = game->player.dir.y * 0.66;
+	printf("player plane x:%f\n", game->player.plane.x);
+	printf("player plane y:%f\n", game->player.plane.y);
 }
 
 int	main(int ac, char **av)

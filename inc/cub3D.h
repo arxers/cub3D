@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/27 21:01:00 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/28 20:36:30 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@
 
 // movement
 # define MOUSE_SEN 0.004
-# define MOV_SPD 0.1
+# define MOV_SPD 0.001
 # define ROT_SPD 0.05
 # define UP 0
 # define DOWN 1
@@ -94,11 +94,9 @@ typedef struct s_sprites
 
 typedef struct s_player
 {
-	float			x;
-	float			y;
-	float			dx;
-	float			dy;
-	float			angle;
+	t_fpoint		pos;
+	t_fpoint		plane;
+	t_fpoint		dir;
 }					t_player;
 
 typedef struct s_ray
@@ -118,6 +116,7 @@ typedef struct s_ray_calculation
 
 typedef struct s_game
 {
+	
 	struct timeval	current_frame;
 	struct timeval	last_frame;
 	char			*fps;
