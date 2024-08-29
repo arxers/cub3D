@@ -24,8 +24,8 @@
 # define FRAME_RATE 60
 
 // resolution
-# define RES_X 1280
-# define RES_Y 720
+# define RES_X 1024
+# define RES_Y 768
 # define WALL 64
 
 // map
