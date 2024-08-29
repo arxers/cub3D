@@ -392,29 +392,26 @@ int	key_press(unsigned int key, t_game *game)
 
 void	handle_rotation(t_game *game)
 {
-	// t_fpoint	old_dir;
-	// t_fpoint	old_plane;
+	float	old_dir_x;
+	float	old_plane_x;
 
-	// old_dir = game->player.dir;
-	// old_plane = game->player.plane;
-	// printf("dir.x: %f, dir.y: %f\n", game->player.dir.x, game->player.dir.y);
-	if (game->move_keys[ROT_R])
-	{
-      float oldDirX = game->player.dir.x;
-      game->player.dir.x = game->player.dir.x * cos(-ROT_SPD) - game->player.dir.y * sin(-ROT_SPD);
-      game->player.dir.y = oldDirX * sin(-ROT_SPD) + game->player.dir.y * cos(-ROT_SPD);
-      float oldPlaneX = game->player.plane.x;
-      game->player.plane.x = game->player.plane.x * cos(-ROT_SPD) - game->player.plane.y * sin(-ROT_SPD);
-      game->player.plane.y = oldPlaneX * sin(-ROT_SPD) + game->player.plane.y * cos(-ROT_SPD);
-	}
 	if (game->move_keys[ROT_L])
 	{
-      float oldDirX = game->player.dir.x;
-      game->player.dir.x = game->player.dir.x * cos(ROT_SPD) - game->player.dir.y * sin(ROT_SPD);
-      game->player.dir.y = oldDirX * sin(ROT_SPD) + game->player.dir.y * cos(ROT_SPD);
-      float oldPlaneX = game->player.plane.x;
-      game->player.plane.x = game->player.plane.x * cos(ROT_SPD) - game->player.plane.y * sin(ROT_SPD);
-      game->player.plane.y = oldPlaneX * sin(ROT_SPD) + game->player.plane.y * cos(ROT_SPD);
+		old_dir_x = game->player.dir.x;
+		game->player.dir.x = game->player.dir.x * cos(-ROT_SPD) - game->player.dir.y * sin(-ROT_SPD);
+		game->player.dir.y = old_dir_x * sin(-ROT_SPD) + game->player.dir.y * cos(-ROT_SPD);
+		old_plane_x = game->player.plane.x;
+		game->player.plane.x = game->player.plane.x * cos(-ROT_SPD) - game->player.plane.y * sin(-ROT_SPD);
+		game->player.plane.y = old_plane_x * sin(-ROT_SPD) + game->player.plane.y * cos(-ROT_SPD);
+	}
+	if (game->move_keys[ROT_R])
+	{
+		old_dir_x = game->player.dir.x;
+		game->player.dir.x = game->player.dir.x * cos(ROT_SPD) - game->player.dir.y * sin(ROT_SPD);
+		game->player.dir.y = old_dir_x * sin(ROT_SPD) + game->player.dir.y * cos(ROT_SPD);
+		old_plane_x = game->player.plane.x;
+		game->player.plane.x = game->player.plane.x * cos(ROT_SPD) - game->player.plane.y * sin(ROT_SPD);
+		game->player.plane.y = old_plane_x * sin(ROT_SPD) + game->player.plane.y * cos(ROT_SPD);
 	}
 }
 
@@ -608,6 +605,7 @@ void	lodev(t_game *game)
 	while (x < RES_X)
 	{
 		camera_x = 2 * x / (float)RES_X - 1;
+		camera_x = -camera_x;
 		ray_dir.x = game->player.dir.x + game->player.plane.x * camera_x;
 		ray_dir.y = game->player.dir.y + game->player.plane.y * camera_x;
 		map.x = (int)game->player.pos.x;
@@ -669,7 +667,6 @@ void	lodev(t_game *game)
 		draw_end = line_height / 2 + RES_Y / 2;
 		if (draw_end >= RES_Y)
 			draw_end = RES_Y - 1;
-		color = 0xAAAAAA;
 		if (side == 1)
 			color = 0x888888;
 		draw_line(&game->view,
@@ -677,6 +674,10 @@ void	lodev(t_game *game)
 			(t_point){x, draw_end}, color);
 		x++;
 	}
+	printf("player dir x:%f\n", game->player.dir.x);
+	printf("player dir y:%f\n", game->player.dir.y);
+	printf("player plane x:%f\n", game->player.plane.x);
+	printf("player plane y:%f\n", game->player.plane.y);
 }
 
 int	game_loop(t_game *game)
@@ -711,10 +712,6 @@ void	init_player_pos(t_game *game)
 	game->player.dir.y = 0;
 	game->player.plane.x = 0;
 	game->player.plane.y = 0.66;
-	printf("player dir x:%f\n", game->player.dir.x);
-	printf("player dir y:%f\n", game->player.dir.y);
-	printf("player plane x:%f\n", game->player.plane.x);
-	printf("player plane y:%f\n", game->player.plane.y);
 }
 
 
