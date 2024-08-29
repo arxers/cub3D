@@ -667,6 +667,7 @@ void	lodev(t_game *game)
 		draw_end = line_height / 2 + RES_Y / 2;
 		if (draw_end >= RES_Y)
 			draw_end = RES_Y - 1;
+		color = 0xAAAAAA;
 		if (side == 1)
 			color = 0x888888;
 		draw_line(&game->view,
