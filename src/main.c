@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/30 12:25:04 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/30 16:58:52 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,20 +159,28 @@ void	draw_circle(t_img *dst, t_point origin, int radius, unsigned int color)
 	}
 }
 
-void	draw_circle_outline(t_img *img, t_point origin, int radius,
+void	draw_circle_outline(t_img *dst, t_point origin, int radius,
 	unsigned int color)
 {
-	int		x;
-	int		y;
-	float	angle;
+	int		r_sq;
+	t_point	p;
+	t_point	d;
 
-	angle = 0;
-	while (angle < 360)
+	r_sq = radius * radius;
+	p.y = origin.y - radius;
+	while (p.y <= origin.y + radius)
 	{
-		x = origin.x + radius * cos(angle * PI / 180);
-		y = origin.y + radius * sin(angle * PI / 180);
-		set_pixel(img, x, y, color);
-		angle += 0.1;
+		p.x = origin.x - radius;
+		while (p.x <= origin.x + radius)
+		{
+			d.x = p.x - origin.x;
+			d.y = p.y - origin.y;
+			if ((d.x * d.x) + (d.y * d.y) >= r_sq - radius + 1
+				&& (d.x * d.x) + (d.y * d.y) <= r_sq + radius - 1)
+				set_pixel(dst, p.x, p.y, color);
+			p.x++;
+		}
+		p.y++;
 	}
 }
 
@@ -240,20 +248,21 @@ void draw_triangle(t_img *img, t_triangle t, unsigned int color)
 // RES_X - game->map.size.x, 0}
 void	draw_map_player(t_img *img, t_player p, t_point origin)
 {
-	static float	scale = (float)MINIMAP_CELL;
+	static float	scale = (float)MAP_CELL_SIZE;
 	t_point			player_pos;
 	t_point			pointer_pos;
-	float			pointer_radius;
-	float			pointer_dist;
+	float			dir_radius;
+	float			dir_dist;
 
 	player_pos.x = (int)((p.pos.x * scale) + origin.x);
 	player_pos.y = (int)((p.pos.y * scale) + origin.y);
-	draw_circle(img, player_pos, MINIMAP_CELL * 0.25, WHITE);
-	pointer_radius = MINIMAP_CELL * 0.15;
-	pointer_dist = 0.25;
-	pointer_pos.x = (int)((p.pos.x + (p.dir.x * pointer_dist)) * scale) + origin.x;
-	pointer_pos.y = (int)((p.pos.y + (p.dir.y * pointer_dist)) * scale) + origin.y;
-	draw_circle(img, pointer_pos, pointer_radius, WHITE);
+	draw_circle(img, player_pos, MAP_CELL_SIZE * 0.15, WHITE);
+	draw_circle_outline(img, player_pos, MAP_CELL_SIZE * 0.25, WHITE);
+	dir_radius = MAP_CELL_SIZE * 0.15;
+	dir_dist = 0.25;
+	pointer_pos.x = (int)((p.pos.x + (p.dir.x * dir_dist)) * scale) + origin.x;
+	pointer_pos.y = (int)((p.pos.y + (p.dir.y * dir_dist)) * scale) + origin.y;
+	draw_circle(img, pointer_pos, dir_radius, WHITE);
 }
 
 int	input_validation(int ac, char **av)
@@ -313,7 +322,7 @@ void	draw_map_tiles(t_img *map)
 
 	count.y = 0;
 	origin.y = 0;
-	size = (t_point){MINIMAP_CELL - 1, MINIMAP_CELL - 1};
+	size = (t_point){MAP_CELL_SIZE - 1, MAP_CELL_SIZE - 1};
 	while (count.y < g_map_y)
 	{
 		origin.x = 0;
@@ -325,10 +334,10 @@ void	draw_map_tiles(t_img *map)
 			else if (g_map[count.y][count.x] == 0)
 				draw_rectangle(map, origin, size, BLACK);
 			count.x++;
-			origin.x += MINIMAP_CELL;
+			origin.x += MAP_CELL_SIZE;
 		}
 		count.y++;
-		origin.y += MINIMAP_CELL;
+		origin.y += MAP_CELL_SIZE;
 	}
 }
 
@@ -337,11 +346,9 @@ t_img	init_minimap(t_game *game, t_point map_grid_size)
 	t_img	map;
 	t_point	map_size;
 
-	map_size.x = map_grid_size.x * MINIMAP_CELL;
-	map_size.y = map_grid_size.y * MINIMAP_CELL;
+	map_size.x = map_grid_size.x * MAP_CELL_SIZE;
+	map_size.y = map_grid_size.y * MAP_CELL_SIZE;
 	map = init_img(game->mlx_ptr, map_size.x, map_size.y);
-	draw_rectangle(&map, (t_point){0, 0}, map_size, MAP_COLOR);
-	draw_map_tiles(&map);
 	return (map);
 }
 
@@ -512,15 +519,43 @@ void	normalize_movement(float *move_x, float *move_y)
 
 void	handle_movement(t_game *game, float speed)
 {
-	float	move_x;
-	float	move_y;
+	t_fpoint	move;
+	t_fpoint	new_pos;
+	float	radius;
 
-	move_x = 0.0;
-	move_y = 0.0;
-	calculate_movement(game, &move_x, &move_y);
-	normalize_movement(&move_x, &move_y);
-	game->player.pos.x += move_x * speed;
-	game->player.pos.y += move_y * speed;
+	radius = 0.1;
+	move.x = 0;
+	move.y = 0;
+	calculate_movement(game, &move.x, &move.y);
+	normalize_movement(&move.x, &move.y);
+	new_pos.x = (game->player.pos.x + move.x * speed);
+	new_pos.y = (game->player.pos.y + move.y * speed);
+	if (move.x < 0)
+	{
+		if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x - radius)] == 0
+			&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x - radius)] == 0
+			&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x - radius)] == 0)
+			game->player.pos.x = new_pos.x;
+	}
+	else
+	{
+		if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x + radius)] == 0
+			&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x + radius)] == 0
+			&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x + radius)] == 0)
+			game->player.pos.x = new_pos.x;
+	}
+	if (move.y < 0)
+	{
+		if (g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x)] == 0
+			&& g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x - radius)] == 0
+			&& g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x + radius)] == 0)
+			game->player.pos.y = new_pos.y;
+	}
+	else
+		if (g_map[(int)(new_pos.y + radius)][(int)(game->player.pos.x)] == 0
+			&& g_map[(int)(new_pos.y + radius)][(int)(game->player.pos.x - radius)] == 0
+			&& g_map[(int)(new_pos.y + radius)][(int)(game->player.pos.x + radius)] == 0)
+			game->player.pos.y = new_pos.y;
 }
 
 int	handle_keys(t_game *game)
@@ -589,11 +624,38 @@ int	should_render_frame(t_game *game)
 	return (0);
 }
 
+//GPT
+void rotate_image(t_img *src, t_img *dst, float angle)
+{
+    int x, y;
+    int center_x = src->size.x / 2;
+    int center_y = src->size.y / 2;
+    float cos_a = cos(angle);
+    float sin_a = sin(angle);
+
+    for (y = 0; y < src->size.y; y++)
+    {
+        for (x = 0; x < src->size.x; x++)
+        {
+            int new_x = cos_a * (x - center_x) - sin_a * (y - center_y) + center_x;
+            int new_y = sin_a * (x - center_x) + cos_a * (y - center_y) + center_y;
+
+            if (new_x >= 0 && new_x < dst->size.x && new_y >= 0 && new_y < dst->size.y)
+            {
+                unsigned int color = get_pixel(src, x, y); // Assume get_pixel reads a pixel color
+                set_pixel(dst, new_x, new_y, color);      // Assume set_pixel sets a pixel color
+            }
+        }
+    }
+}
+
 void	draw_minimap(t_game *game)
 {
+	draw_rectangle(&game->map, (t_point){0, 0}, game->map.size, MAP_COLOR);
+	draw_map_tiles(&game->map);
+	draw_map_player(&game->map, game->player,
+		(t_point){0, 0});
 	put_img(game->map_offset, game->map.size, &game->map, &game->win);
-	draw_map_player(&game->win, game->player,
-		(t_point){game->map_offset.x, game->map_offset.y});
 }
 
 // void	handle_mouse(t_game *game)
@@ -738,6 +800,7 @@ int	game_loop(t_game *game)
 			if (game->fps)
 				mlx_string_put(game->mlx_ptr, game->win_ptr, 1, 11, WHITE,
 					game->fps);
+			// rotate_image(&game->map, &game->map, atan2f(game->player.dir.x, game->player.dir.y));
 		}
 	}
 	return (0);
