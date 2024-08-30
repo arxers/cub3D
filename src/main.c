@@ -391,6 +391,22 @@ int	key_press(unsigned int key, t_game *game)
 		key_esc(game);
 	if (key == XK_p)
 		pause_game(game);
+	if (key == XK_bracketleft)
+	{
+		if (game->target_fps > 30)
+		{
+			game->target_fps -= 30;
+			game->frame_time = 1000 / game->target_fps;
+		}
+	}
+	if (key == XK_bracketright)
+	{
+		if (game->target_fps < 90)
+		{
+			game->target_fps += 30;
+			game->frame_time = 1000 / game->target_fps;
+		}
+	}
 	if (key == XK_Up || key == XK_w)
 		game->keys[UP] = 1;
 	if (key == XK_Down || key == XK_s)
@@ -560,8 +576,8 @@ void	handle_movement(t_game *game, float speed)
 
 int	handle_keys(t_game *game)
 {
-	handle_rotation(game, ROT_SPD * (1000 / FRAME_RATE));
-	handle_movement(game, MOV_SPD * (1000 / FRAME_RATE));
+	handle_rotation(game, ROT_SPD * game->frame_time);
+	handle_movement(game, MOV_SPD * game->frame_time);
 	return (0);
 }
 
@@ -602,14 +618,13 @@ int	a_second_has_passed(void)
 
 int	should_render_frame(t_game *game)
 {
-	static int	frame_time = 1000 / FRAME_RATE;
 	static int	fps = 0;
 	long		elapsed;
 
 	gettimeofday(&game->current_frame, NULL);
 	elapsed = (game->current_frame.tv_sec - game->last_frame.tv_sec) * 1000
 		+ (game->current_frame.tv_usec - game->last_frame.tv_usec) / 1000;
-	if (elapsed >= frame_time)
+	if (elapsed >= game->frame_time)
 	{
 		fps++;
 		game->last_frame = game->current_frame;
@@ -623,6 +638,30 @@ int	should_render_frame(t_game *game)
 	}
 	return (0);
 }
+
+// int	should_render_frame(t_game *game)
+// {
+// 	static int	frame_time = 1000 / FRAME_RATE;
+// 	static int	fps = 0;
+// 	long		elapsed;
+
+// 	gettimeofday(&game->current_frame, NULL);
+// 	elapsed = (game->current_frame.tv_sec - game->last_frame.tv_sec) * 1000
+// 		+ (game->current_frame.tv_usec - game->last_frame.tv_usec) / 1000;
+// 	if (elapsed >= frame_time)
+// 	{
+// 		fps++;
+// 		game->last_frame = game->current_frame;
+// 		if (a_second_has_passed())
+// 		{
+// 			ft_free(&game->fps);
+// 			game->fps = ft_itoa(fps);
+// 			fps = 0;
+// 		}
+// 		return (1);
+// 	}
+// 	return (0);
+// }
 
 //GPT
 void rotate_image(t_img *src, t_img *dst, float angle)
@@ -655,6 +694,7 @@ void	draw_minimap(t_game *game)
 	draw_map_tiles(&game->map);
 	draw_map_player(&game->map, game->player,
 		(t_point){0, 0});
+	// rotate_image(&game->map, &game->map, atan2f(game->player.dir.x, game->player.dir.y));
 	put_img(game->map_offset, game->map.size, &game->map, &game->win);
 }
 
@@ -764,7 +804,7 @@ void	lodev(t_game *game)
 		line_height = (int)(RES_Y / perp_wall_dist);
 		draw_start = -line_height / 2 + RES_Y / 2;
 		if (draw_start < 0)
-			draw_start = 0;
+			draw_start = -1;
 		draw_end = line_height / 2 + RES_Y / 2;
 		if (draw_end >= RES_Y)
 			draw_end = RES_Y - 1;
@@ -785,23 +825,20 @@ void	lodev(t_game *game)
 int	game_loop(t_game *game)
 {
 	if (game->pause != 1)
-	{
 		handle_mouse(game);
-		if (should_render_frame(game))
-		{
-			handle_keys(game);
-			put_img((t_point){0, 0}, game->bg.size, &game->bg, &game->view);
-			lodev(game);
-			put_img((t_point){0, 0}, game->view.size, &game->view, &game->win);
-			if (game->map_toggle == 1)
-				draw_minimap(game);
-			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->win.img,
-				0, 0);
-			if (game->fps)
-				mlx_string_put(game->mlx_ptr, game->win_ptr, 1, 11, WHITE,
-					game->fps);
-			// rotate_image(&game->map, &game->map, atan2f(game->player.dir.x, game->player.dir.y));
-		}
+	if (should_render_frame(game))
+	{
+		put_img((t_point){0, 0}, game->bg.size, &game->bg, &game->view);
+		lodev(game);
+		handle_keys(game);
+		put_img((t_point){0, 0}, game->view.size, &game->view, &game->win);
+		if (game->map_toggle == 1)
+			draw_minimap(game);
+		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->win.img,
+			0, 0);
+		if (game->fps)
+			mlx_string_put(game->mlx_ptr, game->win_ptr, 1, 11, WHITE,
+				game->fps);
 	}
 	return (0);
 }
@@ -840,6 +877,8 @@ int	main(int ac, char **av)
 	game.map_offset.x = RES_X - game.map.size.x - RES_X / 50;
 	game.map_offset.y = RES_X / 50;
 	game.fps = NULL;
+	game.target_fps = 60;
+	game.frame_time = 1000 / game.target_fps;
 	init_keys(&game);
 	init_player_pos(&game);
 	gettimeofday(&game.last_frame, NULL);

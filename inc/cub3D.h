@@ -119,6 +119,8 @@ typedef struct s_game
 	struct timeval	current_frame;
 	struct timeval	last_frame;
 	char			*fps;
+	unsigned int	target_fps;
+	unsigned int	frame_time;
 	long			elapsed;
 	void			*mlx_ptr;
 	void			*win_ptr;
