@@ -120,7 +120,7 @@ typedef struct s_game
 	struct timeval	last_frame;
 	char			*fps;
 	unsigned int	target_fps;
-	unsigned int	frame_time;
+	float			frame_time;
 	long			elapsed;
 	void			*mlx_ptr;
 	void			*win_ptr;

@@ -245,7 +245,6 @@ void draw_triangle(t_img *img, t_triangle t, unsigned int color)
 	draw_line(img, v3, v1, color);
 }
 
-// RES_X - game->map.size.x, 0}
 void	draw_map_player(t_img *img, t_player p, t_point origin)
 {
 	static float	scale = (float)MAP_CELL_SIZE;
@@ -387,26 +386,6 @@ void	pause_game(t_game *game)
 
 int	key_press(unsigned int key, t_game *game)
 {
-	if (key == XK_Escape)
-		key_esc(game);
-	if (key == XK_p)
-		pause_game(game);
-	if (key == XK_bracketleft)
-	{
-		if (game->target_fps > 30)
-		{
-			game->target_fps -= 30;
-			game->frame_time = 1000 / game->target_fps;
-		}
-	}
-	if (key == XK_bracketright)
-	{
-		if (game->target_fps < 90)
-		{
-			game->target_fps += 30;
-			game->frame_time = 1000 / game->target_fps;
-		}
-	}
 	if (key == XK_Up || key == XK_w)
 		game->keys[UP] = 1;
 	if (key == XK_Down || key == XK_s)
@@ -419,8 +398,28 @@ int	key_press(unsigned int key, t_game *game)
 		game->keys[ROT_L] = 1;
 	if (key == XK_Right || key == XK_e)
 		game->keys[ROT_R] = 1;
+	if (key == XK_Escape)
+		key_esc(game);
+	if (key == XK_p)
+		pause_game(game);
 	if (key == XK_m)
 		game->map_toggle *= -1;
+	if (key == XK_bracketleft)
+	{
+		if (game->target_fps > 30)
+		{
+			game->target_fps -= 30;
+			game->frame_time = 1000.0 / game->target_fps;
+		}
+	}
+	if (key == XK_bracketright)
+	{
+		if (game->target_fps < 90)
+		{
+			game->target_fps += 30;
+			game->frame_time = 1000.0 / game->target_fps;
+		}
+	}
 	return (0);
 }
 
@@ -450,9 +449,9 @@ void	handle_mouse(t_game *game)
 {
 	static t_point	center = {RES_X / 2, RES_Y / 2};
 	t_point			mouse;
-	int				delta_x;
 	float			old_dir_x;
 	float			old_plane_x;
+	int				delta_x;
 
 	mlx_mouse_get_pos(game->mlx_ptr, game->win_ptr, &mouse.x, &mouse.y);
 	delta_x = mouse.x - center.x;
@@ -601,7 +600,7 @@ int	a_second_has_passed(void)
 	struct timeval			current_time;
 	long					seconds_elapsed;
 
-	if (start_time.tv_sec == 0 && start_time.tv_usec == 0)
+	if (start_time.tv_sec == 0)
 	{
 		gettimeofday(&start_time, NULL);
 		return (0);
@@ -639,30 +638,6 @@ int	should_render_frame(t_game *game)
 	return (0);
 }
 
-// int	should_render_frame(t_game *game)
-// {
-// 	static int	frame_time = 1000 / FRAME_RATE;
-// 	static int	fps = 0;
-// 	long		elapsed;
-
-// 	gettimeofday(&game->current_frame, NULL);
-// 	elapsed = (game->current_frame.tv_sec - game->last_frame.tv_sec) * 1000
-// 		+ (game->current_frame.tv_usec - game->last_frame.tv_usec) / 1000;
-// 	if (elapsed >= frame_time)
-// 	{
-// 		fps++;
-// 		game->last_frame = game->current_frame;
-// 		if (a_second_has_passed())
-// 		{
-// 			ft_free(&game->fps);
-// 			game->fps = ft_itoa(fps);
-// 			fps = 0;
-// 		}
-// 		return (1);
-// 	}
-// 	return (0);
-// }
-
 //GPT
 void rotate_image(t_img *src, t_img *dst, float angle)
 {
@@ -697,27 +672,6 @@ void	draw_minimap(t_game *game)
 	// rotate_image(&game->map, &game->map, atan2f(game->player.dir.x, game->player.dir.y));
 	put_img(game->map_offset, game->map.size, &game->map, &game->win);
 }
-
-// void	handle_mouse(t_game *game)
-// {
-// 	static t_point	center = {RES_X / 2, RES_Y / 2};
-// 	int				delta_x;
-// 	t_point			mouse;
-
-// 	mlx_mouse_get_pos(game->mlx_ptr, game->win_ptr, &mouse.x, &mouse.y);
-// 	delta_x = mouse.x - center.x;
-// 	if (delta_x != 0)
-// 	{
-// 		game->player.angle += delta_x * MOUSE_SEN;
-// 		if (game->player.angle < 0)
-// 			game->player.angle += PI2;
-// 		else if (game->player.angle > PI2)
-// 			game->player.angle -= PI2;
-// 		game->player.dir.x = cos(game->player.angle);
-// 		game->player.dir.y = sin(game->player.angle);
-// 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
-// 	}
-// }
 
 int	not_out_of_bounds(t_point map)
 {
@@ -837,8 +791,11 @@ int	game_loop(t_game *game)
 		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->win.img,
 			0, 0);
 		if (game->fps)
+		{
+			draw_rectangle(&game->win, (t_point){0, 0}, (t_point){13, 13}, BLACK);
 			mlx_string_put(game->mlx_ptr, game->win_ptr, 1, 11, WHITE,
 				game->fps);
+		}
 	}
 	return (0);
 }
@@ -878,7 +835,7 @@ int	main(int ac, char **av)
 	game.map_offset.y = RES_X / 50;
 	game.fps = NULL;
 	game.target_fps = 60;
-	game.frame_time = 1000 / game.target_fps;
+	game.frame_time = 1000.0 / game.target_fps;
 	init_keys(&game);
 	init_player_pos(&game);
 	gettimeofday(&game.last_frame, NULL);
