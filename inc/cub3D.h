@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/28 20:36:30 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/30 11:10:59 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@
 # define MAP_COLOR 0x0ADAF3
 
 // movement
-# define MOUSE_SEN 0.004
+# define MOUSE_SEN 0.0025
 # define MOV_SPD 0.001
 # define ROT_SPD 0.0025
 # define UP 0
@@ -116,14 +116,14 @@ typedef struct s_ray_calculation
 
 typedef struct s_game
 {
-	
+	int				pause;
 	struct timeval	current_frame;
 	struct timeval	last_frame;
 	char			*fps;
 	long			elapsed;
 	void			*mlx_ptr;
 	void			*win_ptr;
-	int				move_keys[6];
+	unsigned char	keys[255];
 	t_player		player;
 	t_img			win;
 	t_img			view;

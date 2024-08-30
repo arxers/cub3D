@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/28 21:09:07 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/30 11:46:03 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -355,56 +355,115 @@ int	key_esc(t_game *game)
 int	key_release(unsigned int key, t_game *game)
 {
 	if (key == XK_Up || key == XK_w)
-		game->move_keys[UP] = 0;
+		game->keys[UP] = 0;
 	if (key == XK_Down || key == XK_s)
-		game->move_keys[DOWN] = 0;
+		game->keys[DOWN] = 0;
 	if (key == XK_a)
-		game->move_keys[LEFT] = 0;
+		game->keys[LEFT] = 0;
 	if (key == XK_d)
-		game->move_keys[RIGHT] = 0;
+		game->keys[RIGHT] = 0;
 	if (key == XK_Left || key == XK_q)
-		game->move_keys[ROT_L] = 0;
+		game->keys[ROT_L] = 0;
 	if (key == XK_Right || key == XK_e)
-		game->move_keys[ROT_R] = 0;
+		game->keys[ROT_R] = 0;
 	return (0);
+}
+
+void	pause_game(t_game *game)
+{
+	static t_point	center = {RES_X / 2, RES_Y / 2};
+
+	if (game->pause == 1)
+		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
+	game->pause = -game->pause;
 }
 
 int	key_press(unsigned int key, t_game *game)
 {
 	if (key == XK_Escape)
 		key_esc(game);
+	if (key == XK_p)
+		pause_game(game);
 	if (key == XK_Up || key == XK_w)
-		game->move_keys[UP] = 1;
+		game->keys[UP] = 1;
 	if (key == XK_Down || key == XK_s)
-		game->move_keys[DOWN] = 1;
+		game->keys[DOWN] = 1;
 	if (key == XK_a)
-		game->move_keys[LEFT] = 1;
+		game->keys[LEFT] = 1;
 	if (key == XK_d)
-		game->move_keys[RIGHT] = 1;
+		game->keys[RIGHT] = 1;
 	if (key == XK_Left || key == XK_q)
-		game->move_keys[ROT_L] = 1;
+		game->keys[ROT_L] = 1;
 	if (key == XK_Right || key == XK_e)
-		game->move_keys[ROT_R] = 1;
+		game->keys[ROT_R] = 1;
 	if (key == XK_m)
 		game->map_toggle *= -1;
 	return (0);
 }
 
+// void	handle_mouse(t_game *game)
+// {
+// 	static t_point	center = {RES_X / 2, RES_Y / 2};
+// 	int				delta_x;
+// 	t_point			mouse;
+// 	float			old_dir_x;
+// 	float			old_plane_x;
+
+// 	mlx_mouse_get_pos(game->mlx_ptr, game->win_ptr, &mouse.x, &mouse.y);
+// 	delta_x = mouse.x - center.x;
+// 	old_dir_x = game->player.dir.x;
+// 	old_plane_x = game->player.plane.x;
+// 	if (delta_x != 0)
+// 	{
+// 		game->player.dir.x = game->player.dir.x * cos(MOUSE_SEN) - game->player.dir.y * sin(MOUSE_SEN);
+// 		game->player.dir.y = old_dir_x * sin(MOUSE_SEN) + game->player.dir.y * cos(MOUSE_SEN);
+// 		game->player.plane.x = game->player.plane.x * cos(MOUSE_SEN) - game->player.plane.y * sin(MOUSE_SEN);
+// 		game->player.plane.y = old_plane_x * sin(MOUSE_SEN) + game->player.plane.y * cos(MOUSE_SEN);
+// 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
+// 	}
+// }
+
+void	handle_mouse(t_game *game)
+{
+	static t_point	center = {RES_X / 2, RES_Y / 2};
+	t_point			mouse;
+	int				delta_x;
+	float			old_dir_x;
+	float			old_plane_x;
+
+	mlx_mouse_get_pos(game->mlx_ptr, game->win_ptr, &mouse.x, &mouse.y);
+	delta_x = mouse.x - center.x;
+	if (delta_x != 0)
+	{
+		old_dir_x = game->player.dir.x;
+		old_plane_x = game->player.plane.x;
+		game->player.dir.x = game->player.dir.x * cos(MOUSE_SEN * delta_x)
+			- game->player.dir.y * sin(MOUSE_SEN * delta_x);
+		game->player.dir.y = old_dir_x * sin(MOUSE_SEN * delta_x)
+			+ game->player.dir.y * cos(MOUSE_SEN * delta_x);
+		game->player.plane.x = game->player.plane.x * cos(MOUSE_SEN * delta_x)
+			- game->player.plane.y * sin(MOUSE_SEN * delta_x);
+		game->player.plane.y = old_plane_x * sin(MOUSE_SEN * delta_x)
+			+ game->player.plane.y * cos(MOUSE_SEN * delta_x);
+		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
+	}
+}
+
 void	handle_rotation(t_game *game, float speed)
 {
-	float	old_dir_x;
-	float	old_plane_x;
+	float			old_dir_x;
+	float			old_plane_x;
 
 	old_dir_x = game->player.dir.x;
 	old_plane_x = game->player.plane.x;
-	if (game->move_keys[ROT_L])
+	if (game->keys[ROT_L])
 	{
 		game->player.dir.x = game->player.dir.x * cos(-speed) - game->player.dir.y * sin(-speed);
 		game->player.dir.y = old_dir_x * sin(-speed) + game->player.dir.y * cos(-speed);
 		game->player.plane.x = game->player.plane.x * cos(-speed) - game->player.plane.y * sin(-speed);
 		game->player.plane.y = old_plane_x * sin(-speed) + game->player.plane.y * cos(-speed);
 	}
-	if (game->move_keys[ROT_R])
+	if (game->keys[ROT_R])
 	{
 		game->player.dir.x = game->player.dir.x * cos(speed) - game->player.dir.y * sin(speed);
 		game->player.dir.y = old_dir_x * sin(speed) + game->player.dir.y * cos(speed);
@@ -413,44 +472,24 @@ void	handle_rotation(t_game *game, float speed)
 	}
 }
 
-// void	handle_rotation(t_game *game, float speed)
-// {
-// 	if (game->move_keys[ROT_L])
-// 	{
-// 		game->player.angle -= 0.05 * speed;
-// 		if (game->player.angle < 0)
-// 			game->player.angle += 2 * PI;
-// 		game->player.dir.x = cos(game->player.angle);
-// 		game->player.dir.y = sin(game->player.angle);
-// 	}
-// 	if (game->move_keys[ROT_R])
-// 	{
-// 		game->player.angle += 0.05 * speed;
-// 		if (game->player.angle > 2 * PI)
-// 			game->player.angle -= 2 * PI;
-// 		game->player.dir.x = cos(game->player.angle);
-// 		game->player.dir.y = sin(game->player.angle);
-// 	}
-// }
-
 void	calculate_movement(t_game *game, float *move_x, float *move_y)
 {
-	if (game->move_keys[UP])
+	if (game->keys[UP])
 	{
 		*move_x += game->player.dir.x;
 		*move_y += game->player.dir.y;
 	}
-	if (game->move_keys[DOWN])
+	if (game->keys[DOWN])
 	{
 		*move_x -= game->player.dir.x;
 		*move_y -= game->player.dir.y;
 	}
-	if (game->move_keys[LEFT])
+	if (game->keys[LEFT])
 	{
 		*move_x += game->player.dir.y;
 		*move_y -= game->player.dir.x;
 	}
-	if (game->move_keys[RIGHT])
+	if (game->keys[RIGHT])
 	{
 		*move_x -= game->player.dir.y;
 		*move_y += game->player.dir.x;
@@ -494,12 +533,13 @@ void	init_keys(t_game *game)
 	int	i;
 
 	i = 0;
-	while (i < 7)
+	while (i <= 255)
 	{
-		game->move_keys[i] = 0;
+		game->keys[i] = 0;
 		i++;
 	}
 	game->map_toggle = 1;
+	game->pause = -1;
 }
 
 int	a_second_has_passed(void)
@@ -681,20 +721,23 @@ void	lodev(t_game *game)
 
 int	game_loop(t_game *game)
 {
-	// handle_mouse(game);
-	if (should_render_frame(game))
+	if (game->pause != 1)
 	{
-		handle_keys(game);
-		put_img((t_point){0, 0}, game->bg.size, &game->bg, &game->view);
-		lodev(game);
-		put_img((t_point){0, 0}, game->view.size, &game->view, &game->win);
-		if (game->map_toggle == 1)
-			draw_minimap(game);
-		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->win.img,
-			0, 0);
-		if (game->fps)
-			mlx_string_put(game->mlx_ptr, game->win_ptr, 1, 11, WHITE,
-				game->fps);
+		handle_mouse(game);
+		if (should_render_frame(game))
+		{
+			handle_keys(game);
+			put_img((t_point){0, 0}, game->bg.size, &game->bg, &game->view);
+			lodev(game);
+			put_img((t_point){0, 0}, game->view.size, &game->view, &game->win);
+			if (game->map_toggle == 1)
+				draw_minimap(game);
+			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->win.img,
+				0, 0);
+			if (game->fps)
+				mlx_string_put(game->mlx_ptr, game->win_ptr, 1, 11, WHITE,
+					game->fps);
+		}
 	}
 	return (0);
 }
