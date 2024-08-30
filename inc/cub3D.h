@@ -36,7 +36,7 @@
 // movement
 # define MOUSE_SEN 0.004
 # define MOV_SPD 0.001
-# define ROT_SPD 0.05
+# define ROT_SPD 0.0025
 # define UP 0
 # define DOWN 1
 # define LEFT 2

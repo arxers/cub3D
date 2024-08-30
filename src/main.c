@@ -390,28 +390,26 @@ int	key_press(unsigned int key, t_game *game)
 	return (0);
 }
 
-void	handle_rotation(t_game *game)
+void	handle_rotation(t_game *game, float speed)
 {
 	float	old_dir_x;
 	float	old_plane_x;
 
+	old_dir_x = game->player.dir.x;
+	old_plane_x = game->player.plane.x;
 	if (game->move_keys[ROT_L])
 	{
-		old_dir_x = game->player.dir.x;
-		game->player.dir.x = game->player.dir.x * cos(-ROT_SPD) - game->player.dir.y * sin(-ROT_SPD);
-		game->player.dir.y = old_dir_x * sin(-ROT_SPD) + game->player.dir.y * cos(-ROT_SPD);
-		old_plane_x = game->player.plane.x;
-		game->player.plane.x = game->player.plane.x * cos(-ROT_SPD) - game->player.plane.y * sin(-ROT_SPD);
-		game->player.plane.y = old_plane_x * sin(-ROT_SPD) + game->player.plane.y * cos(-ROT_SPD);
+		game->player.dir.x = game->player.dir.x * cos(-speed) - game->player.dir.y * sin(-speed);
+		game->player.dir.y = old_dir_x * sin(-speed) + game->player.dir.y * cos(-speed);
+		game->player.plane.x = game->player.plane.x * cos(-speed) - game->player.plane.y * sin(-speed);
+		game->player.plane.y = old_plane_x * sin(-speed) + game->player.plane.y * cos(-speed);
 	}
 	if (game->move_keys[ROT_R])
 	{
-		old_dir_x = game->player.dir.x;
-		game->player.dir.x = game->player.dir.x * cos(ROT_SPD) - game->player.dir.y * sin(ROT_SPD);
-		game->player.dir.y = old_dir_x * sin(ROT_SPD) + game->player.dir.y * cos(ROT_SPD);
-		old_plane_x = game->player.plane.x;
-		game->player.plane.x = game->player.plane.x * cos(ROT_SPD) - game->player.plane.y * sin(ROT_SPD);
-		game->player.plane.y = old_plane_x * sin(ROT_SPD) + game->player.plane.y * cos(ROT_SPD);
+		game->player.dir.x = game->player.dir.x * cos(speed) - game->player.dir.y * sin(speed);
+		game->player.dir.y = old_dir_x * sin(speed) + game->player.dir.y * cos(speed);
+		game->player.plane.x = game->player.plane.x * cos(speed) - game->player.plane.y * sin(speed);
+		game->player.plane.y = old_plane_x * sin(speed) + game->player.plane.y * cos(speed);
 	}
 }
 
@@ -486,7 +484,7 @@ void	handle_movement(t_game *game, float speed)
 
 int	handle_keys(t_game *game)
 {
-	handle_rotation(game/* , ROT_SPD * (1000 / FRAME_RATE) */);
+	handle_rotation(game, ROT_SPD * (1000 / FRAME_RATE));
 	handle_movement(game, MOV_SPD * (1000 / FRAME_RATE));
 	return (0);
 }
