@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/30 11:10:59 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/30 12:23:16 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ typedef struct s_game
 	long			elapsed;
 	void			*mlx_ptr;
 	void			*win_ptr;
-	unsigned char	keys[255];
+	unsigned char	keys[32];
 	t_player		player;
 	t_img			win;
 	t_img			view;

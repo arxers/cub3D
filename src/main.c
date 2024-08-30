@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/30 11:46:03 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/08/30 12:25:04 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -332,7 +332,7 @@ void	draw_map_tiles(t_img *map)
 	}
 }
 
-t_img	init_map(t_game *game, t_point map_grid_size)
+t_img	init_minimap(t_game *game, t_point map_grid_size)
 {
 	t_img	map;
 	t_point	map_size;
@@ -454,6 +454,8 @@ void	handle_rotation(t_game *game, float speed)
 	float			old_dir_x;
 	float			old_plane_x;
 
+	if (game->keys[ROT_L] && game->keys[ROT_R])
+		return ;
 	old_dir_x = game->player.dir.x;
 	old_plane_x = game->player.plane.x;
 	if (game->keys[ROT_L])
@@ -463,7 +465,7 @@ void	handle_rotation(t_game *game, float speed)
 		game->player.plane.x = game->player.plane.x * cos(-speed) - game->player.plane.y * sin(-speed);
 		game->player.plane.y = old_plane_x * sin(-speed) + game->player.plane.y * cos(-speed);
 	}
-	if (game->keys[ROT_R])
+	else if (game->keys[ROT_R])
 	{
 		game->player.dir.x = game->player.dir.x * cos(speed) - game->player.dir.y * sin(speed);
 		game->player.dir.y = old_dir_x * sin(speed) + game->player.dir.y * cos(speed);
@@ -533,7 +535,7 @@ void	init_keys(t_game *game)
 	int	i;
 
 	i = 0;
-	while (i <= 255)
+	while (i <= (int)sizeof(game->keys))
 	{
 		game->keys[i] = 0;
 		i++;
@@ -643,20 +645,18 @@ void	lodev(t_game *game)
 	while (x < RES_X)
 	{
 		camera_x = 2 * x / (float)RES_X - 1;
-		camera_x = -camera_x;
 		ray_dir.x = game->player.dir.x + game->player.plane.x * camera_x;
 		ray_dir.y = game->player.dir.y + game->player.plane.y * camera_x;
 		map.x = (int)game->player.pos.x;
 		map.y = (int)game->player.pos.y;
 		if (ray_dir.x == 0)
-			delta_dist.x = 1e30;
+			delta_dist.x = 1E+37;
 		else
 			delta_dist.x = fabsf(1 / ray_dir.x);
 		if (ray_dir.y == 0)
-			delta_dist.y = 1e30;
+			delta_dist.y = 1E+37;
 		else
 			delta_dist.y = fabsf(1 / ray_dir.y);
-		hit = 0;
 		if (ray_dir.x < 0)
 		{
 			step.x = -1;
@@ -677,6 +677,7 @@ void	lodev(t_game *game)
 			step.y = 1;
 			side_dist.y = (map.y + 1.0 - game->player.pos.y) * delta_dist.y;
 		}
+		hit = 0;
 		while (hit == 0)
 		{
 			if (side_dist.x < side_dist.y)
@@ -713,10 +714,10 @@ void	lodev(t_game *game)
 			(t_point){x, draw_end}, color);
 		x++;
 	}
-	printf("player dir x:%f\n", game->player.dir.x);
-	printf("player dir y:%f\n", game->player.dir.y);
-	printf("player plane x:%f\n", game->player.plane.x);
-	printf("player plane y:%f\n", game->player.plane.y);
+	// printf("player dir x:%f\n", game->player.dir.x);
+	// printf("player dir y:%f\n", game->player.dir.y);
+	// printf("player plane x:%f\n", game->player.plane.x);
+	// printf("player plane y:%f\n", game->player.plane.y);
 }
 
 int	game_loop(t_game *game)
@@ -750,12 +751,15 @@ void	init_player_pos(t_game *game)
 	pos.y = 1;
 	game->player.pos.x = pos.x + 0.5;
 	game->player.pos.y = pos.y + 0.5;
-	game->player.dir.x = -1;
+	game->player.dir.x = 1;
 	game->player.dir.y = 0;
-	game->player.plane.x = 0;
+	game->player.plane.x = 0.66;
 	game->player.plane.y = 0.66;
+	if (game->player.dir.x)
+		game->player.plane.x = 0;
+	else
+		game->player.plane.y = 0;
 }
-
 
 int	main(int ac, char **av)
 {
@@ -765,10 +769,11 @@ int	main(int ac, char **av)
 		return (1);
 	game.mlx_ptr = mlx_init();
 	game.win_ptr = mlx_new_window(game.mlx_ptr, RES_X, RES_Y, "cub3D");
+	mlx_mouse_move(game.mlx_ptr, game.win_ptr, RES_X / 2, RES_Y / 2);
 	game.win = init_img(game.mlx_ptr, RES_X, RES_Y);
 	game.view = init_img(game.mlx_ptr, RES_X, RES_Y);
 	game.bg = init_bg(game.mlx_ptr);
-	game.map = init_map(&game, (t_point){g_map_x, g_map_y});
+	game.map = init_minimap(&game, (t_point){g_map_x, g_map_y});
 	game.map_offset.x = RES_X - game.map.size.x - RES_X / 50;
 	game.map_offset.y = RES_X / 50;
 	game.fps = NULL;
