@@ -790,11 +790,15 @@ int	game_loop(t_game *game)
 			draw_minimap(game);
 		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->win.img,
 			0, 0);
+		if (game->pause == 1)
+			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 26, WHITE,
+				"MOUSE DISABLED");
 		if (game->fps)
 		{
-			draw_rectangle(&game->win, (t_point){0, 0}, (t_point){13, 13}, BLACK);
-			mlx_string_put(game->mlx_ptr, game->win_ptr, 1, 11, WHITE,
+			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 13, WHITE,
 				game->fps);
+			mlx_string_put(game->mlx_ptr, game->win_ptr, 20, 13, WHITE,
+				"FPS");
 		}
 	}
 	return (0);
