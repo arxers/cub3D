@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/02 18:51:20 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/02 19:51:46 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,23 +79,25 @@ unsigned int	get_pixel(t_img *img, int x, int y)
 
 void	put_img(t_point origin, t_point size, t_img *src, t_img *dst)
 {
-	int		x;
-	int		y;
+	t_point	src_pos;
+	t_point	dst_pos;
 
-	y = 0;
-	if (origin.x < 0 || origin.y < 0
-		|| (origin.x + size.x) > (dst->line_len / (dst->bits_per_pixel / 8))
-		|| (origin.y + size.y) > (dst->line_len / (dst->bits_per_pixel / 8)))
-		return ;
-	while (y < size.y)
+	src_pos.y = 0;
+	// if (origin.x < 0 || origin.y < 0
+	// 	|| (origin.x + size.x) > (dst->line_len / (dst->bits_per_pixel / 8))
+	// 	|| (origin.y + size.y) > (dst->line_len / (dst->bits_per_pixel / 8)))
+	// 	return ;
+	while (src_pos.y < size.y)
 	{
-		x = 0;
-		while (x < size.x)
+		src_pos.x = 0;
+		while (src_pos.x < size.x)
 		{
-			set_pixel(dst, x + origin.x, y + origin.y, get_pixel(src, x, y));
-			x++;
+			dst_pos.x = src_pos.x + origin.x;
+			dst_pos.y = src_pos.y + origin.y;
+			set_pixel(dst, dst_pos.x, dst_pos.y, get_pixel(src, src_pos.x, src_pos.y));
+			src_pos.x++;
 		}
-		y++;
+		src_pos.y++;
 	}
 }
 
@@ -579,7 +581,7 @@ int	handle_keys(t_game *game)
 	int	run_speed;
 
 	run_speed = 1;
-	if (game->keys[RUN] == 1)
+	if (game->keys[RUN] == 1 && game->keys[UP])
 		run_speed = RUN_SPD;
 	handle_movement(game, MOV_SPD * game->frame.time * run_speed);
 	handle_rotation(game, ROT_SPD * game->frame.time);
@@ -762,10 +764,10 @@ void	lodev(t_game *game)
 		else
 			perp_wall_dist = (side_dist.y - delta_dist.y);
 		line_height = (int)(RES_Y / perp_wall_dist);
-		draw_start = -line_height / 2 + RES_Y / 2;
+		draw_start = -line_height / 2 + RES_Y / 2 + game->player.z;
 		if (draw_start < 0)
 			draw_start = -1;
-		draw_end = line_height / 2 + RES_Y / 2;
+		draw_end = line_height / 2 + RES_Y / 2 + game->player.z;
 		if (draw_end >= RES_Y)
 			draw_end = RES_Y - 1;
 		color = 0xAAAAAA;
@@ -810,22 +812,23 @@ int	game_loop(t_game *game)
 	return (0);
 }
 
-void	init_player_pos(t_game *game)
+void	init_player(t_player *player)
 {
 	t_fpoint	pos;
 
 	pos.x = 1;
 	pos.y = 1;
-	game->player.pos.x = pos.x + 0.5;
-	game->player.pos.y = pos.y + 0.5;
-	game->player.dir.x = 1;
-	game->player.dir.y = 0;
-	game->player.plane.x = 0.66;
-	game->player.plane.y = 0.66;
-	if (game->player.dir.x)
-		game->player.plane.x = 0;
+	player->z = 0;
+	player->pos.x = pos.x + 0.5;
+	player->pos.y = pos.y + 0.5;
+	player->dir.x = 1;
+	player->dir.y = 0;
+	player->plane.x = 0.66;
+	player->plane.y = 0.66;
+	if (player->dir.x)
+		player->plane.x = 0;
 	else
-		game->player.plane.y = 0;
+		player->plane.y = 0;
 }
 
 int	main(int ac, char **av)
@@ -847,7 +850,7 @@ int	main(int ac, char **av)
 	game.frame.fps_target = 60;
 	game.frame.time = 1000.0 / game.frame.fps_target;
 	init_keys(&game);
-	init_player_pos(&game);
+	init_player(&game.player);
 	gettimeofday(&game.frame.last, NULL);
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win_ptr, KeyRelease, KeyReleaseMask, &key_release, &game);
