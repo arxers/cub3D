@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/02 18:48:23 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/02 18:51:20 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -576,12 +576,12 @@ void	handle_movement(t_game *game, float speed)
 
 int	handle_keys(t_game *game)
 {
-	int	run;
+	int	run_speed;
 
-	run = 1;
+	run_speed = 1;
 	if (game->keys[RUN] == 1)
-		run = RUN_SPD;
-	handle_movement(game, MOV_SPD * game->frame.time * run);
+		run_speed = RUN_SPD;
+	handle_movement(game, MOV_SPD * game->frame.time * run_speed);
 	handle_rotation(game, ROT_SPD * game->frame.time);
 	return (0);
 }
