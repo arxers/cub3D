@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/30 16:58:52 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/02 18:48:23 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,9 +111,9 @@ int	load_xpm(void *mlx, char *path, t_img *img)
 
 int	load_xpms(t_game *game)
 {
-	if (load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->sprites.wall[0]) == -1)
+	if (load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->images.wall[0]) == -1)
 		return (-1);
-	put_img((t_point){RES_X / 2 - (game->sprites.wall[0].size.x / 2), RES_Y / 2 - (game->sprites.wall[0].size.y / 2)}, game->sprites.wall[0].size, &game->sprites.wall[0], &game->win);
+	put_img((t_point){RES_X / 2 - (game->images.wall[0].size.x / 2), RES_Y / 2 - (game->images.wall[0].size.y / 2)}, game->images.wall[0].size, &game->images.wall[0], &game->images.win);
 	return (0);
 }
 
@@ -280,14 +280,14 @@ int	input_validation(int ac, char **av)
 
 int	cleanup(t_game *game)
 {
-	mlx_destroy_image(game->mlx_ptr, game->win.img);
-	mlx_destroy_image(game->mlx_ptr, game->map.img);
-	mlx_destroy_image(game->mlx_ptr, game->bg.img);
-	mlx_destroy_image(game->mlx_ptr, game->view.img);
+	mlx_destroy_image(game->mlx_ptr, game->images.win.img);
+	mlx_destroy_image(game->mlx_ptr, game->images.map.img);
+	mlx_destroy_image(game->mlx_ptr, game->images.bg.img);
+	mlx_destroy_image(game->mlx_ptr, game->images.view.img);
 	mlx_destroy_window(game->mlx_ptr, game->win_ptr);
 	mlx_destroy_display(game->mlx_ptr);
 	ft_free_void(&game->mlx_ptr);
-	ft_free(&game->fps);
+	ft_free(&game->frame.fps_str);
 	exit(0);
 }
 
@@ -372,6 +372,8 @@ int	key_release(unsigned int key, t_game *game)
 		game->keys[ROT_L] = 0;
 	if (key == XK_Right || key == XK_e)
 		game->keys[ROT_R] = 0;
+	if (key == XK_Shift_L)
+		game->keys[RUN] = 0;
 	return (0);
 }
 
@@ -379,9 +381,9 @@ void	pause_game(t_game *game)
 {
 	static t_point	center = {RES_X / 2, RES_Y / 2};
 
-	if (game->pause == 1)
+	if (game->keys[PAUSE] == 1)
 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
-	game->pause = -game->pause;
+	game->keys[PAUSE] = -game->keys[PAUSE];
 }
 
 int	key_press(unsigned int key, t_game *game)
@@ -398,26 +400,28 @@ int	key_press(unsigned int key, t_game *game)
 		game->keys[ROT_L] = 1;
 	if (key == XK_Right || key == XK_e)
 		game->keys[ROT_R] = 1;
+	if (key == XK_Shift_L)
+		game->keys[RUN] = 1;
 	if (key == XK_Escape)
 		key_esc(game);
 	if (key == XK_p)
 		pause_game(game);
 	if (key == XK_m)
-		game->map_toggle *= -1;
+		game->keys[MAP] = -game->keys[MAP];
 	if (key == XK_bracketleft)
 	{
-		if (game->target_fps > 30)
+		if (game->frame.fps_target > 30)
 		{
-			game->target_fps -= 30;
-			game->frame_time = 1000.0 / game->target_fps;
+			game->frame.fps_target -= 30;
+			game->frame.time = 1000.0 / game->frame.fps_target;
 		}
 	}
 	if (key == XK_bracketright)
 	{
-		if (game->target_fps < 90)
+		if (game->frame.fps_target < 90)
 		{
-			game->target_fps += 30;
-			game->frame_time = 1000.0 / game->target_fps;
+			game->frame.fps_target += 30;
+			game->frame.time = 1000.0 / game->frame.fps_target;
 		}
 	}
 	return (0);
@@ -532,51 +536,53 @@ void	normalize_movement(float *move_x, float *move_y)
 	}
 }
 
+void	check_collision(t_game *game, t_fpoint new_pos, t_fpoint move, float radius)
+{
+	t_fpoint	side;
+
+	if (move.x < 0)
+		side.x = -radius;
+	else
+		side.x = radius;
+	if (move.y < 0)
+		side.y = -radius;
+	else
+		side.y = radius;
+	if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x - radius)] == 0
+		&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x + side.x)] == 0
+		&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x + side.x)] == 0)
+		game->player.pos.x = new_pos.x;
+	if (g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x)] == 0
+		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x - radius)] == 0
+		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x + radius)] == 0)
+		game->player.pos.y = new_pos.y;
+}
+
 void	handle_movement(t_game *game, float speed)
 {
 	t_fpoint	move;
 	t_fpoint	new_pos;
-	float	radius;
+	float		radius;
 
 	radius = 0.1;
 	move.x = 0;
 	move.y = 0;
 	calculate_movement(game, &move.x, &move.y);
 	normalize_movement(&move.x, &move.y);
-	new_pos.x = (game->player.pos.x + move.x * speed);
-	new_pos.y = (game->player.pos.y + move.y * speed);
-	if (move.x < 0)
-	{
-		if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x - radius)] == 0
-			&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x - radius)] == 0
-			&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x - radius)] == 0)
-			game->player.pos.x = new_pos.x;
-	}
-	else
-	{
-		if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x + radius)] == 0
-			&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x + radius)] == 0
-			&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x + radius)] == 0)
-			game->player.pos.x = new_pos.x;
-	}
-	if (move.y < 0)
-	{
-		if (g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x)] == 0
-			&& g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x - radius)] == 0
-			&& g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x + radius)] == 0)
-			game->player.pos.y = new_pos.y;
-	}
-	else
-		if (g_map[(int)(new_pos.y + radius)][(int)(game->player.pos.x)] == 0
-			&& g_map[(int)(new_pos.y + radius)][(int)(game->player.pos.x - radius)] == 0
-			&& g_map[(int)(new_pos.y + radius)][(int)(game->player.pos.x + radius)] == 0)
-			game->player.pos.y = new_pos.y;
+	new_pos.x = game->player.pos.x + move.x * speed;
+	new_pos.y = game->player.pos.y + move.y * speed;
+	check_collision(game, new_pos, move, radius);
 }
 
 int	handle_keys(t_game *game)
 {
-	handle_rotation(game, ROT_SPD * game->frame_time);
-	handle_movement(game, MOV_SPD * game->frame_time);
+	int	run;
+
+	run = 1;
+	if (game->keys[RUN] == 1)
+		run = RUN_SPD;
+	handle_movement(game, MOV_SPD * game->frame.time * run);
+	handle_rotation(game, ROT_SPD * game->frame.time);
 	return (0);
 }
 
@@ -590,8 +596,8 @@ void	init_keys(t_game *game)
 		game->keys[i] = 0;
 		i++;
 	}
-	game->map_toggle = 1;
-	game->pause = -1;
+	game->keys[MAP] = 1;
+	game->keys[PAUSE] = -1;
 }
 
 int	a_second_has_passed(void)
@@ -620,17 +626,17 @@ int	should_render_frame(t_game *game)
 	static int	fps = 0;
 	long		elapsed;
 
-	gettimeofday(&game->current_frame, NULL);
-	elapsed = (game->current_frame.tv_sec - game->last_frame.tv_sec) * 1000
-		+ (game->current_frame.tv_usec - game->last_frame.tv_usec) / 1000;
-	if (elapsed >= game->frame_time)
+	gettimeofday(&game->frame.current, NULL);
+	elapsed = (game->frame.current.tv_sec - game->frame.last.tv_sec) * 1000
+		+ (game->frame.current.tv_usec - game->frame.last.tv_usec) / 1000;
+	if (elapsed >= game->frame.time)
 	{
 		fps++;
-		game->last_frame = game->current_frame;
+		game->frame.last = game->frame.current;
 		if (a_second_has_passed())
 		{
-			ft_free(&game->fps);
-			game->fps = ft_itoa(fps);
+			ft_free(&game->frame.fps_str);
+			game->frame.fps_str = ft_itoa(fps);
 			fps = 0;
 		}
 		return (1);
@@ -665,12 +671,12 @@ void rotate_image(t_img *src, t_img *dst, float angle)
 
 void	draw_minimap(t_game *game)
 {
-	draw_rectangle(&game->map, (t_point){0, 0}, game->map.size, MAP_COLOR);
-	draw_map_tiles(&game->map);
-	draw_map_player(&game->map, game->player,
+	draw_rectangle(&game->images.map, (t_point){0, 0}, game->images.map.size, MAP_COLOR);
+	draw_map_tiles(&game->images.map);
+	draw_map_player(&game->images.map, game->player,
 		(t_point){0, 0});
 	// rotate_image(&game->map, &game->map, atan2f(game->player.dir.x, game->player.dir.y));
-	put_img(game->map_offset, game->map.size, &game->map, &game->win);
+	put_img(game->map_offset, game->images.map.size, &game->images.map, &game->images.win);
 }
 
 int	not_out_of_bounds(t_point map)
@@ -765,7 +771,7 @@ void	lodev(t_game *game)
 		color = 0xAAAAAA;
 		if (side == 1)
 			color = 0x888888;
-		draw_line(&game->view,
+		draw_line(&game->images.view,
 			(t_point){x, draw_start},
 			(t_point){x, draw_end}, color);
 		x++;
@@ -778,25 +784,25 @@ void	lodev(t_game *game)
 
 int	game_loop(t_game *game)
 {
-	if (game->pause != 1)
+	if (game->keys[PAUSE] != 1)
 		handle_mouse(game);
 	if (should_render_frame(game))
 	{
-		put_img((t_point){0, 0}, game->bg.size, &game->bg, &game->view);
-		lodev(game);
 		handle_keys(game);
-		put_img((t_point){0, 0}, game->view.size, &game->view, &game->win);
-		if (game->map_toggle == 1)
+		put_img((t_point){0, 0}, game->images.bg.size, &game->images.bg, &game->images.view);
+		lodev(game);
+		put_img((t_point){0, 0}, game->images.view.size, &game->images.view, &game->images.win);
+		if (game->keys[MAP] == 1)
 			draw_minimap(game);
-		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->win.img,
+		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->images.win.img,
 			0, 0);
-		if (game->pause == 1)
+		if (game->keys[PAUSE] == 1)
 			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 26, WHITE,
 				"MOUSE DISABLED");
-		if (game->fps)
+		if (game->frame.fps_str)
 		{
 			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 13, WHITE,
-				game->fps);
+				game->frame.fps_str);
 			mlx_string_put(game->mlx_ptr, game->win_ptr, 20, 13, WHITE,
 				"FPS");
 		}
@@ -831,18 +837,18 @@ int	main(int ac, char **av)
 	game.mlx_ptr = mlx_init();
 	game.win_ptr = mlx_new_window(game.mlx_ptr, RES_X, RES_Y, "cub3D");
 	mlx_mouse_move(game.mlx_ptr, game.win_ptr, RES_X / 2, RES_Y / 2);
-	game.win = init_img(game.mlx_ptr, RES_X, RES_Y);
-	game.view = init_img(game.mlx_ptr, RES_X, RES_Y);
-	game.bg = init_bg(game.mlx_ptr);
-	game.map = init_minimap(&game, (t_point){g_map_x, g_map_y});
-	game.map_offset.x = RES_X - game.map.size.x - RES_X / 50;
+	game.images.win = init_img(game.mlx_ptr, RES_X, RES_Y);
+	game.images.view = init_img(game.mlx_ptr, RES_X, RES_Y);
+	game.images.bg = init_bg(game.mlx_ptr);
+	game.images.map = init_minimap(&game, (t_point){g_map_x, g_map_y});
+	game.map_offset.x = RES_X - game.images.map.size.x - RES_X / 50;
 	game.map_offset.y = RES_X / 50;
-	game.fps = NULL;
-	game.target_fps = 60;
-	game.frame_time = 1000.0 / game.target_fps;
+	game.frame.fps_str = NULL;
+	game.frame.fps_target = 60;
+	game.frame.time = 1000.0 / game.frame.fps_target;
 	init_keys(&game);
 	init_player_pos(&game);
-	gettimeofday(&game.last_frame, NULL);
+	gettimeofday(&game.frame.last, NULL);
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win_ptr, KeyRelease, KeyReleaseMask, &key_release, &game);
 	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &key_esc, &game);

@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/08/30 16:46:40 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/02 18:48:06 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,16 +32,11 @@
 # define MAP_CELL_SIZE 16
 # define MAP_COLOR 0x0ADAF3
 
-// movement
+// movement multipliers
 # define MOUSE_SEN 0.0025
 # define MOV_SPD 0.001
 # define ROT_SPD 0.0025
-# define UP 0
-# define DOWN 1
-# define LEFT 2
-# define RIGHT 3
-# define ROT_L 4
-# define ROT_R 5
+# define RUN_SPD 2
 
 // colors
 # define RED 0xFF0000
@@ -56,6 +51,19 @@
 # define P2 1.57079632679
 # define P3 4.71238898038
 # define FOV 90
+
+typedef enum e_keystate
+{
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT,
+	ROT_L,
+	ROT_R,
+	MAP,
+	PAUSE,
+	RUN
+}							t_keystate;
 
 typedef struct s_fpoint
 {
@@ -86,10 +94,14 @@ typedef struct s_img
 	t_point			size;
 }					t_img;
 
-typedef struct s_sprites
+typedef struct s_images
 {
 	t_img			wall[4];
-}					t_sprites;
+	t_img			win;
+	t_img			view;
+	t_img			map;
+	t_img			bg;
+}					t_images;
 
 typedef struct s_player
 {
@@ -98,41 +110,25 @@ typedef struct s_player
 	t_fpoint		dir;
 }					t_player;
 
-typedef struct s_ray
+typedef struct s_frame_data
 {
-	float			dist;
-	t_fpoint		pos;
-}					t_ray;
-
-typedef struct s_ray_calculation
-{
-	int				dof;
-	t_point			map;
-	t_fpoint		ray;
-	t_fpoint		origin;
-	float			tan;
-}					t_ray_calculation;
+	struct timeval	current;
+	struct timeval	last;
+	long			elapsed;
+	float			time;
+	unsigned int	fps_target;
+	char			*fps_str;
+}					t_frame_data;
 
 typedef struct s_game
 {
-	int				pause;
-	struct timeval	current_frame;
-	struct timeval	last_frame;
-	char			*fps;
-	unsigned int	target_fps;
-	float			frame_time;
-	long			elapsed;
+	char			keys[32];
+	t_images		images;
+	t_frame_data	frame;
 	void			*mlx_ptr;
 	void			*win_ptr;
-	unsigned char	keys[32];
 	t_player		player;
-	t_img			win;
-	t_img			view;
-	t_img			map;
-	int				map_toggle;
 	t_point			map_offset;
-	t_img			bg;
-	t_sprites		sprites;
 }					t_game;
 
 #endif
