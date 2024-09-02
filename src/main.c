@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/02 19:51:46 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/02 22:29:29 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ void	set_pixel(t_img *img, int x, int y, unsigned int color)
 {
 	char			*dst;
 
-	if (x < 0 || y < 0 || x > RES_X || y > RES_Y || (color >> 24) & 0xFF)
+	if (x < 0 || y < 0 || x > img->size.x || y > img->size.y || (color >> 24) & 0xFF)
 		return ;
 	dst = img->addr + ((y * img->line_len) + (x * (img->bits_per_pixel / 8)));
 	*(unsigned int *)dst = color;
@@ -77,23 +77,19 @@ unsigned int	get_pixel(t_img *img, int x, int y)
 	return (*(unsigned int *)src);
 }
 
-void	put_img(t_point origin, t_point size, t_img *src, t_img *dst)
+void	put_img(t_point offset, t_point size, t_img *src, t_img *dst)
 {
 	t_point	src_pos;
 	t_point	dst_pos;
 
 	src_pos.y = 0;
-	// if (origin.x < 0 || origin.y < 0
-	// 	|| (origin.x + size.x) > (dst->line_len / (dst->bits_per_pixel / 8))
-	// 	|| (origin.y + size.y) > (dst->line_len / (dst->bits_per_pixel / 8)))
-	// 	return ;
 	while (src_pos.y < size.y)
 	{
 		src_pos.x = 0;
 		while (src_pos.x < size.x)
 		{
-			dst_pos.x = src_pos.x + origin.x;
-			dst_pos.y = src_pos.y + origin.y;
+			dst_pos.x = src_pos.x + offset.x;
+			dst_pos.y = src_pos.y + offset.y;
 			set_pixel(dst, dst_pos.x, dst_pos.y, get_pixel(src, src_pos.x, src_pos.y));
 			src_pos.x++;
 		}
@@ -300,18 +296,18 @@ t_point	center(t_point origin, t_point size)
 	return (origin);
 }
 
-t_img	init_bg(void *mlx_ptr)
+t_img	init_bg(void *mlx_ptr, int ceiling, int floor)
 {
 	t_img	bg;
 	t_point	size;
 
 	size.x = RES_X;
-	size.y = RES_Y / 2;
-	bg = init_img(mlx_ptr, RES_X, RES_Y);
+	size.y = RES_Y;
+	bg = init_img(mlx_ptr, RES_X, RES_Y * 2);
 	// if (bg.img == NULL)
 	// 	;//handle it
-	draw_rectangle(&bg, (t_point){0, 0}, size, 0x171B22);
-	draw_rectangle(&bg, (t_point){0, RES_Y / 2}, size, 0x3B3E44);
+	draw_rectangle(&bg, (t_point){0, 0}, size, ceiling);
+	draw_rectangle(&bg, (t_point){0, RES_Y}, size, floor);
 	return (bg);
 }
 
@@ -677,7 +673,6 @@ void	draw_minimap(t_game *game)
 	draw_map_tiles(&game->images.map);
 	draw_map_player(&game->images.map, game->player,
 		(t_point){0, 0});
-	// rotate_image(&game->map, &game->map, atan2f(game->player.dir.x, game->player.dir.y));
 	put_img(game->map_offset, game->images.map.size, &game->images.map, &game->images.win);
 }
 
@@ -764,10 +759,10 @@ void	lodev(t_game *game)
 		else
 			perp_wall_dist = (side_dist.y - delta_dist.y);
 		line_height = (int)(RES_Y / perp_wall_dist);
-		draw_start = -line_height / 2 + RES_Y / 2 + game->player.z;
+		draw_start = -line_height / 2 + RES_Y / 2 - game->player.z;
 		if (draw_start < 0)
 			draw_start = -1;
-		draw_end = line_height / 2 + RES_Y / 2 + game->player.z;
+		draw_end = line_height / 2 + RES_Y / 2 - game->player.z;
 		if (draw_end >= RES_Y)
 			draw_end = RES_Y - 1;
 		color = 0xAAAAAA;
@@ -784,6 +779,7 @@ void	lodev(t_game *game)
 	// printf("player plane y:%f\n", game->player.plane.y);
 }
 
+
 int	game_loop(t_game *game)
 {
 	if (game->keys[PAUSE] != 1)
@@ -791,7 +787,7 @@ int	game_loop(t_game *game)
 	if (should_render_frame(game))
 	{
 		handle_keys(game);
-		put_img((t_point){0, 0}, game->images.bg.size, &game->images.bg, &game->images.view);
+		put_img((t_point){0, -RES_Y / 2 - game->player.z}, game->images.bg.size, &game->images.bg, &game->images.view);
 		lodev(game);
 		put_img((t_point){0, 0}, game->images.view.size, &game->images.view, &game->images.win);
 		if (game->keys[MAP] == 1)
@@ -842,7 +838,7 @@ int	main(int ac, char **av)
 	mlx_mouse_move(game.mlx_ptr, game.win_ptr, RES_X / 2, RES_Y / 2);
 	game.images.win = init_img(game.mlx_ptr, RES_X, RES_Y);
 	game.images.view = init_img(game.mlx_ptr, RES_X, RES_Y);
-	game.images.bg = init_bg(game.mlx_ptr);
+	game.images.bg = init_bg(game.mlx_ptr, 0x171B22, 0x3B3E44);
 	game.images.map = init_minimap(&game, (t_point){g_map_x, g_map_y});
 	game.map_offset.x = RES_X - game.images.map.size.x - RES_X / 50;
 	game.map_offset.y = RES_X / 50;
