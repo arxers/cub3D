@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/02 22:29:29 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/03 12:13:45 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,21 +42,21 @@ int	g_map[24][24] =
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
-t_img	init_img(void *mlx_ptr, int width, int height)
+int	init_img(void *mlx_ptr, t_img *img, int width, int height)
 {
-	t_img	img;
-
-	img.img = mlx_new_image(mlx_ptr, width, height);
-	if (img.img == NULL)
+	img->img = mlx_new_image(mlx_ptr, width, height);
+	if (img->img == NULL)
 	{
-		img.addr = NULL;
-		return (img);
+		img->addr = NULL;
+		return (-1);
 	}
-	img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel,
-			&img.line_len, &img.endian);
-	img.size.x = width;
-	img.size.y = height;
-	return (img);
+	img->addr = mlx_get_data_addr(img->img, &img->bits_per_pixel,
+			&img->line_len, &img->endian);
+	if (img->addr == NULL)
+		return (-1);
+	img->size.x = width;
+	img->size.y = height;
+	return (0);
 }
 
 void	set_pixel(t_img *img, int x, int y, unsigned int color)
@@ -109,9 +109,9 @@ int	load_xpm(void *mlx, char *path, t_img *img)
 
 int	load_xpms(t_game *game)
 {
-	if (load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->images.wall[0]) == -1)
+	if (load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->img.wall[0]) == -1)
 		return (-1);
-	put_img((t_point){RES_X / 2 - (game->images.wall[0].size.x / 2), RES_Y / 2 - (game->images.wall[0].size.y / 2)}, game->images.wall[0].size, &game->images.wall[0], &game->images.win);
+	put_img((t_point){RES_X / 2 - (game->img.wall[0].size.x / 2), RES_Y / 2 - (game->img.wall[0].size.y / 2)}, game->img.wall[0].size, &game->img.wall[0], &game->img.win);
 	return (0);
 }
 
@@ -262,31 +262,40 @@ void	draw_map_player(t_img *img, t_player p, t_point origin)
 	draw_circle(img, pointer_pos, dir_radius, WHITE);
 }
 
-int	input_validation(int ac, char **av)
+void	validate_input(int ac, char **av)
 {
 	if (ac != 2)
 	{
 		ft_printf("cub3D: Invalid number of arguments\n");
 		ft_printf("cub3D: usage: cub3D [*.cub]\n");
-		return (-1);
+		exit(1);
 	}
-	// if (open(av[1]) == -1)
-	// 	;
+	// if (open(av[1]) == -1) //check if able to open
+	// 	;remove (void)av when this check is done
 	(void)av;
-	return (0);
 }
 
-int	cleanup(t_game *game)
+void	ft_destroy_image(void *mlx_ptr, void **img)
 {
-	mlx_destroy_image(game->mlx_ptr, game->images.win.img);
-	mlx_destroy_image(game->mlx_ptr, game->images.map.img);
-	mlx_destroy_image(game->mlx_ptr, game->images.bg.img);
-	mlx_destroy_image(game->mlx_ptr, game->images.view.img);
-	mlx_destroy_window(game->mlx_ptr, game->win_ptr);
-	mlx_destroy_display(game->mlx_ptr);
+	if (mlx_ptr && img && *img)
+		mlx_destroy_image(mlx_ptr, *img);
+	*img = NULL;
+}
+
+int	cleanup(t_game *game, unsigned char status)
+{
+	ft_destroy_image(game->mlx_ptr, &game->img.win.img);
+	ft_destroy_image(game->mlx_ptr, &game->img.map.img);
+	ft_destroy_image(game->mlx_ptr, &game->img.bg.img);
+	ft_destroy_image(game->mlx_ptr, &game->img.view.img);
+	if (game->win_ptr)
+		mlx_destroy_window(game->mlx_ptr, game->win_ptr);
+	game->win_ptr = NULL;
+	if (game->mlx_ptr)
+		mlx_destroy_display(game->mlx_ptr);
 	ft_free_void(&game->mlx_ptr);
 	ft_free(&game->frame.fps_str);
-	exit(0);
+	exit(status);
 }
 
 t_point	center(t_point origin, t_point size)
@@ -296,19 +305,17 @@ t_point	center(t_point origin, t_point size)
 	return (origin);
 }
 
-t_img	init_bg(void *mlx_ptr, int ceiling, int floor)
+int	init_bg(void *mlx_ptr, t_img *bg, int ceiling, int floor)
 {
-	t_img	bg;
 	t_point	size;
 
 	size.x = RES_X;
 	size.y = RES_Y;
-	bg = init_img(mlx_ptr, RES_X, RES_Y * 2);
-	// if (bg.img == NULL)
-	// 	;//handle it
-	draw_rectangle(&bg, (t_point){0, 0}, size, ceiling);
-	draw_rectangle(&bg, (t_point){0, RES_Y}, size, floor);
-	return (bg);
+	if (init_img(mlx_ptr, bg, RES_X, RES_Y * 2) == -1)
+		return (-1);
+	draw_rectangle(bg, (t_point){0, 0}, size, ceiling);
+	draw_rectangle(bg, (t_point){0, RES_Y}, size, floor);
+	return (0);
 }
 
 void	draw_map_tiles(t_img *map)
@@ -338,21 +345,21 @@ void	draw_map_tiles(t_img *map)
 	}
 }
 
-t_img	init_minimap(t_game *game, t_point map_grid_size)
+int	init_minimap(void *mlx_ptr, t_img *map, t_point map_grid_size)
 {
-	t_img	map;
 	t_point	map_size;
 
 	map_size.x = map_grid_size.x * MAP_CELL_SIZE;
 	map_size.y = map_grid_size.y * MAP_CELL_SIZE;
-	map = init_img(game->mlx_ptr, map_size.x, map_size.y);
-	return (map);
+	if (init_img(mlx_ptr, map, map_size.x, map_size.y) == -1)
+		return (-1);
+	return (0);
 }
 
 int	key_esc(t_game *game)
 {
 	ft_printf("exit\n");
-	cleanup(game);
+	cleanup(game, 0);
 	return (0);
 }
 
@@ -584,12 +591,12 @@ int	handle_keys(t_game *game)
 	return (0);
 }
 
-void	init_keys(t_game *game)
+void	init_keystate(t_game *game)
 {
 	int	i;
 
 	i = 0;
-	while (i <= (int)sizeof(game->keys))
+	while (i <= (int) sizeof(game->keys))
 	{
 		game->keys[i] = 0;
 		i++;
@@ -642,38 +649,15 @@ int	should_render_frame(t_game *game)
 	return (0);
 }
 
-//GPT
-void rotate_image(t_img *src, t_img *dst, float angle)
-{
-    int x, y;
-    int center_x = src->size.x / 2;
-    int center_y = src->size.y / 2;
-    float cos_a = cos(angle);
-    float sin_a = sin(angle);
-
-    for (y = 0; y < src->size.y; y++)
-    {
-        for (x = 0; x < src->size.x; x++)
-        {
-            int new_x = cos_a * (x - center_x) - sin_a * (y - center_y) + center_x;
-            int new_y = sin_a * (x - center_x) + cos_a * (y - center_y) + center_y;
-
-            if (new_x >= 0 && new_x < dst->size.x && new_y >= 0 && new_y < dst->size.y)
-            {
-                unsigned int color = get_pixel(src, x, y); // Assume get_pixel reads a pixel color
-                set_pixel(dst, new_x, new_y, color);      // Assume set_pixel sets a pixel color
-            }
-        }
-    }
-}
-
 void	draw_minimap(t_game *game)
 {
-	draw_rectangle(&game->images.map, (t_point){0, 0}, game->images.map.size, MAP_COLOR);
-	draw_map_tiles(&game->images.map);
-	draw_map_player(&game->images.map, game->player,
+	draw_rectangle(&game->img.map, (t_point){0, 0}, game->img.map.size,
+		MAP_COLOR);
+	draw_map_tiles(&game->img.map);
+	draw_map_player(&game->img.map, game->player,
 		(t_point){0, 0});
-	put_img(game->map_offset, game->images.map.size, &game->images.map, &game->images.win);
+	put_img(game->map_offset, game->img.map.size, &game->img.map,
+		&game->img.win);
 }
 
 int	not_out_of_bounds(t_point map)
@@ -683,7 +667,7 @@ int	not_out_of_bounds(t_point map)
 	return (1);
 }
 
-void	lodev(t_game *game)
+void	render_viewport(t_game *game)
 {
 	int				x;
 	float			camera_x;
@@ -700,6 +684,8 @@ void	lodev(t_game *game)
 	int				draw_end;
 	unsigned int	color;
 
+	put_img((t_point){0, -RES_Y / 2 - game->player.z}, game->img.bg.size,
+		&game->img.bg, &game->img.view);
 	x = 0;
 	while (x < RES_X)
 	{
@@ -768,17 +754,32 @@ void	lodev(t_game *game)
 		color = 0xAAAAAA;
 		if (side == 1)
 			color = 0x888888;
-		draw_line(&game->images.view,
+		draw_line(&game->img.view,
 			(t_point){x, draw_start},
 			(t_point){x, draw_end}, color);
 		x++;
 	}
+	put_img((t_point){0, 0}, game->img.view.size, &game->img.view,
+		&game->img.win);
 	// printf("player dir x:%f\n", game->player.dir.x);
 	// printf("player dir y:%f\n", game->player.dir.y);
 	// printf("player plane x:%f\n", game->player.plane.x);
 	// printf("player plane y:%f\n", game->player.plane.y);
 }
 
+void	display_fps_counter(t_game *game)
+{
+	if (game->frame.fps_str)
+	{
+		mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 13, WHITE,
+			game->frame.fps_str);
+		mlx_string_put(game->mlx_ptr, game->win_ptr, 20, 13, WHITE,
+			"FPS");
+	}
+	else
+		mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 13, WHITE,
+			"INITIALIZING FPS...");
+}
 
 int	game_loop(t_game *game)
 {
@@ -787,23 +788,15 @@ int	game_loop(t_game *game)
 	if (should_render_frame(game))
 	{
 		handle_keys(game);
-		put_img((t_point){0, -RES_Y / 2 - game->player.z}, game->images.bg.size, &game->images.bg, &game->images.view);
-		lodev(game);
-		put_img((t_point){0, 0}, game->images.view.size, &game->images.view, &game->images.win);
+		render_viewport(game);
 		if (game->keys[MAP] == 1)
 			draw_minimap(game);
-		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->images.win.img,
-			0, 0);
+		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
+			game->img.win.img, 0, 0);
 		if (game->keys[PAUSE] == 1)
 			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 26, WHITE,
 				"MOUSE DISABLED");
-		if (game->frame.fps_str)
-		{
-			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 13, WHITE,
-				game->frame.fps_str);
-			mlx_string_put(game->mlx_ptr, game->win_ptr, 20, 13, WHITE,
-				"FPS");
-		}
+		display_fps_counter(game);
 	}
 	return (0);
 }
@@ -819,35 +812,71 @@ void	init_player(t_player *player)
 	player->pos.y = pos.y + 0.5;
 	player->dir.x = 1;
 	player->dir.y = 0;
-	player->plane.x = 0.66;
-	player->plane.y = 0.66;
-	if (player->dir.x)
+	if (player->dir.x < 0)
+	{
+		player->plane.x = -0.66;
+		player->plane.y = -0.66;
+	}
+	else
+	{
+		player->plane.x = 0.66;
+		player->plane.y = 0.66;
+	}
+	if (player->dir.x != 0)
 		player->plane.x = 0;
 	else
 		player->plane.y = 0;
+}
+
+void	init_framedata(t_frame_data *frame)
+{
+	frame->fps_target = 60;
+	frame->time = 1000.0 / frame->fps_target;
+	gettimeofday(&frame->last, NULL);
+}
+
+void	init_game_struct(t_game *game)
+{
+	game->mlx_ptr = NULL;
+	game->win_ptr = NULL;
+	game->img.win.img = NULL;
+	game->img.map.img = NULL;
+	game->img.bg.img = NULL;
+	game->img.view.img = NULL;
+	game->frame.fps_str = NULL;
+}
+
+int	init_game(t_game *game)
+{
+	init_game_struct(game);
+	game->mlx_ptr = mlx_init();
+	if (game->mlx_ptr == NULL)
+		return (-1);
+	game->win_ptr = mlx_new_window(game->mlx_ptr, RES_X, RES_Y, "cub3D");
+	if (game->win_ptr == NULL)
+		return (-1);
+	if (init_img(game->mlx_ptr, &game->img.win, RES_X, RES_Y) == -1
+		|| init_img(game->mlx_ptr, &game->img.view, RES_X, RES_Y) == -1)
+		return (-1);
+	if (init_minimap(game->mlx_ptr, &game->img.map, (t_point){g_map_x, g_map_y}) == -1
+		|| init_bg(game->mlx_ptr, &game->img.bg, 0x171B22, 0x3B3E44) == -1)
+		return (-1);
+	game->map_offset.x = RES_X - game->img.map.size.x - RES_X / 50;
+	game->map_offset.y = RES_X / 50;
+	init_framedata(&game->frame);
+	init_keystate(game);
+	init_player(&game->player);
+	mlx_mouse_move(game->mlx_ptr, game->win_ptr, RES_X / 2, RES_Y / 2);
+	return (0);
 }
 
 int	main(int ac, char **av)
 {
 	t_game	game;
 
-	if (input_validation(ac, av) == -1)
-		return (1);
-	game.mlx_ptr = mlx_init();
-	game.win_ptr = mlx_new_window(game.mlx_ptr, RES_X, RES_Y, "cub3D");
-	mlx_mouse_move(game.mlx_ptr, game.win_ptr, RES_X / 2, RES_Y / 2);
-	game.images.win = init_img(game.mlx_ptr, RES_X, RES_Y);
-	game.images.view = init_img(game.mlx_ptr, RES_X, RES_Y);
-	game.images.bg = init_bg(game.mlx_ptr, 0x171B22, 0x3B3E44);
-	game.images.map = init_minimap(&game, (t_point){g_map_x, g_map_y});
-	game.map_offset.x = RES_X - game.images.map.size.x - RES_X / 50;
-	game.map_offset.y = RES_X / 50;
-	game.frame.fps_str = NULL;
-	game.frame.fps_target = 60;
-	game.frame.time = 1000.0 / game.frame.fps_target;
-	init_keys(&game);
-	init_player(&game.player);
-	gettimeofday(&game.frame.last, NULL);
+	validate_input(ac, av);
+	if (init_game(&game) == -1)
+		return (cleanup(&game, 1));
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win_ptr, KeyRelease, KeyReleaseMask, &key_release, &game);
 	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &key_esc, &game);
