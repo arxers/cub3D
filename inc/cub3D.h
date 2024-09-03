@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/03 15:14:41 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/03 18:11:11 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ typedef enum e_keystate
 	MAP,
 	PAUSE,
 	RUN
-}							t_keystate;
+}					t_keystate;
 
 typedef struct s_fpoint
 {
@@ -121,6 +121,13 @@ typedef struct s_frame_data
 	char			*fps_str;
 }					t_frame_data;
 
+typedef struct s_map
+{
+	int				*grid;
+	t_point			size;
+	t_point			offset;
+}					t_map;
+
 typedef struct s_game
 {
 	char			keys[32];
@@ -129,7 +136,7 @@ typedef struct s_game
 	void			*mlx_ptr;
 	void			*win_ptr;
 	t_player		player;
-	t_point			map_offset;
+	t_map			map;
 }					t_game;
 
 #endif

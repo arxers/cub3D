@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/03 16:23:11 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/03 18:19:15 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -375,12 +375,14 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 
 	map.x = map_grid_size.x * MAP_CELL_SIZE;
 	map.y = map_grid_size.y * MAP_CELL_SIZE;
-	mask.x = map_grid_size.x * MAP_CELL_SIZE / 2;
-	mask.y = map_grid_size.y * MAP_CELL_SIZE / 2;
+	mask.x = 24 * MAP_CELL_SIZE / 2;
+	mask.y = 24 * MAP_CELL_SIZE / 2;
 	if (init_img(game->mlx_ptr, &game->img.map, map.x, map.y) == -1
 		|| init_img(game->mlx_ptr, &game->img.map_mask, mask.x, mask.y) == -1
 		|| init_img(game->mlx_ptr, &game->img.map_bg, mask.x, mask.y) == -1)
 		return (-1);
+	game->map.offset.x = RES_X - game->img.map_mask.size.x - RES_X / 50;
+	game->map.offset.y = RES_X / 50;
 	draw_rectangle(&game->img.map_bg, (t_point){0, 0}, game->img.map_mask.size,
 		BLACK);
 	draw_diagonal_lines(&game->img.map_bg, game->img.map_mask.size, 0x333333);
@@ -462,28 +464,6 @@ int	key_press(unsigned int key, t_game *game)
 	}
 	return (0);
 }
-
-// void	handle_mouse(t_game *game)
-// {
-// 	static t_point	center = {RES_X / 2, RES_Y / 2};
-// 	int				delta_x;
-// 	t_point			mouse;
-// 	float			old_dir_x;
-// 	float			old_plane_x;
-
-// 	mlx_mouse_get_pos(game->mlx_ptr, game->win_ptr, &mouse.x, &mouse.y);
-// 	delta_x = mouse.x - center.x;
-// 	old_dir_x = game->player.dir.x;
-// 	old_plane_x = game->player.plane.x;
-// 	if (delta_x != 0)
-// 	{
-// 		game->player.dir.x = game->player.dir.x * cos(MOUSE_SEN) - game->player.dir.y * sin(MOUSE_SEN);
-// 		game->player.dir.y = old_dir_x * sin(MOUSE_SEN) + game->player.dir.y * cos(MOUSE_SEN);
-// 		game->player.plane.x = game->player.plane.x * cos(MOUSE_SEN) - game->player.plane.y * sin(MOUSE_SEN);
-// 		game->player.plane.y = old_plane_x * sin(MOUSE_SEN) + game->player.plane.y * cos(MOUSE_SEN);
-// 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
-// 	}
-// }
 
 void	handle_mouse(t_game *game)
 {
@@ -695,7 +675,7 @@ void	draw_minimap(t_game *game)
 		&game->img.map_mask);
 	put_img((t_point){-player_pos.x + game->img.map_mask.size.x / 2, -player_pos.y + game->img.map_mask.size.y / 2}, game->img.map.size, &game->img.map,
 		&game->img.map_mask);
-	put_img(game->map_offset, game->img.map_mask.size, &game->img.map_mask,
+	put_img(game->map.offset, game->img.map_mask.size, &game->img.map_mask,
 		&game->img.win);
 }
 
@@ -887,6 +867,9 @@ void	init_game_struct(t_game *game)
 
 int	init_game(t_game *game)
 {
+	// game->map.size.x = (n rows);
+	// game->map.size.y = (n columns);
+	// game->map.grid = malloc(game->map.size.y * sizeof(int *));
 	init_game_struct(game);
 	game->mlx_ptr = mlx_init();
 	if (game->mlx_ptr == NULL)
@@ -900,8 +883,6 @@ int	init_game(t_game *game)
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
 		|| init_bg(game->mlx_ptr, &game->img.bg, 0x171B22, 0x3B3E44) == -1)
 		return (-1);
-	game->map_offset.x = RES_X - game->img.map_mask.size.x - RES_X / 50;
-	game->map_offset.y = RES_X / 50;
 	init_framedata(&game->frame);
 	init_keystate(game);
 	init_player(&game->player);
