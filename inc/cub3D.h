@@ -21,8 +21,6 @@
 # include <stdio.h>
 # include <sys/time.h>
 
-# define FRAME_RATE 60
-
 // resolution
 # define RES_X 1024
 # define RES_Y 768
@@ -100,6 +98,7 @@ typedef struct s_images
 	t_img			win;
 	t_img			view;
 	t_img			map;
+	t_img			map_mask;
 	t_img			bg;
 }					t_images;
 

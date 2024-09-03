@@ -63,7 +63,7 @@ void	set_pixel(t_img *img, int x, int y, unsigned int color)
 {
 	char			*dst;
 
-	if (x < 0 || y < 0 || x > img->size.x || y > img->size.y || (color >> 24) & 0xFF)
+	if (x < 0 || y < 0 || x >= img->size.x || y >= img->size.y || (color >> 24) & 0xFF)
 		return ;
 	dst = img->addr + ((y * img->line_len) + (x * (img->bits_per_pixel / 8)));
 	*(unsigned int *)dst = color;
@@ -90,7 +90,10 @@ void	put_img(t_point offset, t_point size, t_img *src, t_img *dst)
 		{
 			dst_pos.x = src_pos.x + offset.x;
 			dst_pos.y = src_pos.y + offset.y;
-			set_pixel(dst, dst_pos.x, dst_pos.y, get_pixel(src, src_pos.x, src_pos.y));
+			if (dst_pos.x >= 0 && dst_pos.x < dst->size.x
+				&& dst_pos.y >= 0 && dst_pos.y < dst->size.y)
+				set_pixel(dst, dst_pos.x, dst_pos.y,
+					get_pixel(src, src_pos.x, src_pos.y));
 			src_pos.x++;
 		}
 		src_pos.y++;
@@ -345,13 +348,17 @@ void	draw_map_tiles(t_img *map)
 	}
 }
 
-int	init_minimap(void *mlx_ptr, t_img *map, t_point map_grid_size)
+int	init_minimap(t_game *game, t_point map_grid_size)
 {
 	t_point	map_size;
+	t_point	map_mask_size;
 
 	map_size.x = map_grid_size.x * MAP_CELL_SIZE;
 	map_size.y = map_grid_size.y * MAP_CELL_SIZE;
-	if (init_img(mlx_ptr, map, map_size.x, map_size.y) == -1)
+	map_mask_size.x = map_grid_size.x * MAP_CELL_SIZE / 2;
+	map_mask_size.y = map_grid_size.y * MAP_CELL_SIZE / 2;
+	if (init_img(game->mlx_ptr, &game->img.map, map_size.x, map_size.y) == -1
+		|| init_img(game->mlx_ptr, &game->img.map_mask, map_mask_size.x, map_mask_size.y) == -1)
 		return (-1);
 	return (0);
 }
@@ -649,15 +656,45 @@ int	should_render_frame(t_game *game)
 	return (0);
 }
 
+void draw_out_of_bounds_area(t_img *img, int size, unsigned int color)
+{
+	t_point	start;
+	t_point	end;
+	int		i;
+	int		step;
+
+	step = 10;
+	i = -size;
+    while (i < size * 2)
+    {
+        start = (t_point){i, 0};
+        end = (t_point){i + size, size};
+        draw_line(img, start, end, color);
+		i += step;
+    }
+}
+
+
+
 void	draw_minimap(t_game *game)
 {
+	t_fpoint	player_pos;
+
+	player_pos.x = (int)((game->player.pos.x * (float)MAP_CELL_SIZE));
+	player_pos.y = (int)((game->player.pos.y * (float)MAP_CELL_SIZE));
 	draw_rectangle(&game->img.map, (t_point){0, 0}, game->img.map.size,
 		MAP_COLOR);
 	draw_map_tiles(&game->img.map);
 	draw_map_player(&game->img.map, game->player,
 		(t_point){0, 0});
-	put_img(game->map_offset, game->img.map.size, &game->img.map,
+	draw_rectangle(&game->img.map_mask, (t_point){0, 0}, game->img.map_mask.size,
+		BLACK);
+	draw_out_of_bounds_area(&game->img.map_mask, game->img.map_mask.size.x, RED);
+	put_img((t_point){-player_pos.x + game->img.map_mask.size.x / 2, -player_pos.y + game->img.map_mask.size.y / 2}, game->img.map.size, &game->img.map,
+		&game->img.map_mask);
+	put_img(game->map_offset, game->img.map_mask.size, &game->img.map_mask,
 		&game->img.win);
+
 }
 
 int	not_out_of_bounds(t_point map)
@@ -858,10 +895,10 @@ int	init_game(t_game *game)
 	if (init_img(game->mlx_ptr, &game->img.win, RES_X, RES_Y) == -1
 		|| init_img(game->mlx_ptr, &game->img.view, RES_X, RES_Y) == -1)
 		return (-1);
-	if (init_minimap(game->mlx_ptr, &game->img.map, (t_point){g_map_x, g_map_y}) == -1
+	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
 		|| init_bg(game->mlx_ptr, &game->img.bg, 0x171B22, 0x3B3E44) == -1)
 		return (-1);
-	game->map_offset.x = RES_X - game->img.map.size.x - RES_X / 50;
+	game->map_offset.x = RES_X - game->img.map_mask.size.x - RES_X / 50;
 	game->map_offset.y = RES_X / 50;
 	init_framedata(&game->frame);
 	init_keystate(game);
