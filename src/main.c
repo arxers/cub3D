@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/03 12:13:45 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/03 14:26:02 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -663,12 +663,12 @@ void draw_out_of_bounds_area(t_img *img, int size, unsigned int color)
 	int		i;
 	int		step;
 
-	step = 10;
+	step = 15;
 	i = -size;
     while (i < size * 2)
     {
-        start = (t_point){i, 0};
-        end = (t_point){i + size, size};
+        start = (t_point){i, -1};
+        end = (t_point){i + size, size - 1};
         draw_line(img, start, end, color);
 		i += step;
     }
@@ -689,7 +689,7 @@ void	draw_minimap(t_game *game)
 		(t_point){0, 0});
 	draw_rectangle(&game->img.map_mask, (t_point){0, 0}, game->img.map_mask.size,
 		BLACK);
-	draw_out_of_bounds_area(&game->img.map_mask, game->img.map_mask.size.x, RED);
+	draw_out_of_bounds_area(&game->img.map_mask, game->img.map_mask.size.x, 0x333333);
 	put_img((t_point){-player_pos.x + game->img.map_mask.size.x / 2, -player_pos.y + game->img.map_mask.size.y / 2}, game->img.map.size, &game->img.map,
 		&game->img.map_mask);
 	put_img(game->map_offset, game->img.map_mask.size, &game->img.map_mask,
