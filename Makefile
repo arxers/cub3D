@@ -14,12 +14,13 @@ LIBRARY_FLAGS = $(LIBFT_FLAGS) $(MLX_FLAGS) -lm
 
 all: $(NAME)
 
-$(MLX):
-	@if [ ! -d $(MLXDIR) ] || [ ! -f $(MLX) ]; then \
-		rm -rf $(MLXDIR); \
+$(MLXDIR)/Makefile:
+	@if [ ! -d $(MLXDIR) ]; then \
 		git clone $(MLX_URL) $(MLXDIR); \
-		make -C $(MLXDIR); \
 	fi
+
+$(MLX): $(MLXDIR)/Makefile
+	make -C $(MLXDIR)
 
 $(NAME): $(MLX) $(LIBFT) $(OBJ)
 	cc $(CFLAGS) $(OBJ) $(LIBRARY) $(LIBRARY_FLAGS) -o $(NAME)

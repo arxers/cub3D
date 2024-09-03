@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/03 15:39:19 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/03 16:23:11 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -370,16 +370,16 @@ void	draw_map_tiles(t_img *map)
 
 int	init_minimap(t_game *game, t_point map_grid_size)
 {
-	t_point	map_size;
-	t_point	map_mask_size;
+	t_point	map;
+	t_point	mask;
 
-	map_size.x = map_grid_size.x * MAP_CELL_SIZE;
-	map_size.y = map_grid_size.y * MAP_CELL_SIZE;
-	map_mask_size.x = map_grid_size.x * MAP_CELL_SIZE / 2;
-	map_mask_size.y = map_grid_size.y * MAP_CELL_SIZE / 2;
-	if (init_img(game->mlx_ptr, &game->img.map, map_size.x, map_size.y) == -1
-		|| init_img(game->mlx_ptr, &game->img.map_mask, map_mask_size.x, map_mask_size.y) == -1
-		|| init_img(game->mlx_ptr, &game->img.map_bg, map_mask_size.x, map_mask_size.y) == -1)
+	map.x = map_grid_size.x * MAP_CELL_SIZE;
+	map.y = map_grid_size.y * MAP_CELL_SIZE;
+	mask.x = map_grid_size.x * MAP_CELL_SIZE / 2;
+	mask.y = map_grid_size.y * MAP_CELL_SIZE / 2;
+	if (init_img(game->mlx_ptr, &game->img.map, map.x, map.y) == -1
+		|| init_img(game->mlx_ptr, &game->img.map_mask, mask.x, mask.y) == -1
+		|| init_img(game->mlx_ptr, &game->img.map_bg, mask.x, mask.y) == -1)
 		return (-1);
 	draw_rectangle(&game->img.map_bg, (t_point){0, 0}, game->img.map_mask.size,
 		BLACK);
