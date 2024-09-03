@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/03 14:26:02 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/03 15:39:19 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,6 +227,24 @@ void	draw_line(t_img *img, t_point start, t_point end, unsigned int color)
 	}
 }
 
+void draw_diagonal_lines(t_img *img, t_point size, unsigned int color)
+{
+	t_point	start;
+	t_point	end;
+	int		i;
+	int		step;
+
+	step = 16;
+	i = -size.x;
+	while (i < size.x * 2)
+	{
+		start = (t_point){i, -1};
+		end = (t_point){i + size.x, size.y - 1};
+		draw_line(img, start, end, color);
+		i += step;
+	}
+}
+
 void draw_triangle(t_img *img, t_triangle t, unsigned int color)
 {
 	t_point		v1;
@@ -288,9 +306,11 @@ void	ft_destroy_image(void *mlx_ptr, void **img)
 int	cleanup(t_game *game, unsigned char status)
 {
 	ft_destroy_image(game->mlx_ptr, &game->img.win.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.map.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.bg.img);
 	ft_destroy_image(game->mlx_ptr, &game->img.view.img);
+	ft_destroy_image(game->mlx_ptr, &game->img.map.img);
+	ft_destroy_image(game->mlx_ptr, &game->img.map_mask.img);
+	ft_destroy_image(game->mlx_ptr, &game->img.map_bg.img);
+	ft_destroy_image(game->mlx_ptr, &game->img.bg.img);
 	if (game->win_ptr)
 		mlx_destroy_window(game->mlx_ptr, game->win_ptr);
 	game->win_ptr = NULL;
@@ -358,8 +378,12 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 	map_mask_size.x = map_grid_size.x * MAP_CELL_SIZE / 2;
 	map_mask_size.y = map_grid_size.y * MAP_CELL_SIZE / 2;
 	if (init_img(game->mlx_ptr, &game->img.map, map_size.x, map_size.y) == -1
-		|| init_img(game->mlx_ptr, &game->img.map_mask, map_mask_size.x, map_mask_size.y) == -1)
+		|| init_img(game->mlx_ptr, &game->img.map_mask, map_mask_size.x, map_mask_size.y) == -1
+		|| init_img(game->mlx_ptr, &game->img.map_bg, map_mask_size.x, map_mask_size.y) == -1)
 		return (-1);
+	draw_rectangle(&game->img.map_bg, (t_point){0, 0}, game->img.map_mask.size,
+		BLACK);
+	draw_diagonal_lines(&game->img.map_bg, game->img.map_mask.size, 0x333333);
 	return (0);
 }
 
@@ -656,26 +680,6 @@ int	should_render_frame(t_game *game)
 	return (0);
 }
 
-void draw_out_of_bounds_area(t_img *img, int size, unsigned int color)
-{
-	t_point	start;
-	t_point	end;
-	int		i;
-	int		step;
-
-	step = 15;
-	i = -size;
-    while (i < size * 2)
-    {
-        start = (t_point){i, -1};
-        end = (t_point){i + size, size - 1};
-        draw_line(img, start, end, color);
-		i += step;
-    }
-}
-
-
-
 void	draw_minimap(t_game *game)
 {
 	t_fpoint	player_pos;
@@ -687,14 +691,12 @@ void	draw_minimap(t_game *game)
 	draw_map_tiles(&game->img.map);
 	draw_map_player(&game->img.map, game->player,
 		(t_point){0, 0});
-	draw_rectangle(&game->img.map_mask, (t_point){0, 0}, game->img.map_mask.size,
-		BLACK);
-	draw_out_of_bounds_area(&game->img.map_mask, game->img.map_mask.size.x, 0x333333);
+	put_img((t_point){0, 0,}, game->img.map_mask.size, &game->img.map_bg,
+		&game->img.map_mask);
 	put_img((t_point){-player_pos.x + game->img.map_mask.size.x / 2, -player_pos.y + game->img.map_mask.size.y / 2}, game->img.map.size, &game->img.map,
 		&game->img.map_mask);
 	put_img(game->map_offset, game->img.map_mask.size, &game->img.map_mask,
 		&game->img.win);
-
 }
 
 int	not_out_of_bounds(t_point map)
