@@ -442,6 +442,10 @@ int	key_press(unsigned int key, t_game *game)
 		game->keys[ROT_R] = 1;
 	if (key == XK_Shift_L)
 		game->keys[RUN] = 1;
+	if (key == XK_Control_L)
+		game->player.z -= 0.05;
+	if (key == XK_space)
+		game->player.z += 0.05;
 	if (key == XK_Escape)
 		key_esc(game);
 	if (key == XK_p)
@@ -467,18 +471,18 @@ int	key_press(unsigned int key, t_game *game)
 	return (0);
 }
 
-void	vertical_look(int *z, float delta_y)
+void	vertical_look(int *y_look, float delta_y)
 {
-	static int	z_limit = RES_Y * 0.5;
-	int			new_z;
+	static int	limit = RES_Y * 0.5;
+	int			new;
 
-	new_z = *z + delta_y;
-	if (new_z > -z_limit && new_z < z_limit)
-		*z += delta_y;
-	if (*z < -z_limit)
-		*z = -z_limit;
-	else if (*z > z_limit)
-		*z = z_limit;
+	new = *y_look + delta_y;
+	if (new > -limit && new < limit)
+		*y_look += delta_y;
+	if (*y_look < -limit)
+		*y_look = -limit;
+	else if (*y_look > limit)
+		*y_look = limit;
 }
 
 void	handle_mouse(t_game *game)
@@ -504,7 +508,7 @@ void	handle_mouse(t_game *game)
 			- game->player.plane.y * sin(MOUSE_SEN * delta.x);
 		game->player.plane.y = old_plane_x * sin(MOUSE_SEN * delta.x)
 			+ game->player.plane.y * cos(MOUSE_SEN * delta.x);
-		vertical_look(&game->player.z, delta.y);
+		vertical_look(&game->player.y_dir, delta.y);
 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
 	}
 }
@@ -723,11 +727,11 @@ void	render_viewport(t_game *game)
 
 	put_img((t_point){0, 0}, game->img.ceiling.size,
 		&game->img.ceiling, &game->img.win);
-	if (game->player.z > RES_Y / 2)
+	if (game->player.y_dir > RES_Y / 2)
 		put_img((t_point){0, 0}, game->img.floor.size,
 		&game->img.floor, &game->img.win);
 	else
-		put_img((t_point){0, RES_Y / 2 - game->player.z}, game->img.floor.size,
+		put_img((t_point){0, RES_Y / 2 - game->player.y_dir}, game->img.floor.size,
 			&game->img.floor, &game->img.win);
 	x = 0;
 	while (x < RES_X)
@@ -790,10 +794,10 @@ void	render_viewport(t_game *game)
 		else
 			perp_wall_dist = (side_dist.y - delta_dist.y);
 		line_height = (int)(RES_Y / perp_wall_dist);
-		draw_start = -line_height / 2 + RES_Y / 2 - game->player.z;
+		draw_start = -line_height / 2 + RES_Y / 2 - game->player.y_dir + (line_height * game->player.z);
 		if (draw_start < 0)
 			draw_start = 0;
-		draw_end = line_height / 2 + RES_Y / 2 - game->player.z;
+		draw_end = line_height / 2 + RES_Y / 2 - game->player.y_dir + (line_height * game->player.z);
 		if (draw_end >= RES_Y)
 			draw_end = RES_Y;
 		color = 0xAAAAAA;
@@ -804,12 +808,6 @@ void	render_viewport(t_game *game)
 			(t_point){x, draw_end}, color);
 		x++;
 	}
-	// put_img((t_point){0, 0}, game->img.view.size, &game->img.view,
-	// 	&game->img.win);
-	// printf("player dir x:%f\n", game->player.dir.x);
-	// printf("player dir y:%f\n", game->player.dir.y);
-	// printf("player plane x:%f\n", game->player.plane.x);
-	// printf("player plane y:%f\n", game->player.plane.y);
 }
 
 void	display_fps_counter(t_game *game)
@@ -874,13 +872,14 @@ void	init_player(t_player *player)
 
 	pos.x = 1;
 	pos.y = 1;
-	player->z = 0;
+	player->y_dir = 0;
 	player->pos.x = pos.x + 0.5;
 	player->pos.y = pos.y + 0.5;
 	player->dir.x = 0;
 	player->dir.y = -1;
-	init_player_plane(player);
 	player->zoom = 1.0;
+	player->z = 0.0;
+	init_player_plane(player);
 }
 
 void	init_framedata(t_frame_data *frame)
@@ -931,24 +930,24 @@ int	init_game(t_game *game)
 int mwheel(unsigned int key, int x, int y, t_game *game)
 {
 	static float	step = 0.1;
-	static int		z_limit = RES_Y * 0.5;
+	static int		y_dir_limit = RES_Y * 0.5;
 
 	(void)x;
 	(void)y;
 	if (key == 4 && game->player.zoom < 2)
 	{
 		game->player.zoom += step;
-		game->player.z *= game->player.zoom / (game->player.zoom - step);
+		game->player.y_dir *= game->player.zoom / (game->player.zoom - step);
 	}
 	else if (key == 5 && game->player.zoom > 1)
 	{
 		game->player.zoom -= step;
-		game->player.z *= game->player.zoom / (game->player.zoom + step);
+		game->player.y_dir *= game->player.zoom / (game->player.zoom + step);
 	}
-	if (game->player.z < -z_limit)
-		game->player.z = -z_limit + 1;
-	else if (game->player.z > z_limit)
-		game->player.z = z_limit - 1;
+	if (game->player.y_dir < -y_dir_limit)
+		game->player.y_dir = -y_dir_limit + 1;
+	else if (game->player.y_dir > y_dir_limit)
+		game->player.y_dir = y_dir_limit - 1;
 	return (0);
 }
 

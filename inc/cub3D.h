@@ -60,7 +60,9 @@ typedef enum e_keystate
 	ROT_R,
 	MAP,
 	PAUSE,
-	RUN
+	RUN,
+	CROUCH,
+	JUMP,
 }					t_keystate;
 
 typedef struct s_fpoint
@@ -110,7 +112,8 @@ typedef struct s_player
 	t_fpoint		plane;
 	t_fpoint		dir;
 	float			zoom;
-	int				z;
+	float			z;
+	int				y_dir;
 }					t_player;
 
 typedef struct s_frame_data
