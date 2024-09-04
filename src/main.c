@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/04 12:33:00 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/04 14:34:53 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,8 +278,8 @@ void	draw_map_player(t_img *img, t_player p, t_point origin)
 	draw_circle_outline(img, player_pos, MAP_CELL_SIZE * 0.25, WHITE);
 	dir_radius = MAP_CELL_SIZE * 0.15;
 	dir_dist = 0.25;
-	pointer_pos.x = (int)((p.pos.x + (p.dir.x * dir_dist)) * scale) + origin.x;
-	pointer_pos.y = (int)((p.pos.y + (p.dir.y * dir_dist)) * scale) + origin.y;
+	pointer_pos.x = (int)((p.pos.x + (p.dir.x * dir_dist * p.zoom)) * scale) + origin.x;
+	pointer_pos.y = (int)((p.pos.y + (p.dir.y * dir_dist * p.zoom)) * scale) + origin.y;
 	draw_circle(img, pointer_pos, dir_radius, WHITE);
 }
 
@@ -710,8 +710,8 @@ void	render_viewport(t_game *game)
 	while (x < RES_X)
 	{
 		camera_x = 2 * x / (float)RES_X - 1;
-		ray_dir.x = game->player.dir.x + game->player.plane.x * camera_x;
-		ray_dir.y = game->player.dir.y + game->player.plane.y * camera_x;
+		ray_dir.x = game->player.dir.x * game->player.zoom + game->player.plane.x * camera_x;
+		ray_dir.y = game->player.dir.y * game->player.zoom + game->player.plane.y * camera_x;
 		map.x = (int)game->player.pos.x;
 		map.y = (int)game->player.pos.y;
 		if (ray_dir.x == 0)
@@ -749,20 +749,20 @@ void	render_viewport(t_game *game)
 			{
 				side_dist.x += delta_dist.x;
 				map.x += step.x;
-				side = 0;
+				side = VERTICAL;
 			}
 			else
 			{
 				side_dist.y += delta_dist.y;
 				map.y += step.y;
-				side = 1;
+				side = HORIZONTAL;
 			}
 			if (out_of_bounds(map))
 				return ;
 			if (g_map[map.y][map.x] > 0)
 				hit = 1;
 		}
-		if (side == 0)
+		if (side == VERTICAL)
 			perp_wall_dist = (side_dist.x - delta_dist.x);
 		else
 			perp_wall_dist = (side_dist.y - delta_dist.y);
@@ -825,6 +825,26 @@ int	game_loop(t_game *game)
 	return (0);
 }
 
+void	init_player_plane(t_player *player)
+{
+	if (player->dir.x != 0)
+	{
+		player->plane.x = 0;
+		if (player->dir.x > 0)
+			player->plane.y = 0.66;
+		else
+			player->plane.y = -0.66;
+	}
+	else
+	{
+		if (player->dir.y > 0)
+			player->plane.x = -0.66;
+		else
+			player->plane.x = 0.66;
+		player->plane.y = 0;
+	}
+}
+
 void	init_player(t_player *player)
 {
 	t_fpoint	pos;
@@ -834,22 +854,10 @@ void	init_player(t_player *player)
 	player->z = 0;
 	player->pos.x = pos.x + 0.5;
 	player->pos.y = pos.y + 0.5;
-	player->dir.x = 1;
-	player->dir.y = 0;
-	if (player->dir.x < 0)
-	{
-		player->plane.x = -0.66;
-		player->plane.y = -0.66;
-	}
-	else
-	{
-		player->plane.x = 0.66;
-		player->plane.y = 0.66;
-	}
-	if (player->dir.x != 0)
-		player->plane.x = 0;
-	else
-		player->plane.y = 0;
+	player->dir.x = 0;
+	player->dir.y = -1;
+	init_player_plane(player);
+	player->zoom = 1.0;
 }
 
 void	init_framedata(t_frame_data *frame)
@@ -895,6 +903,17 @@ int	init_game(t_game *game)
 	return (0);
 }
 
+int mwheel(unsigned int key, int x, int y, t_game *game)
+{
+	(void)x;
+	(void)y;
+	if (key == 4 && game->player.zoom < 2)
+		game->player.zoom += 0.2;
+	else if (key == 5 && game->player.zoom > 1)
+		game->player.zoom -= 0.2;
+	return (0);
+}
+
 int	main(int ac, char **av)
 {
 	t_game	game;
@@ -904,6 +923,7 @@ int	main(int ac, char **av)
 		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win_ptr, KeyRelease, KeyReleaseMask, &key_release, &game);
+	mlx_hook(game.win_ptr, ButtonPress, ButtonPressMask, &mwheel, &game);
 	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &key_esc, &game);
 	mlx_loop_hook(game.mlx_ptr, &game_loop, &game);
 	mlx_loop(game.mlx_ptr);
