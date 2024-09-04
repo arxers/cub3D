@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/04 14:34:53 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/04 19:09:09 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -306,11 +306,11 @@ void	ft_destroy_image(void *mlx_ptr, void **img)
 int	cleanup(t_game *game, unsigned char status, char *msg)
 {
 	ft_destroy_image(game->mlx_ptr, &game->img.win.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.view.img);
 	ft_destroy_image(game->mlx_ptr, &game->img.map.img);
 	ft_destroy_image(game->mlx_ptr, &game->img.map_mask.img);
 	ft_destroy_image(game->mlx_ptr, &game->img.map_bg.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.bg.img);
+	ft_destroy_image(game->mlx_ptr, &game->img.ceiling.img);
+	ft_destroy_image(game->mlx_ptr, &game->img.floor.img);
 	if (game->win_ptr)
 		mlx_destroy_window(game->mlx_ptr, game->win_ptr);
 	game->win_ptr = NULL;
@@ -330,16 +330,17 @@ t_point	center(t_point origin, t_point size)
 	return (origin);
 }
 
-int	init_bg(void *mlx_ptr, t_img *bg, int ceiling, int floor)
+int	init_bg(t_game *game, int ceiling, int floor)
 {
 	t_point	size;
 
 	size.x = RES_X;
 	size.y = RES_Y;
-	if (init_img(mlx_ptr, bg, RES_X, RES_Y * 2) == -1)
+	if (init_img(game->mlx_ptr, &game->img.ceiling, RES_X, RES_Y) == -1
+		|| init_img(game->mlx_ptr, &game->img.floor, RES_X, RES_Y) == -1)
 		return (-1);
-	draw_rectangle(bg, (t_point){0, 0}, size, ceiling);
-	draw_rectangle(bg, (t_point){0, RES_Y}, size, floor);
+	draw_rectangle(&game->img.ceiling, (t_point){0, 0}, size, ceiling);
+	draw_rectangle(&game->img.floor, (t_point){0, 0}, size, floor);
 	return (0);
 }
 
@@ -466,28 +467,44 @@ int	key_press(unsigned int key, t_game *game)
 	return (0);
 }
 
+void	vertical_look(int *z, float delta_y)
+{
+	static int	z_limit = RES_Y * 0.5;
+	int			new_z;
+
+	new_z = *z + delta_y;
+	if (new_z > -z_limit && new_z < z_limit)
+		*z += delta_y;
+	if (*z < -z_limit)
+		*z = -z_limit;
+	else if (*z > z_limit)
+		*z = z_limit;
+}
+
 void	handle_mouse(t_game *game)
 {
 	static t_point	center = {RES_X / 2, RES_Y / 2};
 	t_point			mouse;
 	float			old_dir_x;
 	float			old_plane_x;
-	int				delta_x;
+	t_point			delta;
 
 	mlx_mouse_get_pos(game->mlx_ptr, game->win_ptr, &mouse.x, &mouse.y);
-	delta_x = mouse.x - center.x;
-	if (delta_x != 0)
+	delta.x = mouse.x - center.x;
+	delta.y = mouse.y - center.y;
+	if (delta.x != 0 || delta.y != 0)
 	{
 		old_dir_x = game->player.dir.x;
 		old_plane_x = game->player.plane.x;
-		game->player.dir.x = game->player.dir.x * cos(MOUSE_SEN * delta_x)
-			- game->player.dir.y * sin(MOUSE_SEN * delta_x);
-		game->player.dir.y = old_dir_x * sin(MOUSE_SEN * delta_x)
-			+ game->player.dir.y * cos(MOUSE_SEN * delta_x);
-		game->player.plane.x = game->player.plane.x * cos(MOUSE_SEN * delta_x)
-			- game->player.plane.y * sin(MOUSE_SEN * delta_x);
-		game->player.plane.y = old_plane_x * sin(MOUSE_SEN * delta_x)
-			+ game->player.plane.y * cos(MOUSE_SEN * delta_x);
+		game->player.dir.x = game->player.dir.x * cos(MOUSE_SEN * delta.x)
+			- game->player.dir.y * sin(MOUSE_SEN * delta.x);
+		game->player.dir.y = old_dir_x * sin(MOUSE_SEN * delta.x)
+			+ game->player.dir.y * cos(MOUSE_SEN * delta.x);
+		game->player.plane.x = game->player.plane.x * cos(MOUSE_SEN * delta.x)
+			- game->player.plane.y * sin(MOUSE_SEN * delta.x);
+		game->player.plane.y = old_plane_x * sin(MOUSE_SEN * delta.x)
+			+ game->player.plane.y * cos(MOUSE_SEN * delta.x);
+		vertical_look(&game->player.z, delta.y);
 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
 	}
 }
@@ -581,7 +598,7 @@ void	handle_movement(t_game *game, float speed)
 	t_fpoint	new_pos;
 	float		radius;
 
-	radius = 0.1;
+	radius = 0.15;
 	move.x = 0;
 	move.y = 0;
 	calculate_movement(game, &move.x, &move.y);
@@ -704,8 +721,14 @@ void	render_viewport(t_game *game)
 	int				draw_end;
 	unsigned int	color;
 
-	put_img((t_point){0, -RES_Y / 2 - game->player.z}, game->img.bg.size,
-		&game->img.bg, &game->img.view);
+	put_img((t_point){0, 0}, game->img.ceiling.size,
+		&game->img.ceiling, &game->img.win);
+	if (game->player.z > RES_Y / 2)
+		put_img((t_point){0, 0}, game->img.floor.size,
+		&game->img.floor, &game->img.win);
+	else
+		put_img((t_point){0, RES_Y / 2 - game->player.z}, game->img.floor.size,
+			&game->img.floor, &game->img.win);
 	x = 0;
 	while (x < RES_X)
 	{
@@ -769,20 +792,20 @@ void	render_viewport(t_game *game)
 		line_height = (int)(RES_Y / perp_wall_dist);
 		draw_start = -line_height / 2 + RES_Y / 2 - game->player.z;
 		if (draw_start < 0)
-			draw_start = -1;
+			draw_start = 0;
 		draw_end = line_height / 2 + RES_Y / 2 - game->player.z;
 		if (draw_end >= RES_Y)
-			draw_end = RES_Y - 1;
+			draw_end = RES_Y;
 		color = 0xAAAAAA;
 		if (side == 1)
 			color = 0x888888;
-		draw_line(&game->img.view,
+		draw_line(&game->img.win,
 			(t_point){x, draw_start},
 			(t_point){x, draw_end}, color);
 		x++;
 	}
-	put_img((t_point){0, 0}, game->img.view.size, &game->img.view,
-		&game->img.win);
+	// put_img((t_point){0, 0}, game->img.view.size, &game->img.view,
+	// 	&game->img.win);
 	// printf("player dir x:%f\n", game->player.dir.x);
 	// printf("player dir y:%f\n", game->player.dir.y);
 	// printf("player plane x:%f\n", game->player.plane.x);
@@ -872,9 +895,12 @@ void	init_game_struct(t_game *game)
 	game->mlx_ptr = NULL;
 	game->win_ptr = NULL;
 	game->img.win.img = NULL;
-	game->img.map.img = NULL;
-	game->img.bg.img = NULL;
 	game->img.view.img = NULL;
+	game->img.map.img = NULL;
+	game->img.map_mask.img = NULL;
+	game->img.map_bg.img = NULL;
+	game->img.ceiling.img = NULL;
+	game->img.floor.img = NULL;
 	game->frame.fps_str = NULL;
 }
 
@@ -890,11 +916,10 @@ int	init_game(t_game *game)
 	game->win_ptr = mlx_new_window(game->mlx_ptr, RES_X, RES_Y, "cub3D");
 	if (game->win_ptr == NULL)
 		return (-1);
-	if (init_img(game->mlx_ptr, &game->img.win, RES_X, RES_Y) == -1
-		|| init_img(game->mlx_ptr, &game->img.view, RES_X, RES_Y) == -1)
+	if (init_img(game->mlx_ptr, &game->img.win, RES_X, RES_Y) == -1)
 		return (-1);
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
-		|| init_bg(game->mlx_ptr, &game->img.bg, 0x171B22, 0x3B3E44) == -1)
+		|| init_bg(game, 0x171B22, 0x3B3E44) == -1)
 		return (-1);
 	init_framedata(&game->frame);
 	init_keystate(game);
@@ -905,12 +930,25 @@ int	init_game(t_game *game)
 
 int mwheel(unsigned int key, int x, int y, t_game *game)
 {
+	static float	step = 0.1;
+	static int		z_limit = RES_Y * 0.5;
+
 	(void)x;
 	(void)y;
 	if (key == 4 && game->player.zoom < 2)
-		game->player.zoom += 0.2;
+	{
+		game->player.zoom += step;
+		game->player.z *= game->player.zoom / (game->player.zoom - step);
+	}
 	else if (key == 5 && game->player.zoom > 1)
-		game->player.zoom -= 0.2;
+	{
+		game->player.zoom -= step;
+		game->player.z *= game->player.zoom / (game->player.zoom + step);
+	}
+	if (game->player.z < -z_limit)
+		game->player.z = -z_limit + 1;
+	else if (game->player.z > z_limit)
+		game->player.z = z_limit - 1;
 	return (0);
 }
 

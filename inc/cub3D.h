@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/04 14:39:14 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/04 16:54:51 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,8 @@ typedef struct s_images
 	t_img			map;
 	t_img			map_mask;
 	t_img			map_bg;
-	t_img			bg;
+	t_img			ceiling;
+	t_img			floor;
 }					t_images;
 
 typedef struct s_player
