@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/03 18:19:15 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/04 12:33:00 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,8 +287,8 @@ void	validate_input(int ac, char **av)
 {
 	if (ac != 2)
 	{
-		ft_printf("cub3D: Invalid number of arguments\n");
-		ft_printf("cub3D: usage: cub3D [*.cub]\n");
+		ft_putstr_fd("cub3D: Invalid number of arguments\n", 2);
+		ft_putstr_fd("cub3D: usage: cub3D [*.cub]\n", 2);
 		exit(1);
 	}
 	// if (open(av[1]) == -1) //check if able to open
@@ -303,7 +303,7 @@ void	ft_destroy_image(void *mlx_ptr, void **img)
 	*img = NULL;
 }
 
-int	cleanup(t_game *game, unsigned char status)
+int	cleanup(t_game *game, unsigned char status, char *msg)
 {
 	ft_destroy_image(game->mlx_ptr, &game->img.win.img);
 	ft_destroy_image(game->mlx_ptr, &game->img.view.img);
@@ -318,6 +318,8 @@ int	cleanup(t_game *game, unsigned char status)
 		mlx_destroy_display(game->mlx_ptr);
 	ft_free_void(&game->mlx_ptr);
 	ft_free(&game->frame.fps_str);
+	if (msg)
+		ft_putstr_fd(msg, 2);
 	exit(status);
 }
 
@@ -391,8 +393,7 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 
 int	key_esc(t_game *game)
 {
-	ft_printf("exit\n");
-	cleanup(game, 0);
+	cleanup(game, 0, "exit\n");
 	return (0);
 }
 
@@ -679,11 +680,11 @@ void	draw_minimap(t_game *game)
 		&game->img.win);
 }
 
-int	not_out_of_bounds(t_point map)
+int	out_of_bounds(t_point map)
 {
 	if (map.x < 0 || map.y < 0 || map.x > g_map_x || map.y > g_map_y)
-		return (0);
-	return (1);
+		return (1);
+	return (0);
 }
 
 void	render_viewport(t_game *game)
@@ -756,6 +757,8 @@ void	render_viewport(t_game *game)
 				map.y += step.y;
 				side = 1;
 			}
+			if (out_of_bounds(map))
+				return ;
 			if (g_map[map.y][map.x] > 0)
 				hit = 1;
 		}
@@ -816,6 +819,8 @@ int	game_loop(t_game *game)
 			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 26, WHITE,
 				"MOUSE DISABLED");
 		display_fps_counter(game);
+		if (out_of_bounds((t_point){(int)game->player.pos.x, (int)game->player.pos.y}))
+			cleanup(game, 0, "cub3D: Out of bounds\n");
 	}
 	return (0);
 }
@@ -896,7 +901,7 @@ int	main(int ac, char **av)
 
 	validate_input(ac, av);
 	if (init_game(&game) == -1)
-		return (cleanup(&game, 1));
+		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win_ptr, KeyRelease, KeyReleaseMask, &key_release, &game);
 	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &key_esc, &game);

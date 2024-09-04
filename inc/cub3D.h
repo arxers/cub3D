@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/03 18:11:11 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/04 12:28:40 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@
 
 // movement multipliers
 # define MOUSE_SEN 0.0025
-# define MOV_SPD 0.001
+# define MOV_SPD 1
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
 
