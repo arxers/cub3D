@@ -283,6 +283,27 @@ void	draw_map_player(t_img *img, t_player p, t_point origin)
 	draw_circle(img, pointer_pos, dir_radius, WHITE);
 }
 
+
+
+/* 
+if .cub extension, return 0
+else return 1
+*/
+int	is_cub_ext(char *s)
+{
+	int	len;
+	
+	len = ft_strlen(s);
+	if ((s[len - 1] == 'b') && \
+		(s[len - 2] == 'u') && \
+		(s[len - 3] == 'c') && \
+		(s[len - 4] == '.') \
+		)
+	return (0);
+	else
+		return (1);
+}
+
 void	validate_input(int ac, char **av)
 {
 	if (ac != 2)
@@ -291,6 +312,13 @@ void	validate_input(int ac, char **av)
 		ft_putstr_fd("cub3D: usage: cub3D [*.cub]\n", 2);
 		exit(1);
 	}
+	
+	if (is_cub_ext(av[1]))
+	{
+		ft_putstr_fd("cub3D: arg does not end in .cub\n", 2);
+		exit(1);
+	}
+	
 	// if (open(av[1]) == -1) //check if able to open
 	// 	;remove (void)av when this check is done
 	(void)av;
@@ -919,6 +947,8 @@ int	main(int ac, char **av)
 	t_game	game;
 
 	validate_input(ac, av);
+	printf("Here\n");
+	
 	if (init_game(&game) == -1)
 		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
@@ -927,5 +957,6 @@ int	main(int ac, char **av)
 	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &key_esc, &game);
 	mlx_loop_hook(game.mlx_ptr, &game_loop, &game);
 	mlx_loop(game.mlx_ptr);
+	
 	return (0);
 }
