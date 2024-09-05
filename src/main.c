@@ -602,7 +602,7 @@ void	handle_movement(t_game *game, float speed)
 	t_fpoint	new_pos;
 	float		radius;
 
-	radius = 0.15;
+	radius = 0.125;
 	move.x = 0;
 	move.y = 0;
 	calculate_movement(game, &move.x, &move.y);
@@ -720,7 +720,7 @@ void	render_viewport(t_game *game)
 	t_point			step;
 	int				hit;
 	int				side;
-	int				line_height;
+	double			line_height;
 	int				draw_start;
 	int				draw_end;
 	unsigned int	color;
