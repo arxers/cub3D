@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/05 22:02:39 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/06 06:08:26 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,17 +104,15 @@ int	load_xpm(void *mlx, char *path, t_img *img)
 {
 	img->img = mlx_xpm_file_to_image(mlx, path, &img->size.x, &img->size.y);
 	if (!img->img)
-		return (-1);
+		return (0);
 	img->addr = mlx_get_data_addr(img->img, &img->bits_per_pixel,
 			&img->line_len, &img->endian);
-	return (0);
+	return (1);
 }
 
 int	load_xpms(t_game *game)
 {
-	if (load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->img.wall[0]) == -1)
-		return (-1);
-	put_img((t_point){RES_X / 2 - (game->img.wall[0].size.x / 2), RES_Y / 2 - (game->img.wall[0].size.y / 2)}, game->img.wall[0].size, &game->img.wall[0], &game->img.win);
+	load_xpm(game->mlx_ptr, "textures/shift_tab.xpm", &game->img.misc[0]);
 	return (0);
 }
 
@@ -305,6 +303,7 @@ void	ft_destroy_image(void *mlx_ptr, void **img)
 
 int	cleanup(t_game *game, unsigned char status, char *msg)
 {
+	ft_destroy_image(game->mlx_ptr, &game->img.misc[0].img);
 	ft_destroy_image(game->mlx_ptr, &game->img.win.img);
 	ft_destroy_image(game->mlx_ptr, &game->img.map.img);
 	ft_destroy_image(game->mlx_ptr, &game->img.map_mask.img);
@@ -429,9 +428,9 @@ void	pause_game(t_game *game)
 {
 	static t_point	center = {RES_X / 2, RES_Y / 2};
 
-	if (game->keys[PAUSE] == 1)
+	if (game->keys[MOUSE] == 1)
 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
-	game->keys[PAUSE] = -game->keys[PAUSE];
+	game->keys[MOUSE] = -game->keys[MOUSE];
 }
 
 int	key_press(unsigned int key, t_game *game)
@@ -454,6 +453,9 @@ int	key_press(unsigned int key, t_game *game)
 		game->keys[ROT_R] = 1;
 	if (key == XK_Shift_L)
 		game->keys[RUN] = 1;
+	if (key == XK_Tab)
+		if (game->keys[RUN] == 1)
+			game->keys[PAUSE] = 1 - game->keys[PAUSE];
 	if (key == XK_Control_L)
 		game->keys[CROUCH] = 1;
 	if (key == XK_space)
@@ -685,7 +687,7 @@ void	init_keystate(t_game *game)
 		i++;
 	}
 	game->keys[MAP] = 1;
-	game->keys[PAUSE] = -1;
+	game->keys[MOUSE] = -1;
 }
 
 int	a_second_has_passed(void)
@@ -877,17 +879,25 @@ void	display_fps_counter(t_game *game)
 
 int	game_loop(t_game *game)
 {
-	if (game->keys[PAUSE] != 1)
+	if (game->keys[MOUSE] != 1 && !game->keys[PAUSE])
 		handle_mouse(game);
 	if (should_render_frame(game))
 	{
-		handle_keys(game);
-		render_viewport(game);
-		if (game->keys[MAP] == 1)
-			draw_minimap(game);
-		mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
-			game->img.win.img, 0, 0);
 		if (game->keys[PAUSE] == 1)
+		{
+			put_img((t_point){0, 0}, game->img.misc[0].size, &game->img.misc[0], &game->img.win);
+			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->img.win.img, 0, 0);
+		}
+		else
+		{
+			handle_keys(game);
+			render_viewport(game);
+			if (game->keys[MAP] == 1)
+				draw_minimap(game);
+			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
+				game->img.win.img, 0, 0);
+		}
+		if (game->keys[MOUSE] == 1)
 			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 26, WHITE,
 				"MOUSE DISABLED");
 		display_fps_counter(game);
@@ -974,6 +984,7 @@ int	init_game(t_game *game)
 	init_framedata(&game->frame);
 	init_keystate(game);
 	init_player(&game->player);
+	load_xpms(game);
 	mlx_mouse_move(game->mlx_ptr, game->win_ptr, RES_X / 2, RES_Y / 2);
 	return (0);
 }
