@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/05 12:25:28 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/05 16:54:47 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -477,26 +477,16 @@ int	key_press(unsigned int key, t_game *game)
 
 void	vertical_look(t_game *game, float delta)
 {
-	static int	limit = RES_Y + RES_Y / 2/*  * 0.5 */;
+	static int	limit = RES_Y / 2;
 	int			new;
 
 	new = game->player.pitch + delta;
-	// if (new > -limit && new < limit)
-	game->player.pitch += delta;
+	if (new >= -limit && new <= limit)
+		game->player.pitch += delta;
 	if (game->player.pitch < -limit)
-	{
-		game->player.pitch += 2 * limit;
-		game->player.dir.x = -game->player.dir.x;
-		game->player.dir.y = -game->player.dir.y;
-		game->player.not_inverted = -game->player.not_inverted;
-	}
+		game->player.pitch = -limit;
 	else if (game->player.pitch > limit)
-	{
-		game->player.pitch -= 2 * limit;
-		game->player.dir.x = -game->player.dir.x;
-		game->player.dir.y = -game->player.dir.y;
-		game->player.not_inverted = -game->player.not_inverted;
-	}
+		game->player.pitch = limit;
 }
 
 void	handle_mouse(t_game *game)
@@ -768,7 +758,7 @@ void	render_viewport(t_game *game)
 	x = 0;
 	while (x < RES_X)
 	{
-		camera_x = (x * camera_x_factor - 1) * game->player.not_inverted;
+		camera_x = (x * camera_x_factor - 1);
 		ray_dir.x = game->player.dir.x * game->player.zoom + game->player.plane.x * camera_x;
 		ray_dir.y = game->player.dir.y * game->player.zoom + game->player.plane.y * camera_x;
 		map.x = (int)game->player.pos.x;
@@ -969,27 +959,26 @@ int	init_game(t_game *game)
 int mwheel(unsigned int key, int x, int y, t_game *game)
 {
 	static float	step = 0.1;
-	// static int		pitch_limit = RES_Y * 0.5;
+	static int		pitch_limit = RES_Y / 2;
 
 	(void)x;
 	(void)y;
 	if (key == 4 && game->player.zoom < 2)
 	{
 		game->player.zoom += step;
-		// if (game->player.pitch != pitch_limit && game->player.pitch != -pitch_limit)
+		if (game->player.pitch != pitch_limit && game->player.pitch != -pitch_limit)
 			game->player.pitch *= game->player.zoom / (game->player.zoom - step);
 	}
 	else if (key == 5 && game->player.zoom > 1)
 	{
 		game->player.zoom -= step;
-		// if (game->player.pitch != pitch_limit && game->player.pitch != -pitch_limit)
+		if (game->player.pitch != pitch_limit && game->player.pitch != -pitch_limit)
 			game->player.pitch *= game->player.zoom / (game->player.zoom + step);
 	}
-		// if (game->player.pitch > pitch_limit)
-		// 	game->player.pitch = pitch_limit;
-		// else if (game->player.pitch < -pitch_limit)
-		// 	game->player.pitch = -pitch_limit;
-	// printf("%i\n", pitch_limit);
+		if (game->player.pitch > pitch_limit)
+			game->player.pitch = pitch_limit;
+		else if (game->player.pitch < -pitch_limit)
+			game->player.pitch = -pitch_limit;
 	return (0);
 }
 
