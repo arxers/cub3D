@@ -42,6 +42,7 @@ int	g_map[24][24] =
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
+
 int	init_img(void *mlx_ptr, t_img *img, int width, int height)
 {
 	img->img = mlx_new_image(mlx_ptr, width, height);
@@ -304,6 +305,58 @@ int	is_cub_ext(char *s)
 		return (1);
 }
 
+/*
+jsu to do list:
+
+NOTE. av[1] is test.cub
+X, if av[1] ends in .cub
+X, if av[1] can be opened, and read, as a file
+
+NOTE. treat map as a 2D array, rows of char arrays
+0, map must only consist of 6 possible chars: 0, 1, N, S, E, W
+
+*/
+
+int	is_map_readable(char *mapfile)
+{
+	int map_fd;
+	
+	map_fd = open(mapfile, O_RDONLY);
+	if (map_fd == -1)
+		return (1);	
+	return (0);
+}
+
+#define MAP_HORI 24
+#define MAP_VERT 24
+
+/* 
+if char is NOT found in "valid char str", return 1
+else return 0
+*/
+/*
+int	only_valid_chars(char map)
+{
+	int i;
+	int	j;
+	
+	i = 0;
+	while (i < MAP_VERT)
+	{
+		j = 0;
+		while(j < MAP_HORI)
+		{
+			if (ft_strchr("01NSEW", map[i][j]) == NULL)
+				return (1);
+			j++;
+		}
+		i++;
+	}
+	return (0);
+}
+*/
+
+
 void	validate_input(int ac, char **av)
 {
 	if (ac != 2)
@@ -311,14 +364,26 @@ void	validate_input(int ac, char **av)
 		ft_putstr_fd("cub3D: Invalid number of arguments\n", 2);
 		ft_putstr_fd("cub3D: usage: cub3D [*.cub]\n", 2);
 		exit(1);
-	}
-	
+	}	
 	if (is_cub_ext(av[1]))
 	{
 		ft_putstr_fd("cub3D: arg does not end in .cub\n", 2);
 		exit(1);
 	}
-	
+	if (is_map_readable(av[1]))
+	{
+		ft_putstr_fd("cub3D: cannot read map\n", 2);
+		exit (1);		
+	}
+
+
+/*	
+	if (only_valid_chars(map2))
+	{
+		ft_putstr_fd("cub3D: invalid chars in map\n", 2);
+		exit(1);
+	}
+*/	
 	// if (open(av[1]) == -1) //check if able to open
 	// 	;remove (void)av when this check is done
 	(void)av;

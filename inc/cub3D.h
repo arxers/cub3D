@@ -21,6 +21,8 @@
 # include <stdio.h>
 # include <sys/time.h>
 
+# include <fcntl.h> // open()
+
 // raycasting
 # define VERTICAL 0
 # define HORIZONTAL 1
