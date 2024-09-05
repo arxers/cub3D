@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/04 16:54:51 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/05 11:55:56 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,8 +112,9 @@ typedef struct s_player
 	t_fpoint		plane;
 	t_fpoint		dir;
 	float			zoom;
-	float			z;
-	int				y_dir;
+	float			height;
+	int				pitch;
+	int				not_inverted;
 }					t_player;
 
 typedef struct s_frame_data

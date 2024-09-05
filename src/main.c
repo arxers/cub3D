@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/04 19:09:09 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/05 12:25:28 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -414,6 +414,10 @@ int	key_release(unsigned int key, t_game *game)
 		game->keys[ROT_R] = 0;
 	if (key == XK_Shift_L)
 		game->keys[RUN] = 0;
+	if (key == XK_Control_L)
+		game->keys[CROUCH] = 0;
+	if (key == XK_space)
+		game->keys[JUMP] = 0;
 	return (0);
 }
 
@@ -443,9 +447,9 @@ int	key_press(unsigned int key, t_game *game)
 	if (key == XK_Shift_L)
 		game->keys[RUN] = 1;
 	if (key == XK_Control_L)
-		game->player.z -= 0.05;
+		game->keys[CROUCH] = 1;
 	if (key == XK_space)
-		game->player.z += 0.05;
+		game->keys[JUMP] = 1;
 	if (key == XK_Escape)
 		key_esc(game);
 	if (key == XK_p)
@@ -471,18 +475,28 @@ int	key_press(unsigned int key, t_game *game)
 	return (0);
 }
 
-void	vertical_look(int *y_look, float delta_y)
+void	vertical_look(t_game *game, float delta)
 {
-	static int	limit = RES_Y * 0.5;
+	static int	limit = RES_Y + RES_Y / 2/*  * 0.5 */;
 	int			new;
 
-	new = *y_look + delta_y;
-	if (new > -limit && new < limit)
-		*y_look += delta_y;
-	if (*y_look < -limit)
-		*y_look = -limit;
-	else if (*y_look > limit)
-		*y_look = limit;
+	new = game->player.pitch + delta;
+	// if (new > -limit && new < limit)
+	game->player.pitch += delta;
+	if (game->player.pitch < -limit)
+	{
+		game->player.pitch += 2 * limit;
+		game->player.dir.x = -game->player.dir.x;
+		game->player.dir.y = -game->player.dir.y;
+		game->player.not_inverted = -game->player.not_inverted;
+	}
+	else if (game->player.pitch > limit)
+	{
+		game->player.pitch -= 2 * limit;
+		game->player.dir.x = -game->player.dir.x;
+		game->player.dir.y = -game->player.dir.y;
+		game->player.not_inverted = -game->player.not_inverted;
+	}
 }
 
 void	handle_mouse(t_game *game)
@@ -508,7 +522,7 @@ void	handle_mouse(t_game *game)
 			- game->player.plane.y * sin(MOUSE_SEN * delta.x);
 		game->player.plane.y = old_plane_x * sin(MOUSE_SEN * delta.x)
 			+ game->player.plane.y * cos(MOUSE_SEN * delta.x);
-		vertical_look(&game->player.y_dir, delta.y);
+		vertical_look(game, delta.y);
 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
 	}
 }
@@ -596,13 +610,13 @@ void	check_collision(t_game *game, t_fpoint new_pos, t_fpoint move, float radius
 		game->player.pos.y = new_pos.y;
 }
 
-void	handle_movement(t_game *game, float speed)
+void	handle_movement_xy(t_game *game, float speed)
 {
 	t_fpoint	move;
 	t_fpoint	new_pos;
 	float		radius;
 
-	radius = 0.125;
+	radius = 0.25;
 	move.x = 0;
 	move.y = 0;
 	calculate_movement(game, &move.x, &move.y);
@@ -612,6 +626,22 @@ void	handle_movement(t_game *game, float speed)
 	check_collision(game, new_pos, move, radius);
 }
 
+void	handle_movement_z(t_game *game)
+{
+	if (game->keys[CROUCH])
+	{
+		game->player.height -= 0.05;
+		if (game->player.height < -0.4)
+			game->player.height = -0.4;
+	}
+	if (game->keys[JUMP])
+	{
+		game->player.height += 0.05;
+		if (game->player.height > 0.4)
+			game->player.height = 0.4;
+	}
+}
+
 int	handle_keys(t_game *game)
 {
 	int	run_speed;
@@ -619,7 +649,8 @@ int	handle_keys(t_game *game)
 	run_speed = 1;
 	if (game->keys[RUN] == 1 && game->keys[UP])
 		run_speed = RUN_SPD;
-	handle_movement(game, MOV_SPD * game->frame.time * run_speed);
+	handle_movement_xy(game, MOV_SPD * game->frame.time * run_speed);
+	handle_movement_z(game);
 	handle_rotation(game, ROT_SPD * game->frame.time);
 	return (0);
 }
@@ -710,8 +741,9 @@ int	out_of_bounds(t_point map)
 
 void	render_viewport(t_game *game)
 {
-	int				x;
+	static float	camera_x_factor = 2.0 / RES_X;
 	float			camera_x;
+	int				x;
 	t_point			map;
 	t_fpoint		ray_dir;
 	t_fpoint		side_dist;
@@ -727,16 +759,16 @@ void	render_viewport(t_game *game)
 
 	put_img((t_point){0, 0}, game->img.ceiling.size,
 		&game->img.ceiling, &game->img.win);
-	if (game->player.y_dir > RES_Y / 2)
+	if (game->player.pitch > RES_Y / 2)
 		put_img((t_point){0, 0}, game->img.floor.size,
-		&game->img.floor, &game->img.win);
+			&game->img.floor, &game->img.win);
 	else
-		put_img((t_point){0, RES_Y / 2 - game->player.y_dir}, game->img.floor.size,
+		put_img((t_point){0, RES_Y / 2 - game->player.pitch}, game->img.floor.size,
 			&game->img.floor, &game->img.win);
 	x = 0;
 	while (x < RES_X)
 	{
-		camera_x = 2 * x / (float)RES_X - 1;
+		camera_x = (x * camera_x_factor - 1) * game->player.not_inverted;
 		ray_dir.x = game->player.dir.x * game->player.zoom + game->player.plane.x * camera_x;
 		ray_dir.y = game->player.dir.y * game->player.zoom + game->player.plane.y * camera_x;
 		map.x = (int)game->player.pos.x;
@@ -794,20 +826,26 @@ void	render_viewport(t_game *game)
 		else
 			perp_wall_dist = (side_dist.y - delta_dist.y);
 		line_height = (int)(RES_Y / perp_wall_dist);
-		draw_start = -line_height / 2 + RES_Y / 2 - game->player.y_dir + (line_height * game->player.z);
+		draw_start = -line_height / 2 + RES_Y / 2 - game->player.pitch + (line_height * game->player.height);
 		if (draw_start < 0)
 			draw_start = 0;
-		draw_end = line_height / 2 + RES_Y / 2 - game->player.y_dir + (line_height * game->player.z);
+		draw_end = line_height / 2 + RES_Y / 2 - game->player.pitch + (line_height * game->player.height);
 		if (draw_end >= RES_Y)
 			draw_end = RES_Y;
 		color = 0xAAAAAA;
 		if (side == 1)
 			color = 0x888888;
-		draw_line(&game->img.win,
-			(t_point){x, draw_start},
-			(t_point){x, draw_end}, color);
+		if (game->player.not_inverted == 1)
+			draw_line(&game->img.win,
+				(t_point){x, draw_start},
+				(t_point){x, draw_end}, color);
+		else
+			draw_line(&game->img.win,
+				(t_point){x, draw_end},
+				(t_point){x, draw_start}, color);
 		x++;
 	}
+	printf("pitch: %d\n", game->player.pitch);
 }
 
 void	display_fps_counter(t_game *game)
@@ -872,13 +910,14 @@ void	init_player(t_player *player)
 
 	pos.x = 1;
 	pos.y = 1;
-	player->y_dir = 0;
+	player->pitch = 0;
 	player->pos.x = pos.x + 0.5;
 	player->pos.y = pos.y + 0.5;
 	player->dir.x = 0;
 	player->dir.y = -1;
 	player->zoom = 1.0;
-	player->z = 0.0;
+	player->height = 0.0;
+	player->not_inverted = 1;
 	init_player_plane(player);
 }
 
@@ -930,24 +969,27 @@ int	init_game(t_game *game)
 int mwheel(unsigned int key, int x, int y, t_game *game)
 {
 	static float	step = 0.1;
-	static int		y_dir_limit = RES_Y * 0.5;
+	// static int		pitch_limit = RES_Y * 0.5;
 
 	(void)x;
 	(void)y;
 	if (key == 4 && game->player.zoom < 2)
 	{
 		game->player.zoom += step;
-		game->player.y_dir *= game->player.zoom / (game->player.zoom - step);
+		// if (game->player.pitch != pitch_limit && game->player.pitch != -pitch_limit)
+			game->player.pitch *= game->player.zoom / (game->player.zoom - step);
 	}
 	else if (key == 5 && game->player.zoom > 1)
 	{
 		game->player.zoom -= step;
-		game->player.y_dir *= game->player.zoom / (game->player.zoom + step);
+		// if (game->player.pitch != pitch_limit && game->player.pitch != -pitch_limit)
+			game->player.pitch *= game->player.zoom / (game->player.zoom + step);
 	}
-	if (game->player.y_dir < -y_dir_limit)
-		game->player.y_dir = -y_dir_limit + 1;
-	else if (game->player.y_dir > y_dir_limit)
-		game->player.y_dir = y_dir_limit - 1;
+		// if (game->player.pitch > pitch_limit)
+		// 	game->player.pitch = pitch_limit;
+		// else if (game->player.pitch < -pitch_limit)
+		// 	game->player.pitch = -pitch_limit;
+	// printf("%i\n", pitch_limit);
 	return (0);
 }
 
