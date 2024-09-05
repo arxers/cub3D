@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/05 16:54:47 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/05 22:02:39 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -408,6 +408,10 @@ int	key_release(unsigned int key, t_game *game)
 		game->keys[LEFT] = 0;
 	if (key == XK_d)
 		game->keys[RIGHT] = 0;
+	if (key == XK_r)
+		game->keys[ROT_U] = 0;
+	if (key == XK_f)
+		game->keys[ROT_D] = 0;
 	if (key == XK_Left || key == XK_q)
 		game->keys[ROT_L] = 0;
 	if (key == XK_Right || key == XK_e)
@@ -440,6 +444,10 @@ int	key_press(unsigned int key, t_game *game)
 		game->keys[LEFT] = 1;
 	if (key == XK_d)
 		game->keys[RIGHT] = 1;
+	if (key == XK_r)
+		game->keys[ROT_U] = 1;
+	if (key == XK_f)
+		game->keys[ROT_D] = 1;
 	if (key == XK_Left || key == XK_q)
 		game->keys[ROT_L] = 1;
 	if (key == XK_Right || key == XK_e)
@@ -517,30 +525,7 @@ void	handle_mouse(t_game *game)
 	}
 }
 
-void	handle_rotation(t_game *game, float speed)
-{
-	float			old_dir_x;
-	float			old_plane_x;
 
-	if (game->keys[ROT_L] && game->keys[ROT_R])
-		return ;
-	old_dir_x = game->player.dir.x;
-	old_plane_x = game->player.plane.x;
-	if (game->keys[ROT_L])
-	{
-		game->player.dir.x = game->player.dir.x * cos(-speed) - game->player.dir.y * sin(-speed);
-		game->player.dir.y = old_dir_x * sin(-speed) + game->player.dir.y * cos(-speed);
-		game->player.plane.x = game->player.plane.x * cos(-speed) - game->player.plane.y * sin(-speed);
-		game->player.plane.y = old_plane_x * sin(-speed) + game->player.plane.y * cos(-speed);
-	}
-	else if (game->keys[ROT_R])
-	{
-		game->player.dir.x = game->player.dir.x * cos(speed) - game->player.dir.y * sin(speed);
-		game->player.dir.y = old_dir_x * sin(speed) + game->player.dir.y * cos(speed);
-		game->player.plane.x = game->player.plane.x * cos(speed) - game->player.plane.y * sin(speed);
-		game->player.plane.y = old_plane_x * sin(speed) + game->player.plane.y * cos(speed);
-	}
-}
 
 void	calculate_movement(t_game *game, float *move_x, float *move_y)
 {
@@ -606,6 +591,8 @@ void	handle_movement_xy(t_game *game, float speed)
 	t_fpoint	new_pos;
 	float		radius;
 
+	if (!game->keys[UP] && !game->keys[DOWN] && !game->keys[LEFT] && !game->keys[RIGHT])
+		return ;
 	radius = 0.25;
 	move.x = 0;
 	move.y = 0;
@@ -632,6 +619,47 @@ void	handle_movement_z(t_game *game)
 	}
 }
 
+void	handle_yaw(t_game *game, float speed)
+{
+	float			old_dir_x;
+	float			old_plane_x;
+
+	if (game->keys[ROT_L] && game->keys[ROT_R])
+		return ;
+	old_dir_x = game->player.dir.x;
+	old_plane_x = game->player.plane.x;
+	if (game->keys[ROT_L])
+	{
+		game->player.dir.x = game->player.dir.x * cos(-speed) - game->player.dir.y * sin(-speed);
+		game->player.dir.y = old_dir_x * sin(-speed) + game->player.dir.y * cos(-speed);
+		game->player.plane.x = game->player.plane.x * cos(-speed) - game->player.plane.y * sin(-speed);
+		game->player.plane.y = old_plane_x * sin(-speed) + game->player.plane.y * cos(-speed);
+	}
+	else if (game->keys[ROT_R])
+	{
+		game->player.dir.x = game->player.dir.x * cos(speed) - game->player.dir.y * sin(speed);
+		game->player.dir.y = old_dir_x * sin(speed) + game->player.dir.y * cos(speed);
+		game->player.plane.x = game->player.plane.x * cos(speed) - game->player.plane.y * sin(speed);
+		game->player.plane.y = old_plane_x * sin(speed) + game->player.plane.y * cos(speed);
+	}
+}
+
+void	handle_pitch(t_game *game)
+{
+	static int	limit = RES_Y / 2;
+
+	if (game->keys[ROT_U] && game->keys[ROT_D])
+		return ;
+	if (game->keys[ROT_U])
+		game->player.pitch -= game->frame.time;
+	else if (game->keys[ROT_D])
+		game->player.pitch += game->frame.time;
+	if (game->player.pitch < -limit)
+		game->player.pitch = -limit;
+	else if (game->player.pitch > limit)
+		game->player.pitch = limit;
+}
+
 int	handle_keys(t_game *game)
 {
 	int	run_speed;
@@ -641,7 +669,8 @@ int	handle_keys(t_game *game)
 		run_speed = RUN_SPD;
 	handle_movement_xy(game, MOV_SPD * game->frame.time * run_speed);
 	handle_movement_z(game);
-	handle_rotation(game, ROT_SPD * game->frame.time);
+	handle_pitch(game);
+	handle_yaw(game, ROT_SPD * game->frame.time);
 	return (0);
 }
 
@@ -830,7 +859,6 @@ void	render_viewport(t_game *game)
 			(t_point){x, draw_end}, color);
 		x++;
 	}
-	printf("pitch: %d\n", game->player.pitch);
 }
 
 void	display_fps_counter(t_game *game)

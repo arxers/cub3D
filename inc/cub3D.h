@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/05 11:55:56 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/05 21:13:26 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,8 @@ typedef enum e_keystate
 	DOWN,
 	LEFT,
 	RIGHT,
+	ROT_U,
+	ROT_D,
 	ROT_L,
 	ROT_R,
 	MAP,
