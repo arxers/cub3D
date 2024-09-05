@@ -825,14 +825,9 @@ void	render_viewport(t_game *game)
 		color = 0xAAAAAA;
 		if (side == 1)
 			color = 0x888888;
-		if (game->player.not_inverted == 1)
-			draw_line(&game->img.win,
-				(t_point){x, draw_start},
-				(t_point){x, draw_end}, color);
-		else
-			draw_line(&game->img.win,
-				(t_point){x, draw_end},
-				(t_point){x, draw_start}, color);
+		draw_line(&game->img.win,
+			(t_point){x, draw_start},
+			(t_point){x, draw_end}, color);
 		x++;
 	}
 	printf("pitch: %d\n", game->player.pitch);
@@ -907,7 +902,6 @@ void	init_player(t_player *player)
 	player->dir.y = -1;
 	player->zoom = 1.0;
 	player->height = 0.0;
-	player->not_inverted = 1;
 	init_player_plane(player);
 }
 

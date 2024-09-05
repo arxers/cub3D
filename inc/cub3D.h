@@ -114,7 +114,6 @@ typedef struct s_player
 	float			zoom;
 	float			height;
 	int				pitch;
-	int				not_inverted;
 }					t_player;
 
 typedef struct s_frame_data
