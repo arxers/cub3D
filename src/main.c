@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/09 18:18:06 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/09 21:49:39 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,7 @@ int	load_xpm(void *mlx, char *path, t_img *img)
 int	load_xpms(t_game *game)
 {
 	load_xpm(game->mlx_ptr, "textures/shift_tab.xpm", &game->img.misc[0]);
+	load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->img.wall[0]);
 	return (0);
 }
 
@@ -303,6 +304,7 @@ void	ft_destroy_image(void *mlx_ptr, void **img)
 
 int	cleanup(t_game *game, unsigned char status, char *msg)
 {
+	ft_destroy_image(game->mlx_ptr, &game->img.wall[0].img);
 	ft_destroy_image(game->mlx_ptr, &game->img.misc[0].img);
 	ft_destroy_image(game->mlx_ptr, &game->img.win.img);
 	ft_destroy_image(game->mlx_ptr, &game->img.map.img);
@@ -788,7 +790,6 @@ void	render_viewport(t_game *game)
 	double			line_height;
 	int				draw_start;
 	int				draw_end;
-	unsigned int	color;
 
 	put_img((t_point){0, 0}, game->img.ceiling.size,
 		&game->img.ceiling, &game->img.win);
@@ -865,12 +866,31 @@ void	render_viewport(t_game *game)
 		draw_end = line_height / 2 + RES_Y / 2 - game->player.pitch + (line_height * game->player.height);
 		if (draw_end >= RES_Y)
 			draw_end = RES_Y;
-		color = 0xAAAAAA;
-		if (side == 1)
-			color = 0x888888;
-		draw_line(&game->img.win,
-			(t_point){x, draw_start},
-			(t_point){x, draw_end}, color);
+		float wall_x;
+		if (side == 0)
+			wall_x = game->player.pos.y + perp_wall_dist * ray_dir.y;
+		else
+			wall_x = game->player.pos.x + perp_wall_dist * ray_dir.x;
+		wall_x -= floorf(wall_x);
+		t_point	tex;
+		tex.x = (int)(wall_x * WALL);
+		if (side == VERTICAL && ray_dir.x > 0)
+			tex.x = WALL - tex.x - 1;
+		if (side == HORIZONTAL && ray_dir.y < 0)
+			tex.x = WALL - tex.x - 1;
+		float	tex_step;
+		tex_step = 1.0 * WALL / line_height;
+		int	y;
+		y = draw_start;
+		float	tex_pos;
+		tex_pos = (draw_start + game->player.pitch - (line_height * game->player.height) - RES_Y / 2 + line_height / 2) * tex_step;
+		while (y < draw_end)
+		{
+			tex.y = (int)tex_pos & (WALL - 1);
+			tex_pos += tex_step;
+			set_pixel(&game->img.win, x, y, get_pixel(&game->img.wall[0], tex.x, tex.y));
+			y++;
+		}
 		x++;
 	}
 }
@@ -991,7 +1011,7 @@ int	init_game(t_game *game)
 	if (init_img(game->mlx_ptr, &game->img.win, RES_X, RES_Y) == -1)
 		return (-1);
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
-		|| init_bg(game, 0x171B22, 0x3B3E44) == -1)
+		|| init_bg(game, BLACK, 0x3B3E44) == -1)
 		return (-1);
 	init_framedata(&game->frame);
 	init_keystate(game);
