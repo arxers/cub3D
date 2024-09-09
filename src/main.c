@@ -284,7 +284,7 @@ void	draw_map_player(t_img *img, t_player p, t_point origin)
 	draw_circle(img, pointer_pos, dir_radius, WHITE);
 }
 
-
+// #############################################################################
 
 /* 
 if .cub extension, return 0
@@ -305,15 +305,49 @@ int	is_cub_ext(char *s)
 		return (1);
 }
 
+#define MAP_HORI 25
+#define MAP_VERT 15
+
+/*
+If ft_strchr returns NULL, 
+means at least one char in the arg, is an INVALID char, then return 1.
+
+Else return 0.
+*/
+int	is_line_chars_valid(char *s)
+{
+	int	i;
+	
+	i = 0;
+	while (i < MAP_HORI)
+	{
+		if (ft_strchr("01NSEW", s[i]) == NULL)
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
 /*
 jsu to do list:
 
-NOTE. av[1] is test.cub
-X, if av[1] ends in .cub
-X, if av[1] can be opened, and read, as a file
+NOTE. 
+av[1] is test.cub
+treat map as a 2D array, rows of char arrays
 
-NOTE. treat map as a 2D array, rows of char arrays
-0, map must only consist of 6 possible chars: 0, 1, N, S, E, W
+X, is_cub_ext()
+X, is_map_readable()
+X, is_map_chars_valid()
+	X, is_line_chars_valid()
+0, is_only_one_player()
+
+map must only consist of 6 possible chars: 0, 1, N, S, E, W
+just open map.cub, and read line by line
+NOTE. No need to malloc mem for map, for now
+
+revisit validated so_long code, reuse/adapt, instead od rewrite from scratch
+
+0, determine MAP_HORI and MAP_VERT, aka max width and max_height
 
 */
 
@@ -327,36 +361,86 @@ int	is_map_readable(char *mapfile)
 	return (0);
 }
 
-#define MAP_HORI 24
-#define MAP_VERT 24
 
-/* 
+
+/*
 if char is NOT found in "valid char str", return 1
 else return 0
 */
-/*
-int	only_valid_chars(char map)
+int	is_map_chars_valid(char *mapfile)
 {
-	int i;
-	int	j;
+	int		map_fd;
+	char	*line;
 	
-	i = 0;
-	while (i < MAP_VERT)
+	map_fd = open(mapfile, O_RDONLY);
+	if (map_fd == -1)
+		return (1);
+	line = get_next_line(map_fd);	
+	while (line)
 	{
-		j = 0;
-		while(j < MAP_HORI)
+		if (is_line_chars_valid(line)) // todo, WIDTH is hardcoded for now
 		{
-			if (ft_strchr("01NSEW", map[i][j]) == NULL)
-				return (1);
-			j++;
+			// flush_gnl_static_buffer(line, map_fd); // todo, check jaslim gnl implementation!
+			// skipping flushing, may lead to mem leaks!
+			return (1);
 		}
-		i++;
+		free(line);
+		line = get_next_line(map_fd);
 	}
+	close(map_fd);
 	return (0);
 }
+
+void	count_player_per_line(char *s, int *nsew_count)
+{
+	int	i;
+	
+	i = 0;
+	while (i < MAP_HORI)
+	{
+		if (s[i] == 'N')
+			*nsew_count += 1;
+		else if (s[i] == 'S')
+			*nsew_count += 1;
+		else if (s[i] == 'E')
+			*nsew_count += 1;
+		else if (s[i] == 'W')
+			*nsew_count += 1;
+		i++;
+	}	
+}
+
+/*
+counts the number of 'N', 'S', 'E', and 'W's in the map.
+if sum of counts == 1, return 0, ie. there is only one player in the map
+else return 1, error!
+
 */
+int	is_only_one_player(char *mapfile)
+{
+	int		map_fd;
+	char	*line;
+	int		nsew_count;
 
+	map_fd = open(mapfile, O_RDONLY);
+	if (map_fd == -1)
+		return (1);
+	line = get_next_line(map_fd);
+	nsew_count = 0;
+	while (line)
+	{
+		count_player_per_line(line, &nsew_count);
+		free(line);
+		line = get_next_line(map_fd);
+	}
+	close(map_fd);
+	if (nsew_count == 1)
+		return (0);
+	else
+		return (1);
+}
 
+// wrapper function, that consolidates all map validation steps
 void	validate_input(int ac, char **av)
 {
 	if (ac != 2)
@@ -370,24 +454,43 @@ void	validate_input(int ac, char **av)
 		ft_putstr_fd("cub3D: arg does not end in .cub\n", 2);
 		exit(1);
 	}
+/*
+test cases
+./cub3D ./maps/nosuchmap.cub		// FAIL, and error out
+./cub3D ./maps/valid_mapchars.cub	// SUCCESS 
+*/
 	if (is_map_readable(av[1]))
 	{
 		ft_putstr_fd("cub3D: cannot read map\n", 2);
 		exit (1);		
 	}
-
-
-/*	
-	if (only_valid_chars(map2))
-	{
-		ft_putstr_fd("cub3D: invalid chars in map\n", 2);
-		exit(1);
-	}
+/*
+test cases
+./cub3D ./maps/invalid_mapchars.cub	// FAIL, and error out
+./cub3D ./maps/valid_mapchars.cub	// SUCCESS 
 */	
-	// if (open(av[1]) == -1) //check if able to open
-	// 	;remove (void)av when this check is done
-	(void)av;
+	
+	if (is_map_chars_valid(av[1]))
+	{
+		ft_putstr_fd("cub3D: invalid char(s) in <map>.cub\n", 2);
+		exit (1);		
+	}
+/*
+test cases
+./cub3D ./maps/zero_player_map.cub	// FAIL, and error out
+./cub3D ./maps/two_player_map.cub	// FAIL, and error out
+./cub3D ./maps/many_player_map.cub	// FAIL, and error out
+./cub3D ./maps/valid_mapchars.cub	// SUCCESS
+*/
+	if (is_only_one_player(av[1]))
+	{
+		ft_putstr_fd("cub3D: more/less than one player in <map>.cub\n", 2);
+		exit (1);		
+	}
 }
+
+
+// #############################################################################
 
 void	ft_destroy_image(void *mlx_ptr, void **img)
 {
@@ -1012,7 +1115,7 @@ int	main(int ac, char **av)
 	t_game	game;
 
 	validate_input(ac, av);
-	printf("Here\n");
+	printf("validate input reach here\n");
 	
 	if (init_game(&game) == -1)
 		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
