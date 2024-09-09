@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/06 06:08:26 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/09 18:18:06 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -391,10 +391,49 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 	return (0);
 }
 
-int	key_esc(t_game *game)
+int	exit_game(t_game *game)
 {
 	cleanup(game, 0, "exit\n");
 	return (0);
+}
+
+void	toggle_mouse(t_game *game)
+{
+	static t_point	center = {RES_X / 2, RES_Y / 2};
+
+	if (game->keys[MOUSE] == 0)
+		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
+	game->keys[MOUSE] = 1 - game->keys[MOUSE];
+}
+
+void	pause_game(t_game *game)
+{
+	static t_point	center = {RES_X / 2, RES_Y / 2};
+
+	if (game->keys[RUN])
+		game->keys[PAUSE] = 1 - game->keys[PAUSE];
+	if (!game->keys[PAUSE] && game->keys[MOUSE])
+		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
+}
+
+void	change_target_fps(unsigned int key, t_game *game)
+{
+	if (key == XK_bracketleft)
+	{
+		if (game->frame.fps_target > 30)
+		{
+			game->frame.fps_target -= 30;
+			game->frame.time = 1000.0 / game->frame.fps_target;
+		}
+	}
+	else if (key == XK_bracketright)
+	{
+		if (game->frame.fps_target < 90)
+		{
+			game->frame.fps_target += 30;
+			game->frame.time = 1000.0 / game->frame.fps_target;
+		}
+	}
 }
 
 int	key_release(unsigned int key, t_game *game)
@@ -424,15 +463,6 @@ int	key_release(unsigned int key, t_game *game)
 	return (0);
 }
 
-void	pause_game(t_game *game)
-{
-	static t_point	center = {RES_X / 2, RES_Y / 2};
-
-	if (game->keys[MOUSE] == 1)
-		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
-	game->keys[MOUSE] = -game->keys[MOUSE];
-}
-
 int	key_press(unsigned int key, t_game *game)
 {
 	if (key == XK_Up || key == XK_w)
@@ -453,35 +483,19 @@ int	key_press(unsigned int key, t_game *game)
 		game->keys[ROT_R] = 1;
 	if (key == XK_Shift_L)
 		game->keys[RUN] = 1;
-	if (key == XK_Tab)
-		if (game->keys[RUN] == 1)
-			game->keys[PAUSE] = 1 - game->keys[PAUSE];
 	if (key == XK_Control_L)
 		game->keys[CROUCH] = 1;
 	if (key == XK_space)
 		game->keys[JUMP] = 1;
-	if (key == XK_Escape)
-		key_esc(game);
-	if (key == XK_p)
+	if (key == XK_Tab)
 		pause_game(game);
+	if (key == XK_Escape)
+		exit_game(game);
+	if (key == XK_p)
+		toggle_mouse(game);
 	if (key == XK_m)
 		game->keys[MAP] = -game->keys[MAP];
-	if (key == XK_bracketleft)
-	{
-		if (game->frame.fps_target > 30)
-		{
-			game->frame.fps_target -= 30;
-			game->frame.time = 1000.0 / game->frame.fps_target;
-		}
-	}
-	if (key == XK_bracketright)
-	{
-		if (game->frame.fps_target < 90)
-		{
-			game->frame.fps_target += 30;
-			game->frame.time = 1000.0 / game->frame.fps_target;
-		}
-	}
+	change_target_fps(key, game);
 	return (0);
 }
 
@@ -526,8 +540,6 @@ void	handle_mouse(t_game *game)
 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
 	}
 }
-
-
 
 void	calculate_movement(t_game *game, float *move_x, float *move_y)
 {
@@ -687,7 +699,7 @@ void	init_keystate(t_game *game)
 		i++;
 	}
 	game->keys[MAP] = 1;
-	game->keys[MOUSE] = -1;
+	game->keys[MOUSE] = 1;
 }
 
 int	a_second_has_passed(void)
@@ -879,11 +891,11 @@ void	display_fps_counter(t_game *game)
 
 int	game_loop(t_game *game)
 {
-	if (game->keys[MOUSE] != 1 && !game->keys[PAUSE])
+	if (game->keys[MOUSE] && !game->keys[PAUSE])
 		handle_mouse(game);
 	if (should_render_frame(game))
 	{
-		if (game->keys[PAUSE] == 1)
+		if (game->keys[PAUSE])
 		{
 			put_img((t_point){0, 0}, game->img.misc[0].size, &game->img.misc[0], &game->img.win);
 			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->img.win.img, 0, 0);
@@ -897,7 +909,7 @@ int	game_loop(t_game *game)
 			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
 				game->img.win.img, 0, 0);
 		}
-		if (game->keys[MOUSE] == 1)
+		if (game->keys[MOUSE] == 0)
 			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 26, WHITE,
 				"MOUSE DISABLED");
 		display_fps_counter(game);
@@ -1025,7 +1037,7 @@ int	main(int ac, char **av)
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win_ptr, KeyRelease, KeyReleaseMask, &key_release, &game);
 	mlx_hook(game.win_ptr, ButtonPress, ButtonPressMask, &mwheel, &game);
-	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &key_esc, &game);
+	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &exit_game, &game);
 	mlx_loop_hook(game.mlx_ptr, &game_loop, &game);
 	mlx_loop(game.mlx_ptr);
 	return (0);
