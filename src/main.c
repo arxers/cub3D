@@ -478,9 +478,7 @@ test cases
 /*
 test cases
 ./cub3D ./maps/zero_player_map.cub	// FAIL, and error out
-./cub3D ./maps/two_player_map.cub	// FAIL, and error out
-./cub3D ./maps/many_player_map.cub	// FAIL, and error out
-./cub3D ./maps/valid_mapchars.cub	// SUCCESS
+./cub3D ./maps/four_player_map.cub	// FAIL, and error out
 */
 	if (is_only_one_player(av[1]))
 	{
