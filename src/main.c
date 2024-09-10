@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/10 18:05:21 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/10 19:53:20 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,9 @@ int	load_xpms(t_game *game)
 {
 	load_xpm(game->mlx_ptr, "textures/shift_tab.xpm", &game->img.misc[0]);
 	load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->img.wall[0]);
+	load_xpm(game->mlx_ptr, "textures/wall/wall2.xpm", &game->img.wall[1]);
+	load_xpm(game->mlx_ptr, "textures/wall/wall3.xpm", &game->img.wall[2]);
+	load_xpm(game->mlx_ptr, "textures/wall/wall4.xpm", &game->img.wall[3]);
 	return (0);
 }
 
@@ -799,14 +802,17 @@ float	get_light_intensity(float dist)
 	float	intensity;
 	float	min;
 	float	max;
+	float	ambient;
 
-	min = 0.5;
-	max = 10.0;
+	min = 0.1;
+	max = 5.0;
+	ambient = 0.3;
 	intensity = (max - dist) / (max - min);
 	if (intensity < 0)
 		intensity = 0;
 	if (intensity > 1)
 		intensity = 1;
+	intensity = intensity * (1 - ambient) + ambient;
 	return (intensity);
 }
 
@@ -913,10 +919,28 @@ void	render_viewport(t_game *game)
 			wall_x = game->player.pos.x + perp_wall_dist * ray_dir.x;
 		wall_x -= floorf(wall_x);
 		tex.x = (int)(wall_x * WALL);
-		if (side == VERTICAL && ray_dir.x > 0)
-			tex.x = WALL - tex.x - 1;
-		if (side == HORIZONTAL && ray_dir.y < 0)
-			tex.x = WALL - tex.x - 1;
+		t_img	*wall_tex;
+		// wall_tex = &game->img.wall[0];
+		if (side == VERTICAL)
+		{
+			if (ray_dir.x > 0)
+				wall_tex = &game->img.wall[EAST];
+			else
+			{
+				wall_tex = &game->img.wall[WEST];
+				tex.x = WALL - tex.x - 1;
+			}
+		}
+		else if (side == HORIZONTAL)
+		{
+			if (ray_dir.y < 0)
+				wall_tex = &game->img.wall[NORTH];
+			else
+			{
+				wall_tex = &game->img.wall[SOUTH];
+				tex.x = WALL - tex.x - 1;
+			}
+		}
 		tex_step = 1.0 * WALL / line_height;
 		y = draw_start;
 		tex_pos = (draw_start + game->player.pitch - (line_height * game->player.height) - RES_Y / 2 + line_height / 2) * tex_step;
@@ -924,7 +948,7 @@ void	render_viewport(t_game *game)
 		while (y < draw_end)
 		{
 			tex.y = (int)tex_pos & (WALL - 1);
-			unsigned int	color = get_pixel(&game->img.wall[0], tex.x, tex.y);
+			unsigned int	color = get_pixel(wall_tex, tex.x, tex.y);
 			color = multiply_color(color, intensity);
 			tex_pos += tex_step;
 			set_pixel(&game->img.win, x, y, color);
@@ -1002,8 +1026,8 @@ void	init_player(t_player *player)
 {
 	t_fpoint	pos;
 
-	pos.x = 1;
-	pos.y = 1;
+	pos.x = 8;
+	pos.y = 6;
 	player->pitch = 0;
 	player->pos.x = pos.x + 0.5;
 	player->pos.y = pos.y + 0.5;
