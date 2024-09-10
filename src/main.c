@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/09 21:49:39 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/10 18:05:21 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,20 +265,21 @@ void draw_triangle(t_img *img, t_triangle t, unsigned int color)
 
 void	draw_map_player(t_img *img, t_player p, t_point origin)
 {
-	static float	scale = (float)MAP_CELL_SIZE;
 	t_point			player_pos;
 	t_point			pointer_pos;
 	float			dir_radius;
 	float			dir_dist;
 
-	player_pos.x = (int)((p.pos.x * scale) + origin.x);
-	player_pos.y = (int)((p.pos.y * scale) + origin.y);
+	player_pos.x = (int)((p.pos.x * (float)MAP_CELL_SIZE) + origin.x);
+	player_pos.y = (int)((p.pos.y * (float)MAP_CELL_SIZE) + origin.y);
 	draw_circle(img, player_pos, MAP_CELL_SIZE * 0.15, WHITE);
 	draw_circle_outline(img, player_pos, MAP_CELL_SIZE * 0.25, WHITE);
 	dir_radius = MAP_CELL_SIZE * 0.15;
 	dir_dist = 0.25;
-	pointer_pos.x = (int)((p.pos.x + (p.dir.x * dir_dist * p.zoom)) * scale) + origin.x;
-	pointer_pos.y = (int)((p.pos.y + (p.dir.y * dir_dist * p.zoom)) * scale) + origin.y;
+	pointer_pos.x = (int)((p.pos.x + (p.dir.x * dir_dist * p.zoom))
+			* (float)MAP_CELL_SIZE) + origin.x;
+	pointer_pos.y = (int)((p.pos.y + (p.dir.y * dir_dist * p.zoom))
+			* (float)MAP_CELL_SIZE) + origin.y;
 	draw_circle(img, pointer_pos, dir_radius, WHITE);
 }
 
@@ -401,8 +402,10 @@ int	exit_game(t_game *game)
 
 void	toggle_mouse(t_game *game)
 {
-	static t_point	center = {RES_X / 2, RES_Y / 2};
+	t_point	center;
 
+	center.x = RES_X / 2;
+	center.y = RES_Y / 2;
 	if (game->keys[MOUSE] == 0)
 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
 	game->keys[MOUSE] = 1 - game->keys[MOUSE];
@@ -410,8 +413,10 @@ void	toggle_mouse(t_game *game)
 
 void	pause_game(t_game *game)
 {
-	static t_point	center = {RES_X / 2, RES_Y / 2};
+	t_point	center;
 
+	center.x = RES_X / 2;
+	center.y = RES_Y / 2;
 	if (game->keys[RUN])
 		game->keys[PAUSE] = 1 - game->keys[PAUSE];
 	if (!game->keys[PAUSE] && game->keys[MOUSE])
@@ -624,8 +629,8 @@ void	handle_movement_z(t_game *game)
 	if (game->keys[CROUCH])
 	{
 		game->player.height -= 0.05;
-		if (game->player.height < -0.4)
-			game->player.height = -0.4;
+		if (game->player.height < -0.2)
+			game->player.height = -0.2;
 	}
 	if (game->keys[JUMP])
 	{
@@ -774,6 +779,37 @@ int	out_of_bounds(t_point map)
 	return (0);
 }
 
+unsigned int	multiply_color(unsigned int color, float factor)
+{
+	unsigned int	r;
+	unsigned int	g;
+	unsigned int	b;
+
+	r = (color >> 16) & 0xFF;
+	g = (color >> 8) & 0xFF;
+	b = (color >> 0) & 0xFF;
+	r *= factor;
+	g *= factor;
+	b *= factor;
+	return ((r << 16) | (g << 8) | b);
+}
+
+float	get_light_intensity(float dist)
+{
+	float	intensity;
+	float	min;
+	float	max;
+
+	min = 0.5;
+	max = 10.0;
+	intensity = (max - dist) / (max - min);
+	if (intensity < 0)
+		intensity = 0;
+	if (intensity > 1)
+		intensity = 1;
+	return (intensity);
+}
+
 void	render_viewport(t_game *game)
 {
 	static float	camera_x_factor = 2.0 / RES_X;
@@ -867,28 +903,31 @@ void	render_viewport(t_game *game)
 		if (draw_end >= RES_Y)
 			draw_end = RES_Y;
 		float wall_x;
+		t_point	tex;
+		float	tex_step;
+		float	tex_pos;
+		int	y;
 		if (side == 0)
 			wall_x = game->player.pos.y + perp_wall_dist * ray_dir.y;
 		else
 			wall_x = game->player.pos.x + perp_wall_dist * ray_dir.x;
 		wall_x -= floorf(wall_x);
-		t_point	tex;
 		tex.x = (int)(wall_x * WALL);
 		if (side == VERTICAL && ray_dir.x > 0)
 			tex.x = WALL - tex.x - 1;
 		if (side == HORIZONTAL && ray_dir.y < 0)
 			tex.x = WALL - tex.x - 1;
-		float	tex_step;
 		tex_step = 1.0 * WALL / line_height;
-		int	y;
 		y = draw_start;
-		float	tex_pos;
 		tex_pos = (draw_start + game->player.pitch - (line_height * game->player.height) - RES_Y / 2 + line_height / 2) * tex_step;
+		float intensity = get_light_intensity(perp_wall_dist * game->player.zoom);
 		while (y < draw_end)
 		{
 			tex.y = (int)tex_pos & (WALL - 1);
+			unsigned int	color = get_pixel(&game->img.wall[0], tex.x, tex.y);
+			color = multiply_color(color, intensity);
 			tex_pos += tex_step;
-			set_pixel(&game->img.win, x, y, get_pixel(&game->img.wall[0], tex.x, tex.y));
+			set_pixel(&game->img.win, x, y, color);
 			y++;
 		}
 		x++;
@@ -1011,7 +1050,7 @@ int	init_game(t_game *game)
 	if (init_img(game->mlx_ptr, &game->img.win, RES_X, RES_Y) == -1)
 		return (-1);
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
-		|| init_bg(game, BLACK, 0x3B3E44) == -1)
+		|| init_bg(game, BLACK, BLACK) == -1)
 		return (-1);
 	init_framedata(&game->frame);
 	init_keystate(game);
