@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/10 21:19:59 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/10 23:49:47 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -414,7 +414,7 @@ void	toggle_mouse(t_game *game)
 	center.y = RES_Y / 2;
 	if (game->keys[MOUSE] == 0)
 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
-	game->keys[MOUSE] = 1 - game->keys[MOUSE];
+	game->keys[MOUSE] = !game->keys[MOUSE];
 }
 
 void	pause_game(t_game *game)
@@ -424,7 +424,7 @@ void	pause_game(t_game *game)
 	center.x = RES_X / 2;
 	center.y = RES_Y / 2;
 	if (game->keys[RUN])
-		game->keys[PAUSE] = 1 - game->keys[PAUSE];
+		game->keys[PAUSE] = !game->keys[PAUSE];
 	if (!game->keys[PAUSE] && game->keys[MOUSE])
 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
 }
@@ -917,7 +917,6 @@ void	render_viewport(t_game *game)
 		wall_x -= floorf(wall_x);
 		tex.x = (int)(wall_x * WALL);
 		t_img	*wall_tex;
-		// wall_tex = &game->img.wall[0];
 		if (side == VERTICAL)
 		{
 			if (ray_dir.x > 0)
@@ -941,7 +940,8 @@ void	render_viewport(t_game *game)
 		tex_step = 1.0 * WALL / line_height;
 		y = draw_start;
 		tex_pos = (draw_start + game->player.pitch - (line_height * game->player.height) - RES_Y / 2 + line_height / 2) * tex_step;
-		float intensity = get_light_intensity(&game->light, perp_wall_dist * game->player.zoom);
+		float intensity;
+		intensity = get_light_intensity(&game->light, perp_wall_dist * game->player.zoom);
 		while (y < draw_end)
 		{
 			tex.y = (int)tex_pos & (WALL - 1);
@@ -988,6 +988,7 @@ int	game_loop(t_game *game)
 				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
 				game->img.win.img, 0, 0);
+			// update_lighting()
 		}
 		if (game->keys[MOUSE] == 0)
 			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 26, WHITE,
@@ -1071,7 +1072,7 @@ int	init_game(t_game *game)
 	if (init_img(game->mlx_ptr, &game->img.win, RES_X, RES_Y) == -1)
 		return (-1);
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
-		|| init_bg(game, BLACK, BLACK) == -1)
+		|| init_bg(game, BLACK, 0x222222) == -1)
 		return (-1);
 	init_framedata(&game->frame);
 	init_keystate(game);
