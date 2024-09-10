@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/10 19:50:56 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/10 20:53:12 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,6 +142,13 @@ typedef struct s_map
 	t_point			offset;
 }					t_map;
 
+typedef struct s_light
+{
+	float			ambient;
+	float			min;
+	float			max;
+}					t_light;
+
 typedef struct s_game
 {
 	char			keys[32];
@@ -150,6 +157,7 @@ typedef struct s_game
 	void			*mlx_ptr;
 	void			*win_ptr;
 	t_player		player;
+	t_light			light;
 	t_map			map;
 }					t_game;
 

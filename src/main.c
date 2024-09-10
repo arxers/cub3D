@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/10 19:53:20 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/10 21:19:59 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,12 @@ int	g_map[24][24] =
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1},
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -309,6 +309,9 @@ void	ft_destroy_image(void *mlx_ptr, void **img)
 int	cleanup(t_game *game, unsigned char status, char *msg)
 {
 	ft_destroy_image(game->mlx_ptr, &game->img.wall[0].img);
+	ft_destroy_image(game->mlx_ptr, &game->img.wall[1].img);
+	ft_destroy_image(game->mlx_ptr, &game->img.wall[2].img);
+	ft_destroy_image(game->mlx_ptr, &game->img.wall[3].img);
 	ft_destroy_image(game->mlx_ptr, &game->img.misc[0].img);
 	ft_destroy_image(game->mlx_ptr, &game->img.win.img);
 	ft_destroy_image(game->mlx_ptr, &game->img.map.img);
@@ -797,22 +800,16 @@ unsigned int	multiply_color(unsigned int color, float factor)
 	return ((r << 16) | (g << 8) | b);
 }
 
-float	get_light_intensity(float dist)
+float	get_light_intensity(t_light *light, float dist)
 {
 	float	intensity;
-	float	min;
-	float	max;
-	float	ambient;
 
-	min = 0.1;
-	max = 5.0;
-	ambient = 0.3;
-	intensity = (max - dist) / (max - min);
+	intensity = (light->max - dist) / (light->max - light->min);
 	if (intensity < 0)
 		intensity = 0;
 	if (intensity > 1)
 		intensity = 1;
-	intensity = intensity * (1 - ambient) + ambient;
+	intensity = intensity * (1 - light->ambient) + light->ambient;
 	return (intensity);
 }
 
@@ -944,7 +941,7 @@ void	render_viewport(t_game *game)
 		tex_step = 1.0 * WALL / line_height;
 		y = draw_start;
 		tex_pos = (draw_start + game->player.pitch - (line_height * game->player.height) - RES_Y / 2 + line_height / 2) * tex_step;
-		float intensity = get_light_intensity(perp_wall_dist * game->player.zoom);
+		float intensity = get_light_intensity(&game->light, perp_wall_dist * game->player.zoom);
 		while (y < draw_end)
 		{
 			tex.y = (int)tex_pos & (WALL - 1);
@@ -1080,6 +1077,9 @@ int	init_game(t_game *game)
 	init_keystate(game);
 	init_player(&game->player);
 	load_xpms(game);
+	game->light.min = 1;
+	game->light.max = 5;
+	game->light.ambient = 0.3;
 	mlx_mouse_move(game->mlx_ptr, game->win_ptr, RES_X / 2, RES_Y / 2);
 	return (0);
 }
@@ -1102,11 +1102,11 @@ int mwheel(unsigned int key, int x, int y, t_game *game)
 		game->player.zoom -= step;
 		if (game->player.pitch != pitch_limit && game->player.pitch != -pitch_limit)
 			game->player.pitch *= game->player.zoom / (game->player.zoom + step);
-	}
 		if (game->player.pitch > pitch_limit)
 			game->player.pitch = pitch_limit;
 		else if (game->player.pitch < -pitch_limit)
 			game->player.pitch = -pitch_limit;
+	}
 	return (0);
 }
 
