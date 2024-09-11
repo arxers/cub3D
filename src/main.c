@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/10 23:49:47 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/12 05:27:35 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,16 +77,39 @@ unsigned int	get_pixel(t_img *img, int x, int y)
 	return (*(unsigned int *)src);
 }
 
-void	put_img(t_point offset, t_point size, t_img *src, t_img *dst)
+void	put_img_scale(t_point offset, t_img *src, t_img *dst, t_fpoint scale)
+{
+	t_fpoint	src_pos;
+	t_point		dst_pos;
+
+	dst_pos.y = 0;
+	while (dst_pos.y < dst->size.y)
+	{
+		dst_pos.x = 0;
+		while (dst_pos.x < dst->size.x)
+		{
+			src_pos.x = (dst_pos.x - offset.x) / scale.x;
+			src_pos.y = (dst_pos.y - offset.y) / scale.y;
+			if (src_pos.x >= 0 && src_pos.x < src->size.x &&
+				src_pos.y >= 0 && src_pos.y < src->size.y)
+				set_pixel(dst, dst_pos.x, dst_pos.y,
+					get_pixel(src, src_pos.x, src_pos.y));
+			dst_pos.x++;
+		}
+		dst_pos.y++;
+	}
+}
+
+void	put_img(t_point offset, t_img *src, t_img *dst)
 {
 	t_point	src_pos;
 	t_point	dst_pos;
 
 	src_pos.y = 0;
-	while (src_pos.y < size.y)
+	while (src_pos.y < src->size.y)
 	{
 		src_pos.x = 0;
-		while (src_pos.x < size.x)
+		while (src_pos.x < src->size.x)
 		{
 			dst_pos.x = src_pos.x + offset.x;
 			dst_pos.y = src_pos.y + offset.y;
@@ -113,6 +136,7 @@ int	load_xpm(void *mlx, char *path, t_img *img)
 int	load_xpms(t_game *game)
 {
 	load_xpm(game->mlx_ptr, "textures/shift_tab.xpm", &game->img.misc[0]);
+	load_xpm(game->mlx_ptr, "textures/bg_dither.xpm", &game->img.misc[1]);
 	load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->img.wall[0]);
 	load_xpm(game->mlx_ptr, "textures/wall/wall2.xpm", &game->img.wall[1]);
 	load_xpm(game->mlx_ptr, "textures/wall/wall3.xpm", &game->img.wall[2]);
@@ -706,7 +730,7 @@ void	init_keystate(t_game *game)
 	int	i;
 
 	i = 0;
-	while (i <= (int) sizeof(game->keys))
+	while (i < (int)(sizeof(game->keys) / sizeof(*game->keys)))
 	{
 		game->keys[i] = 0;
 		i++;
@@ -770,11 +794,10 @@ void	draw_minimap(t_game *game)
 	draw_map_tiles(&game->img.map);
 	draw_map_player(&game->img.map, game->player,
 		(t_point){0, 0});
-	put_img((t_point){0, 0,}, game->img.map_mask.size, &game->img.map_bg,
-		&game->img.map_mask);
-	put_img((t_point){-player_pos.x + game->img.map_mask.size.x / 2, -player_pos.y + game->img.map_mask.size.y / 2}, game->img.map.size, &game->img.map,
-		&game->img.map_mask);
-	put_img(game->map.offset, game->img.map_mask.size, &game->img.map_mask,
+	put_img((t_point){0, 0,}, &game->img.map_bg, &game->img.map_mask);
+	put_img((t_point){-player_pos.x + game->img.map_mask.size.x / 2, -player_pos.y + game->img.map_mask.size.y / 2},
+		&game->img.map, &game->img.map_mask);
+	put_img(game->map.offset, &game->img.map_mask,
 		&game->img.win);
 }
 
@@ -830,14 +853,12 @@ void	render_viewport(t_game *game)
 	int				draw_start;
 	int				draw_end;
 
-	put_img((t_point){0, 0}, game->img.ceiling.size,
-		&game->img.ceiling, &game->img.win);
+	put_img((t_point){0, 0}, &game->img.ceiling, &game->img.win);
 	if (game->player.pitch > RES_Y / 2)
-		put_img((t_point){0, 0}, game->img.floor.size,
-			&game->img.floor, &game->img.win);
+		put_img((t_point){0, 0}, &game->img.floor, &game->img.win);
 	else
-		put_img((t_point){0, RES_Y / 2 - game->player.pitch}, game->img.floor.size,
-			&game->img.floor, &game->img.win);
+		put_img((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.floor, &game->img.win);
+	put_img_scale((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.misc[1], &game->img.win, (t_fpoint){1, 1 + game->player.height});
 	x = 0;
 	while (x < RES_X)
 	{
@@ -940,8 +961,7 @@ void	render_viewport(t_game *game)
 		tex_step = 1.0 * WALL / line_height;
 		y = draw_start;
 		tex_pos = (draw_start + game->player.pitch - (line_height * game->player.height) - RES_Y / 2 + line_height / 2) * tex_step;
-		float intensity;
-		intensity = get_light_intensity(&game->light, perp_wall_dist * game->player.zoom);
+		float intensity = get_light_intensity(&game->light, perp_wall_dist * game->player.zoom);
 		while (y < draw_end)
 		{
 			tex.y = (int)tex_pos & (WALL - 1);
@@ -977,7 +997,7 @@ int	game_loop(t_game *game)
 	{
 		if (game->keys[PAUSE])
 		{
-			put_img((t_point){0, 0}, game->img.misc[0].size, &game->img.misc[0], &game->img.win);
+			put_img((t_point){0, 0}, &game->img.misc[0], &game->img.win);
 			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->img.win.img, 0, 0);
 		}
 		else
@@ -1071,16 +1091,16 @@ int	init_game(t_game *game)
 		return (-1);
 	if (init_img(game->mlx_ptr, &game->img.win, RES_X, RES_Y) == -1)
 		return (-1);
+	load_xpms(game);
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
-		|| init_bg(game, BLACK, 0x222222) == -1)
+		|| init_bg(game, BLACK, 0x2C2E33) == -1)
 		return (-1);
 	init_framedata(&game->frame);
 	init_keystate(game);
 	init_player(&game->player);
-	load_xpms(game);
-	game->light.min = 1;
-	game->light.max = 5;
-	game->light.ambient = 0.3;
+	game->light.min = 0.25;
+	game->light.max = 3;
+	game->light.ambient = 0.2;
 	mlx_mouse_move(game->mlx_ptr, game->win_ptr, RES_X / 2, RES_Y / 2);
 	return (0);
 }
