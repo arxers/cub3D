@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/13 03:39:56 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/13 04:29:28 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -474,57 +474,41 @@ void	change_target_fps(unsigned int key, t_game *game)
 	}
 }
 
-int	key_release(unsigned int key, t_game *game)
+void	handle_keystate(unsigned int key, int state, t_game *game)
 {
 	if (key == XK_Up || key == XK_w)
-		game->keys[UP] = 0;
+		game->keys[UP] = state;
 	if (key == XK_Down || key == XK_s)
-		game->keys[DOWN] = 0;
+		game->keys[DOWN] = state;
 	if (key == XK_a)
-		game->keys[LEFT] = 0;
+		game->keys[LEFT] = state;
 	if (key == XK_d)
-		game->keys[RIGHT] = 0;
+		game->keys[RIGHT] = state;
 	if (key == XK_r)
-		game->keys[ROT_U] = 0;
+		game->keys[ROT_U] = state;
 	if (key == XK_f)
-		game->keys[ROT_D] = 0;
+		game->keys[ROT_D] = state;
 	if (key == XK_Left || key == XK_q)
-		game->keys[ROT_L] = 0;
+		game->keys[ROT_L] = state;
 	if (key == XK_Right || key == XK_e)
-		game->keys[ROT_R] = 0;
+		game->keys[ROT_R] = state;
 	if (key == XK_Shift_L)
-		game->keys[RUN] = 0;
+		game->keys[RUN] = state;
 	if (key == XK_Control_L)
-		game->keys[CROUCH] = 0;
+		game->keys[CROUCH] = state;
 	if (key == XK_space)
-		game->keys[JUMP] = 0;
+		game->keys[JUMP] = state;
+}
+
+int	key_release(unsigned int key, t_game *game)
+{
+	handle_keystate(key, 0, game);
 	return (0);
 }
 
 int	key_press(unsigned int key, t_game *game)
 {
-	if (key == XK_Up || key == XK_w)
-		game->keys[UP] = 1;
-	if (key == XK_Down || key == XK_s)
-		game->keys[DOWN] = 1;
-	if (key == XK_a)
-		game->keys[LEFT] = 1;
-	if (key == XK_d)
-		game->keys[RIGHT] = 1;
-	if (key == XK_r)
-		game->keys[ROT_U] = 1;
-	if (key == XK_f)
-		game->keys[ROT_D] = 1;
-	if (key == XK_Left || key == XK_q)
-		game->keys[ROT_L] = 1;
-	if (key == XK_Right || key == XK_e)
-		game->keys[ROT_R] = 1;
-	if (key == XK_Shift_L)
-		game->keys[RUN] = 1;
-	if (key == XK_Control_L)
-		game->keys[CROUCH] = 1;
-	if (key == XK_space)
-		game->keys[JUMP] = 1;
+	handle_keystate(key, 1, game);
 	if (key == XK_Tab)
 		pause_game(game);
 	if (key == XK_Escape)
@@ -532,7 +516,7 @@ int	key_press(unsigned int key, t_game *game)
 	if (key == XK_p)
 		toggle_mouse(game);
 	if (key == XK_m)
-		game->keys[MAP] = -game->keys[MAP];
+		game->keys[MAP] = !game->keys[MAP];
 	change_target_fps(key, game);
 	return (0);
 }
@@ -857,7 +841,7 @@ void	render_viewport(t_game *game)
 	put_img((t_point){0, 0}, &game->img.ceiling, &game->img.win);
 	put_img((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.floor, &game->img.win);
 	put_img_scale((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.misc[1], &game->img.win, 
-				(t_fpoint){1, 1 - (0.4 - game->player.height) / (0.5 - -0.4)});
+				(t_fpoint){1, (1 - (0.4 - game->player.height) / (0.5 - -0.4)) * game->player.zoom});
 	x = 0;
 	while (x < RES_X)
 	{
@@ -1062,6 +1046,9 @@ void	init_framedata(t_frame_data *frame)
 
 void	init_game_struct(t_game *game)
 {
+	int	i;
+
+	i = 0;
 	game->mlx_ptr = NULL;
 	game->win_ptr = NULL;
 	game->img.win.img = NULL;
@@ -1072,6 +1059,17 @@ void	init_game_struct(t_game *game)
 	game->img.ceiling.img = NULL;
 	game->img.floor.img = NULL;
 	game->frame.fps_str = NULL;
+	while (i < 4)
+	{
+		game->img.wall[i].addr = NULL;
+		i++;
+	}
+	i = 0;
+	while (i < (int)(sizeof(game->img.misc) / sizeof(*game->img.misc)))
+	{
+		game->img.misc[i].addr = NULL;
+		i++;
+	}
 }
 
 int	init_game(t_game *game)
