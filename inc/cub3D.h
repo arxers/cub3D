@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/10 20:53:12 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/12 18:27:26 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,9 @@
 # define BLACK 0x000000
 # define WHITE 0xFFFFFF
 
-// math
-# define PI 3.14159265358
+// bounds
+# define P_MAX_HEIGHT 0.4
+# define P_MIN_HEIGHT -0.2
 
 typedef enum e_keystate
 {

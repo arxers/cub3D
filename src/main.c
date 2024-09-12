@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/12 05:27:35 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/12 18:24:02 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,24 +271,24 @@ void draw_diagonal_lines(t_img *img, t_point size, unsigned int color)
 	}
 }
 
-void draw_triangle(t_img *img, t_triangle t, unsigned int color)
-{
-	t_point		v1;
-	t_point		v2;
-	t_point		v3;
-	int			half_size;
+// void draw_triangle(t_img *img, t_triangle t, unsigned int color)
+// {
+// 	t_point		v1;
+// 	t_point		v2;
+// 	t_point		v3;
+// 	int			half_size;
 
-	half_size = t.size / 2;
-	v1.x = t.origin.x + half_size * cos(t.angle * PI / 180);
-	v1.y = t.origin.y + half_size * sin(t.angle * PI / 180);
-	v2.x = t.origin.x + half_size * cos((t.angle + 120) * PI / 180);
-	v2.y = t.origin.y + half_size * sin((t.angle + 120) * PI / 180);
-	v3.x = t.origin.x + half_size * cos((t.angle + 240) * PI / 180);
-	v3.y = t.origin.y + half_size * sin((t.angle + 240) * PI / 180);
-	draw_line(img, v1, v2, color);
-	draw_line(img, v2, v3, color);
-	draw_line(img, v3, v1, color);
-}
+// 	half_size = t.size / 2;
+// 	v1.x = t.origin.x + half_size * cos(t.angle * PI / 180);
+// 	v1.y = t.origin.y + half_size * sin(t.angle * PI / 180);
+// 	v2.x = t.origin.x + half_size * cos((t.angle + 120) * PI / 180);
+// 	v2.y = t.origin.y + half_size * sin((t.angle + 120) * PI / 180);
+// 	v3.x = t.origin.x + half_size * cos((t.angle + 240) * PI / 180);
+// 	v3.y = t.origin.y + half_size * sin((t.angle + 240) * PI / 180);
+// 	draw_line(img, v1, v2, color);
+// 	draw_line(img, v2, v3, color);
+// 	draw_line(img, v3, v1, color);
+// }
 
 void	draw_map_player(t_img *img, t_player p, t_point origin)
 {
@@ -337,6 +337,7 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 	ft_destroy_image(game->mlx_ptr, &game->img.wall[2].img);
 	ft_destroy_image(game->mlx_ptr, &game->img.wall[3].img);
 	ft_destroy_image(game->mlx_ptr, &game->img.misc[0].img);
+	ft_destroy_image(game->mlx_ptr, &game->img.misc[1].img);
 	ft_destroy_image(game->mlx_ptr, &game->img.win.img);
 	ft_destroy_image(game->mlx_ptr, &game->img.map.img);
 	ft_destroy_image(game->mlx_ptr, &game->img.map_mask.img);
@@ -659,14 +660,14 @@ void	handle_movement_z(t_game *game)
 	if (game->keys[CROUCH])
 	{
 		game->player.height -= 0.05;
-		if (game->player.height < -0.2)
-			game->player.height = -0.2;
+		if (game->player.height < P_MIN_HEIGHT)
+			game->player.height = P_MIN_HEIGHT;
 	}
 	if (game->keys[JUMP])
 	{
 		game->player.height += 0.05;
-		if (game->player.height > 0.4)
-			game->player.height = 0.4;
+		if (game->player.height > P_MAX_HEIGHT)
+			game->player.height = P_MAX_HEIGHT;
 	}
 }
 
@@ -858,7 +859,8 @@ void	render_viewport(t_game *game)
 		put_img((t_point){0, 0}, &game->img.floor, &game->img.win);
 	else
 		put_img((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.floor, &game->img.win);
-	put_img_scale((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.misc[1], &game->img.win, (t_fpoint){1, 1 + game->player.height});
+	put_img_scale((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.misc[1], &game->img.win, 
+				(t_fpoint){1, 1 - (0.4 - game->player.height) / (0.5 - -0.4)});
 	x = 0;
 	while (x < RES_X)
 	{
@@ -1091,7 +1093,6 @@ int	init_game(t_game *game)
 		return (-1);
 	if (init_img(game->mlx_ptr, &game->img.win, RES_X, RES_Y) == -1)
 		return (-1);
-	load_xpms(game);
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
 		|| init_bg(game, BLACK, 0x2C2E33) == -1)
 		return (-1);
@@ -1101,6 +1102,7 @@ int	init_game(t_game *game)
 	game->light.min = 0.25;
 	game->light.max = 3;
 	game->light.ambient = 0.2;
+	load_xpms(game);
 	mlx_mouse_move(game->mlx_ptr, game->win_ptr, RES_X / 2, RES_Y / 2);
 	return (0);
 }
