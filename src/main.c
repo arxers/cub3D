@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/12 18:24:02 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/12 18:55:33 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1100,8 +1100,8 @@ int	init_game(t_game *game)
 	init_keystate(game);
 	init_player(&game->player);
 	game->light.min = 0.25;
-	game->light.max = 3;
-	game->light.ambient = 0.2;
+	game->light.max = 2.5;
+	game->light.ambient = 0.25;
 	load_xpms(game);
 	mlx_mouse_move(game->mlx_ptr, game->win_ptr, RES_X / 2, RES_Y / 2);
 	return (0);
