@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/13 04:29:28 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/13 05:06:25 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,7 @@ int	load_xpms(t_game *game)
 {
 	load_xpm(game->mlx_ptr, "textures/shift_tab.xpm", &game->img.misc[0]);
 	load_xpm(game->mlx_ptr, "textures/bg_dither.xpm", &game->img.misc[1]);
+	load_xpm(game->mlx_ptr, "textures/door.xpm", &game->img.misc[2]);
 	load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->img.wall[0]);
 	load_xpm(game->mlx_ptr, "textures/wall/wall2.xpm", &game->img.wall[1]);
 	load_xpm(game->mlx_ptr, "textures/wall/wall3.xpm", &game->img.wall[2]);
@@ -832,7 +833,6 @@ void	render_viewport(t_game *game)
 	t_fpoint		delta_dist;
 	float			perp_wall_dist;
 	t_point			step;
-	int				hit;
 	int				side;
 	double			line_height;
 	int				draw_start;
@@ -841,7 +841,7 @@ void	render_viewport(t_game *game)
 	put_img((t_point){0, 0}, &game->img.ceiling, &game->img.win);
 	put_img((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.floor, &game->img.win);
 	put_img_scale((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.misc[1], &game->img.win, 
-				(t_fpoint){1, (1 - (0.4 - game->player.height) / (0.5 - -0.4)) * game->player.zoom});
+				(t_fpoint){1, (1 - (0.4 - game->player.height) / (0.5 + 0.4)) * game->player.zoom});
 	x = 0;
 	while (x < RES_X)
 	{
@@ -878,8 +878,7 @@ void	render_viewport(t_game *game)
 			step.y = 1;
 			side_dist.y = (map.y + 1.0 - game->player.pos.y) * delta_dist.y;
 		}
-		hit = 0;
-		while (hit == 0)
+		while (1)
 		{
 			if (side_dist.x < side_dist.y)
 			{
@@ -896,7 +895,7 @@ void	render_viewport(t_game *game)
 			if (out_of_bounds(map))
 				return ;
 			if (g_map[map.y][map.x] > 0)
-				hit = 1;
+				break ;
 		}
 		if (side == VERTICAL)
 			perp_wall_dist = (side_dist.x - delta_dist.x);
@@ -938,6 +937,10 @@ void	render_viewport(t_game *game)
 				wall_tex = &game->img.wall[SOUTH];
 				tex.x = WALL - tex.x - 1;
 			}
+		}
+		if (g_map[map.y][map.x] == 2)
+		{
+			wall_tex = &game->img.misc[2];
 		}
 		tex_step = 1.0 * WALL / line_height;
 		y = draw_start;
