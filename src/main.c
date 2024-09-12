@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/12 18:55:33 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/13 03:39:56 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -539,7 +539,7 @@ int	key_press(unsigned int key, t_game *game)
 
 void	vertical_look(t_game *game, float delta)
 {
-	static int	limit = RES_Y / 2;
+	const int	limit = RES_Y / 2;
 	int			new;
 
 	new = game->player.pitch + delta;
@@ -553,7 +553,7 @@ void	vertical_look(t_game *game, float delta)
 
 void	handle_mouse(t_game *game)
 {
-	static t_point	center = {RES_X / 2, RES_Y / 2};
+	const t_point	center = {RES_X / 2, RES_Y / 2};
 	t_point			mouse;
 	float			old_dir_x;
 	float			old_plane_x;
@@ -698,7 +698,7 @@ void	handle_yaw(t_game *game, float speed)
 
 void	handle_pitch(t_game *game)
 {
-	static int	limit = RES_Y / 2;
+	const int	limit = RES_Y / 2;
 
 	if (game->keys[ROT_U] && game->keys[ROT_D])
 		return ;
@@ -839,7 +839,7 @@ float	get_light_intensity(t_light *light, float dist)
 
 void	render_viewport(t_game *game)
 {
-	static float	camera_x_factor = 2.0 / RES_X;
+	const float		camera_x_factor = 2.0 / RES_X;
 	float			camera_x;
 	int				x;
 	t_point			map;
@@ -855,10 +855,7 @@ void	render_viewport(t_game *game)
 	int				draw_end;
 
 	put_img((t_point){0, 0}, &game->img.ceiling, &game->img.win);
-	if (game->player.pitch > RES_Y / 2)
-		put_img((t_point){0, 0}, &game->img.floor, &game->img.win);
-	else
-		put_img((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.floor, &game->img.win);
+	put_img((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.floor, &game->img.win);
 	put_img_scale((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.misc[1], &game->img.win, 
 				(t_fpoint){1, 1 - (0.4 - game->player.height) / (0.5 - -0.4)});
 	x = 0;
@@ -942,9 +939,8 @@ void	render_viewport(t_game *game)
 		t_img	*wall_tex;
 		if (side == VERTICAL)
 		{
-			if (ray_dir.x > 0)
-				wall_tex = &game->img.wall[EAST];
-			else
+			wall_tex = &game->img.wall[EAST];
+			if (ray_dir.x <= 0)
 			{
 				wall_tex = &game->img.wall[WEST];
 				tex.x = WALL - tex.x - 1;
@@ -952,9 +948,8 @@ void	render_viewport(t_game *game)
 		}
 		else if (side == HORIZONTAL)
 		{
-			if (ray_dir.y < 0)
-				wall_tex = &game->img.wall[NORTH];
-			else
+			wall_tex = &game->img.wall[NORTH];
+			if (ray_dir.y >= 0)
 			{
 				wall_tex = &game->img.wall[SOUTH];
 				tex.x = WALL - tex.x - 1;
@@ -968,7 +963,7 @@ void	render_viewport(t_game *game)
 		{
 			tex.y = (int)tex_pos & (WALL - 1);
 			unsigned int	color = get_pixel(wall_tex, tex.x, tex.y);
-			color = multiply_color(color, intensity);
+			color = multiply_color(get_pixel(wall_tex, tex.x, tex.y), intensity);
 			tex_pos += tex_step;
 			set_pixel(&game->img.win, x, y, color);
 			y++;
@@ -1109,8 +1104,8 @@ int	init_game(t_game *game)
 
 int mwheel(unsigned int key, int x, int y, t_game *game)
 {
-	static float	step = 0.1;
-	static int		pitch_limit = RES_Y / 2;
+	const float	step = 0.1;
+	const int	pitch_limit = RES_Y / 2;
 
 	(void)x;
 	(void)y;
