@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/13 05:06:25 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/13 05:23:35 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int	g_map[24][24] =
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,2,2,2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
+  {1,0,0,0,0,0,2,2,-2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1},
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -393,8 +393,12 @@ void	draw_map_tiles(t_img *map)
 		count.x = 0;
 		while (count.x < g_map_x)
 		{
-			if (g_map[count.y][count.x] == 1)
-				draw_rectangle(map, origin, size, MAP_COLOR);
+			// if (g_map[count.y][count.x] == 1)
+			// 	draw_rectangle(map, origin, size, MAP_COLOR);
+			if (g_map[count.y][count.x] == 2)
+				draw_rectangle(map, (t_point){origin.x + 5, origin.y + 5}, (t_point){5, 5}, BLACK);
+			else if (g_map[count.y][count.x] == -2)
+				draw_rectangle(map, (t_point){origin.x + 2, origin.y + 2}, (t_point){12, 12}, BLACK);
 			else if (g_map[count.y][count.x] == 0)
 				draw_rectangle(map, origin, size, BLACK);
 			count.x++;
@@ -612,13 +616,13 @@ void	check_collision(t_game *game, t_fpoint new_pos, t_fpoint move, float radius
 		side.y = -radius;
 	else
 		side.y = radius;
-	if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x - radius)] == 0
-		&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x + side.x)] == 0
-		&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x + side.x)] == 0)
+	if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x - radius)] < 1
+		&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x + side.x)] < 1
+		&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x + side.x)] < 1)
 		game->player.pos.x = new_pos.x;
-	if (g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x)] == 0
-		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x - radius)] == 0
-		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x + radius)] == 0)
+	if (g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x)] < 1
+		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x - radius)] < 1
+		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x + radius)] < 1)
 		game->player.pos.y = new_pos.y;
 }
 
