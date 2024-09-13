@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/13 05:23:35 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/13 23:26:52 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int	g_map[24][24] =
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,2,2,-2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
+  {1,0,0,0,0,0,2,-2,-2,-2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1},
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -61,19 +61,21 @@ int	init_img(void *mlx_ptr, t_img *img, int width, int height)
 
 void	set_pixel(t_img *img, int x, int y, unsigned int color)
 {
-	char			*dst;
+	const int	step = (img->bits_per_pixel / 8);
+	char		*dst;
 
 	if (x < 0 || y < 0 || x >= img->size.x || y >= img->size.y || (color >> 24) & 0xFF)
 		return ;
-	dst = img->addr + ((y * img->line_len) + (x * (img->bits_per_pixel / 8)));
+	dst = img->addr + ((y * img->line_len) + x * step);
 	*(unsigned int *)dst = color;
 }
 
 unsigned int	get_pixel(t_img *img, int x, int y)
 {
-	char	*src;
+	const int	step = (img->bits_per_pixel / 8);
+	char		*src;
 
-	src = img->addr + ((y * img->line_len) + (x * (img->bits_per_pixel / 8)));
+	src = img->addr + ((y * img->line_len) + x * step);
 	return (*(unsigned int *)src);
 }
 
@@ -82,16 +84,18 @@ void	put_img_scale(t_point offset, t_img *src, t_img *dst, t_fpoint scale)
 	t_fpoint	src_pos;
 	t_point		dst_pos;
 
+	scale.x = 1.0 / scale.x;
+	scale.y = 1.0 / scale.y;
 	dst_pos.y = 0;
 	while (dst_pos.y < dst->size.y)
 	{
 		dst_pos.x = 0;
 		while (dst_pos.x < dst->size.x)
 		{
-			src_pos.x = (dst_pos.x - offset.x) / scale.x;
-			src_pos.y = (dst_pos.y - offset.y) / scale.y;
-			if (src_pos.x >= 0 && src_pos.x < src->size.x &&
-				src_pos.y >= 0 && src_pos.y < src->size.y)
+			src_pos.x = (dst_pos.x - offset.x) * scale.x;
+			src_pos.y = (dst_pos.y - offset.y) * scale.y;
+			if (src_pos.x >= 0 && src_pos.x < src->size.x
+				&& src_pos.y >= 0 && src_pos.y < src->size.y)
 				set_pixel(dst, dst_pos.x, dst_pos.y,
 					get_pixel(src, src_pos.x, src_pos.y));
 			dst_pos.x++;
@@ -135,13 +139,13 @@ int	load_xpm(void *mlx, char *path, t_img *img)
 
 int	load_xpms(t_game *game)
 {
-	load_xpm(game->mlx_ptr, "textures/shift_tab.xpm", &game->img.misc[0]);
-	load_xpm(game->mlx_ptr, "textures/bg_dither.xpm", &game->img.misc[1]);
-	load_xpm(game->mlx_ptr, "textures/door.xpm", &game->img.misc[2]);
-	load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->img.wall[0]);
-	load_xpm(game->mlx_ptr, "textures/wall/wall2.xpm", &game->img.wall[1]);
-	load_xpm(game->mlx_ptr, "textures/wall/wall3.xpm", &game->img.wall[2]);
-	load_xpm(game->mlx_ptr, "textures/wall/wall4.xpm", &game->img.wall[3]);
+	load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->tex[T_NORTH]);
+	load_xpm(game->mlx_ptr, "textures/wall/wall2.xpm", &game->tex[T_SOUTH]);
+	load_xpm(game->mlx_ptr, "textures/wall/wall3.xpm", &game->tex[T_EAST]);
+	load_xpm(game->mlx_ptr, "textures/wall/wall4.xpm", &game->tex[T_WEST]);
+	load_xpm(game->mlx_ptr, "textures/door.xpm", &game->tex[T_DOOR_OPEN]);
+	load_xpm(game->mlx_ptr, "textures/shift_tab.xpm", &game->tex[T_PAUSE]);
+	load_xpm(game->mlx_ptr, "textures/bg_dither.xpm", &game->tex[T_DITHER]);
 	return (0);
 }
 
@@ -272,25 +276,6 @@ void draw_diagonal_lines(t_img *img, t_point size, unsigned int color)
 	}
 }
 
-// void draw_triangle(t_img *img, t_triangle t, unsigned int color)
-// {
-// 	t_point		v1;
-// 	t_point		v2;
-// 	t_point		v3;
-// 	int			half_size;
-
-// 	half_size = t.size / 2;
-// 	v1.x = t.origin.x + half_size * cos(t.angle * PI / 180);
-// 	v1.y = t.origin.y + half_size * sin(t.angle * PI / 180);
-// 	v2.x = t.origin.x + half_size * cos((t.angle + 120) * PI / 180);
-// 	v2.y = t.origin.y + half_size * sin((t.angle + 120) * PI / 180);
-// 	v3.x = t.origin.x + half_size * cos((t.angle + 240) * PI / 180);
-// 	v3.y = t.origin.y + half_size * sin((t.angle + 240) * PI / 180);
-// 	draw_line(img, v1, v2, color);
-// 	draw_line(img, v2, v3, color);
-// 	draw_line(img, v3, v1, color);
-// }
-
 void	draw_map_player(t_img *img, t_player p, t_point origin)
 {
 	t_point			player_pos;
@@ -324,27 +309,23 @@ void	validate_input(int ac, char **av)
 	(void)av;
 }
 
-void	ft_destroy_image(void *mlx_ptr, void **img)
+void	ft_destroy_image(void *mlx_ptr, t_img *img)
 {
-	if (mlx_ptr && img && *img)
-		mlx_destroy_image(mlx_ptr, *img);
-	*img = NULL;
+	if (mlx_ptr && img->img)
+		mlx_destroy_image(mlx_ptr, img->img);
+	img->img = NULL;
 }
 
 int	cleanup(t_game *game, unsigned char status, char *msg)
 {
-	ft_destroy_image(game->mlx_ptr, &game->img.wall[0].img);
-	ft_destroy_image(game->mlx_ptr, &game->img.wall[1].img);
-	ft_destroy_image(game->mlx_ptr, &game->img.wall[2].img);
-	ft_destroy_image(game->mlx_ptr, &game->img.wall[3].img);
-	ft_destroy_image(game->mlx_ptr, &game->img.misc[0].img);
-	ft_destroy_image(game->mlx_ptr, &game->img.misc[1].img);
-	ft_destroy_image(game->mlx_ptr, &game->img.win.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.map.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.map_mask.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.map_bg.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.ceiling.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.floor.img);
+	int	i;
+
+	i = 0;
+	while (i < (int)(sizeof(game->tex) / sizeof(*game->tex)))
+	{
+		ft_destroy_image(game->mlx_ptr, &game->tex[i]);
+		i++;
+	}
 	if (game->win_ptr)
 		mlx_destroy_window(game->mlx_ptr, game->win_ptr);
 	game->win_ptr = NULL;
@@ -359,8 +340,8 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 
 t_point	center(t_point origin, t_point size)
 {
-	origin.x -= size.x / 2;
-	origin.y -= size.y / 2;
+	origin.x -= size.x * 0.5;
+	origin.y -= size.y * 0.5;
 	return (origin);
 }
 
@@ -370,11 +351,11 @@ int	init_bg(t_game *game, int ceiling, int floor)
 
 	size.x = RES_X;
 	size.y = RES_Y;
-	if (init_img(game->mlx_ptr, &game->img.ceiling, RES_X, RES_Y) == -1
-		|| init_img(game->mlx_ptr, &game->img.floor, RES_X, RES_Y) == -1)
+	if (init_img(game->mlx_ptr, &game->tex[T_CEILING], RES_X, RES_Y) == -1
+		|| init_img(game->mlx_ptr, &game->tex[T_FLOOR], RES_X, RES_Y) == -1)
 		return (-1);
-	draw_rectangle(&game->img.ceiling, (t_point){0, 0}, size, ceiling);
-	draw_rectangle(&game->img.floor, (t_point){0, 0}, size, floor);
+	draw_rectangle(&game->tex[T_CEILING], (t_point){0, 0}, size, ceiling);
+	draw_rectangle(&game->tex[T_FLOOR], (t_point){0, 0}, size, floor);
 	return (0);
 }
 
@@ -398,7 +379,7 @@ void	draw_map_tiles(t_img *map)
 			if (g_map[count.y][count.x] == 2)
 				draw_rectangle(map, (t_point){origin.x + 5, origin.y + 5}, (t_point){5, 5}, BLACK);
 			else if (g_map[count.y][count.x] == -2)
-				draw_rectangle(map, (t_point){origin.x + 2, origin.y + 2}, (t_point){12, 12}, BLACK);
+				draw_rectangle(map, (t_point){origin.x + 1, origin.y + 2}, (t_point){13, 12}, BLACK);
 			else if (g_map[count.y][count.x] == 0)
 				draw_rectangle(map, origin, size, BLACK);
 			count.x++;
@@ -416,17 +397,17 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 
 	map.x = map_grid_size.x * MAP_CELL_SIZE;
 	map.y = map_grid_size.y * MAP_CELL_SIZE;
-	mask.x = 24 * MAP_CELL_SIZE / 2;
-	mask.y = 24 * MAP_CELL_SIZE / 2;
-	if (init_img(game->mlx_ptr, &game->img.map, map.x, map.y) == -1
-		|| init_img(game->mlx_ptr, &game->img.map_mask, mask.x, mask.y) == -1
-		|| init_img(game->mlx_ptr, &game->img.map_bg, mask.x, mask.y) == -1)
+	mask.x = 24 * MAP_CELL_SIZE * 0.5;
+	mask.y = 24 * MAP_CELL_SIZE * 0.5;
+	if (init_img(game->mlx_ptr, &game->tex[T_MAP], map.x, map.y) == -1
+		|| init_img(game->mlx_ptr, &game->tex[T_MAP_MASK], mask.x, mask.y) == -1
+		|| init_img(game->mlx_ptr, &game->tex[T_MAP_BG], mask.x, mask.y) == -1)
 		return (-1);
-	game->map.offset.x = RES_X - game->img.map_mask.size.x - RES_X / 50;
+	game->map.offset.x = RES_X - game->tex[T_MAP_MASK].size.x - RES_X / 50;
 	game->map.offset.y = RES_X / 50;
-	draw_rectangle(&game->img.map_bg, (t_point){0, 0}, game->img.map_mask.size,
+	draw_rectangle(&game->tex[T_MAP_BG], (t_point){0, 0}, game->tex[T_MAP_MASK].size,
 		BLACK);
-	draw_diagonal_lines(&game->img.map_bg, game->img.map_mask.size, 0x333333);
+	draw_diagonal_lines(&game->tex[T_MAP_BG], game->tex[T_MAP_MASK].size, 0x333333);
 	return (0);
 }
 
@@ -440,8 +421,8 @@ void	toggle_mouse(t_game *game)
 {
 	t_point	center;
 
-	center.x = RES_X / 2;
-	center.y = RES_Y / 2;
+	center.x = RES_X * 0.5;
+	center.y = RES_Y * 0.5;
 	if (game->keys[MOUSE] == 0)
 		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
 	game->keys[MOUSE] = !game->keys[MOUSE];
@@ -451,8 +432,8 @@ void	pause_game(t_game *game)
 {
 	t_point	center;
 
-	center.x = RES_X / 2;
-	center.y = RES_Y / 2;
+	center.x = RES_X * 0.5;
+	center.y = RES_Y * 0.5;
 	if (game->keys[RUN])
 		game->keys[PAUSE] = !game->keys[PAUSE];
 	if (!game->keys[PAUSE] && game->keys[MOUSE])
@@ -522,13 +503,38 @@ int	key_press(unsigned int key, t_game *game)
 		toggle_mouse(game);
 	if (key == XK_m)
 		game->keys[MAP] = !game->keys[MAP];
+	// t_point	step;
+	// if (game->player.dir.x < 0)
+	// {
+	// 	step.x = -1;
+	// }
+	// else
+	// {
+	// 	step.x = 1;
+	// }
+	// if (game->player.dir.y < 0)
+	// {
+	// 	step.y = -1;
+	// }
+	// else
+	// {
+	// 	step.y = 1;
+	// }
+	// int	angle = 
+	// if (key == XK_g)
+	// {
+	// 	printf("angle: ")
+	// 	printf("dir.y: %f, dir.x: %f\n", game->player.dir.y, game->player.dir.x);
+	// 	printf("step.y: %i, step.x: %i\n", step.y, step.x);
+	// 	g_map[(int)(game->player.pos.y - 1)][(int)(game->player.pos.x)] = -g_map[(int)(game->player.pos.y - 1)][(int)(game->player.pos.x)];
+	// }
 	change_target_fps(key, game);
 	return (0);
 }
 
 void	vertical_look(t_game *game, float delta)
 {
-	const int	limit = RES_Y / 2;
+	const int	limit = RES_Y * 0.5;
 	int			new;
 
 	new = game->player.pitch + delta;
@@ -542,7 +548,7 @@ void	vertical_look(t_game *game, float delta)
 
 void	handle_mouse(t_game *game)
 {
-	const t_point	center = {RES_X / 2, RES_Y / 2};
+	const t_point	center = {RES_X * 0.5, RES_Y * 0.5};
 	t_point			mouse;
 	float			old_dir_x;
 	float			old_plane_x;
@@ -687,7 +693,7 @@ void	handle_yaw(t_game *game, float speed)
 
 void	handle_pitch(t_game *game)
 {
-	const int	limit = RES_Y / 2;
+	const int	limit = RES_Y * 0.5;
 
 	if (game->keys[ROT_U] && game->keys[ROT_D])
 		return ;
@@ -757,7 +763,7 @@ int	should_render_frame(t_game *game)
 
 	gettimeofday(&game->frame.current, NULL);
 	elapsed = (game->frame.current.tv_sec - game->frame.last.tv_sec) * 1000
-		+ (game->frame.current.tv_usec - game->frame.last.tv_usec) / 1000;
+		+ (game->frame.current.tv_usec - game->frame.last.tv_usec) * 0.001;
 	if (elapsed >= game->frame.time)
 	{
 		fps++;
@@ -779,16 +785,16 @@ void	draw_minimap(t_game *game)
 
 	player_pos.x = (int)((game->player.pos.x * (float)MAP_CELL_SIZE));
 	player_pos.y = (int)((game->player.pos.y * (float)MAP_CELL_SIZE));
-	draw_rectangle(&game->img.map, (t_point){0, 0}, game->img.map.size,
+	draw_rectangle(&game->tex[T_MAP], (t_point){0, 0}, game->tex[T_MAP].size,
 		MAP_COLOR);
-	draw_map_tiles(&game->img.map);
-	draw_map_player(&game->img.map, game->player,
+	draw_map_tiles(&game->tex[T_MAP]);
+	draw_map_player(&game->tex[T_MAP], game->player,
 		(t_point){0, 0});
-	put_img((t_point){0, 0,}, &game->img.map_bg, &game->img.map_mask);
-	put_img((t_point){-player_pos.x + game->img.map_mask.size.x / 2, -player_pos.y + game->img.map_mask.size.y / 2},
-		&game->img.map, &game->img.map_mask);
-	put_img(game->map.offset, &game->img.map_mask,
-		&game->img.win);
+	put_img((t_point){0, 0,}, &game->tex[T_MAP_BG], &game->tex[T_MAP_MASK]);
+	put_img((t_point){-player_pos.x + game->tex[T_MAP_MASK].size.x * 0.5, -player_pos.y + game->tex[T_MAP_MASK].size.y * 0.5},
+		&game->tex[T_MAP], &game->tex[T_MAP_MASK]);
+	put_img(game->map.offset, &game->tex[T_MAP_MASK],
+		&game->tex[T_WIN]);
 }
 
 int	out_of_bounds(t_point map)
@@ -798,7 +804,7 @@ int	out_of_bounds(t_point map)
 	return (0);
 }
 
-unsigned int	multiply_color(unsigned int color, float factor)
+unsigned int	darken(unsigned int color, float factor)
 {
 	unsigned int	r;
 	unsigned int	g;
@@ -815,9 +821,10 @@ unsigned int	multiply_color(unsigned int color, float factor)
 
 float	get_light_intensity(t_light *light, float dist)
 {
-	float	intensity;
+	const float	inverse_range = 1.0 / (light->max - light->min);
+	float		intensity;
 
-	intensity = (light->max - dist) / (light->max - light->min);
+	intensity = (light->max - dist) * inverse_range;
 	if (intensity < 0)
 		intensity = 0;
 	if (intensity > 1)
@@ -842,10 +849,10 @@ void	render_viewport(t_game *game)
 	int				draw_start;
 	int				draw_end;
 
-	put_img((t_point){0, 0}, &game->img.ceiling, &game->img.win);
-	put_img((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.floor, &game->img.win);
-	put_img_scale((t_point){0, RES_Y / 2 - game->player.pitch}, &game->img.misc[1], &game->img.win, 
-				(t_fpoint){1, (1 - (0.4 - game->player.height) / (0.5 + 0.4)) * game->player.zoom});
+	put_img((t_point){0, 0}, &game->tex[T_CEILING], &game->tex[T_WIN]);
+	put_img((t_point){0, RES_Y * 0.5 - game->player.pitch}, &game->tex[T_FLOOR], &game->tex[T_WIN]);
+	put_img_scale((t_point){0, RES_Y * 0.5 - game->player.pitch}, &game->tex[T_DITHER], &game->tex[T_WIN], 
+				(t_fpoint){1, (1 - (P_MAX_HEIGHT - game->player.height) / (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
 	x = 0;
 	while (x < RES_X)
 	{
@@ -902,14 +909,14 @@ void	render_viewport(t_game *game)
 				break ;
 		}
 		if (side == VERTICAL)
-			perp_wall_dist = (side_dist.x - delta_dist.x);
+			perp_wall_dist = side_dist.x - delta_dist.x;
 		else
-			perp_wall_dist = (side_dist.y - delta_dist.y);
+			perp_wall_dist = side_dist.y - delta_dist.y;
 		line_height = (int)(RES_Y / perp_wall_dist);
-		draw_start = -line_height / 2 + RES_Y / 2 - game->player.pitch + (line_height * game->player.height);
+		draw_start = (-line_height + RES_Y) * 0.5 - game->player.pitch + (line_height * game->player.height);
 		if (draw_start < 0)
 			draw_start = 0;
-		draw_end = line_height / 2 + RES_Y / 2 - game->player.pitch + (line_height * game->player.height);
+		draw_end = (line_height + RES_Y) * 0.5 - game->player.pitch + (line_height * game->player.height);
 		if (draw_end >= RES_Y)
 			draw_end = RES_Y;
 		float wall_x;
@@ -924,39 +931,40 @@ void	render_viewport(t_game *game)
 		wall_x -= floorf(wall_x);
 		tex.x = (int)(wall_x * WALL);
 		t_img	*wall_tex;
-		if (side == VERTICAL)
-		{
-			wall_tex = &game->img.wall[EAST];
-			if (ray_dir.x <= 0)
-			{
-				wall_tex = &game->img.wall[WEST];
-				tex.x = WALL - tex.x - 1;
-			}
-		}
-		else if (side == HORIZONTAL)
-		{
-			wall_tex = &game->img.wall[NORTH];
-			if (ray_dir.y >= 0)
-			{
-				wall_tex = &game->img.wall[SOUTH];
-				tex.x = WALL - tex.x - 1;
-			}
-		}
 		if (g_map[map.y][map.x] == 2)
+			wall_tex = &game->tex[T_DOOR_OPEN];
+		else
 		{
-			wall_tex = &game->img.misc[2];
+			if (side == VERTICAL)
+			{
+				wall_tex = &game->tex[T_EAST];
+				if (ray_dir.x <= 0)
+				{
+					wall_tex = &game->tex[T_WEST];
+					tex.x = WALL - tex.x - 1;
+				}
+			}
+			else if (side == HORIZONTAL)
+			{
+				wall_tex = &game->tex[T_NORTH];
+				if (ray_dir.y >= 0)
+				{
+					wall_tex = &game->tex[T_SOUTH];
+					tex.x = WALL - tex.x - 1;
+				}
+			}
 		}
 		tex_step = 1.0 * WALL / line_height;
 		y = draw_start;
-		tex_pos = (draw_start + game->player.pitch - (line_height * game->player.height) - RES_Y / 2 + line_height / 2) * tex_step;
+		tex_pos = (draw_start + game->player.pitch - (line_height * game->player.height) - (RES_Y + line_height) * 0.5) * tex_step;
 		float intensity = get_light_intensity(&game->light, perp_wall_dist * game->player.zoom);
 		while (y < draw_end)
 		{
 			tex.y = (int)tex_pos & (WALL - 1);
 			unsigned int	color = get_pixel(wall_tex, tex.x, tex.y);
-			color = multiply_color(get_pixel(wall_tex, tex.x, tex.y), intensity);
+			color = darken(get_pixel(wall_tex, tex.x, tex.y), intensity);
 			tex_pos += tex_step;
-			set_pixel(&game->img.win, x, y, color);
+			set_pixel(&game->tex[T_WIN], x, y, color);
 			y++;
 		}
 		x++;
@@ -985,8 +993,8 @@ int	game_loop(t_game *game)
 	{
 		if (game->keys[PAUSE])
 		{
-			put_img((t_point){0, 0}, &game->img.misc[0], &game->img.win);
-			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->img.win.img, 0, 0);
+			put_img((t_point){0, 0}, &game->tex[T_PAUSE], &game->tex[T_WIN]);
+			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->tex[T_WIN].img, 0, 0);
 		}
 		else
 		{
@@ -995,7 +1003,7 @@ int	game_loop(t_game *game)
 			if (game->keys[MAP] == 1)
 				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
-				game->img.win.img, 0, 0);
+				game->tex[T_WIN].img, 0, 0);
 			// update_lighting()
 		}
 		if (game->keys[MOUSE] == 0)
@@ -1056,27 +1064,14 @@ void	init_game_struct(t_game *game)
 	int	i;
 
 	i = 0;
+	while (i < (int)(sizeof(game->tex) / sizeof(*game->tex)))
+	{
+		game->tex[i].img = NULL;
+		i++;
+	}
 	game->mlx_ptr = NULL;
 	game->win_ptr = NULL;
-	game->img.win.img = NULL;
-	game->img.view.img = NULL;
-	game->img.map.img = NULL;
-	game->img.map_mask.img = NULL;
-	game->img.map_bg.img = NULL;
-	game->img.ceiling.img = NULL;
-	game->img.floor.img = NULL;
 	game->frame.fps_str = NULL;
-	while (i < 4)
-	{
-		game->img.wall[i].addr = NULL;
-		i++;
-	}
-	i = 0;
-	while (i < (int)(sizeof(game->img.misc) / sizeof(*game->img.misc)))
-	{
-		game->img.misc[i].addr = NULL;
-		i++;
-	}
 }
 
 int	init_game(t_game *game)
@@ -1091,7 +1086,7 @@ int	init_game(t_game *game)
 	game->win_ptr = mlx_new_window(game->mlx_ptr, RES_X, RES_Y, "cub3D");
 	if (game->win_ptr == NULL)
 		return (-1);
-	if (init_img(game->mlx_ptr, &game->img.win, RES_X, RES_Y) == -1)
+	if (init_img(game->mlx_ptr, &game->tex[T_WIN], RES_X, RES_Y) == -1)
 		return (-1);
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
 		|| init_bg(game, BLACK, 0x2C2E33) == -1)
@@ -1103,14 +1098,14 @@ int	init_game(t_game *game)
 	game->light.max = 2.5;
 	game->light.ambient = 0.25;
 	load_xpms(game);
-	mlx_mouse_move(game->mlx_ptr, game->win_ptr, RES_X / 2, RES_Y / 2);
+	mlx_mouse_move(game->mlx_ptr, game->win_ptr, RES_X * 0.5, RES_Y * 0.5);
 	return (0);
 }
 
 int mwheel(unsigned int key, int x, int y, t_game *game)
 {
 	const float	step = 0.1;
-	const int	pitch_limit = RES_Y / 2;
+	const int	pitch_limit = RES_Y * 0.5;
 
 	(void)x;
 	(void)y;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/12 18:27:26 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/13 23:50:45 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,6 @@
 # include <math.h>
 # include <stdio.h>
 # include <sys/time.h>
-
-# define NORTH 0
-# define SOUTH 1
-# define EAST 2
-# define WEST 3
 
 // raycasting
 # define VERTICAL 0
@@ -56,6 +51,24 @@
 # define P_MAX_HEIGHT 0.4
 # define P_MIN_HEIGHT -0.2
 
+typedef enum e_texture
+{
+	T_WIN,
+	T_MAP,
+	T_MAP_MASK,
+	T_MAP_BG,
+	T_CEILING,
+	T_FLOOR,
+	T_NORTH,
+	T_SOUTH,
+	T_EAST,
+	T_WEST,
+	T_DOOR_OPEN,
+	T_DOOR_CLOSE,
+	T_PAUSE,
+	T_DITHER,
+}					t_texture;
+
 typedef enum e_keystate
 {
 	UP,
@@ -86,35 +99,15 @@ typedef struct s_point
 	int				y;
 }					t_point;
 
-typedef struct s_triangle
-{
-	t_point			origin;
-	int				angle;
-	int				size;
-}					t_triangle;
-
 typedef struct s_img
 {
 	void			*img;
 	char			*addr;
+	t_point			size;
 	int				bits_per_pixel;
 	int				line_len;
 	int				endian;
-	t_point			size;
 }					t_img;
-
-typedef struct s_images
-{
-	t_img			wall[4];
-	t_img			misc[32];
-	t_img			win;
-	t_img			view;
-	t_img			map;
-	t_img			map_mask;
-	t_img			map_bg;
-	t_img			ceiling;
-	t_img			floor;
-}					t_images;
 
 typedef struct s_player
 {
@@ -152,13 +145,13 @@ typedef struct s_light
 
 typedef struct s_game
 {
-	char			keys[32];
-	t_images		img;
-	t_frame_data	frame;
+	t_img			tex[32];
 	void			*mlx_ptr;
 	void			*win_ptr;
+	t_frame_data	frame;
 	t_player		player;
 	t_light			light;
+	char			keys[32];
 	t_map			map;
 }					t_game;
 
