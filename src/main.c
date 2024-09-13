@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/13 23:26:52 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/14 00:03:53 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -503,31 +503,41 @@ int	key_press(unsigned int key, t_game *game)
 		toggle_mouse(game);
 	if (key == XK_m)
 		game->keys[MAP] = !game->keys[MAP];
-	// t_point	step;
-	// if (game->player.dir.x < 0)
-	// {
-	// 	step.x = -1;
-	// }
-	// else
-	// {
-	// 	step.x = 1;
-	// }
-	// if (game->player.dir.y < 0)
-	// {
-	// 	step.y = -1;
-	// }
-	// else
-	// {
-	// 	step.y = 1;
-	// }
-	// int	angle = 
-	// if (key == XK_g)
-	// {
-	// 	printf("angle: ")
-	// 	printf("dir.y: %f, dir.x: %f\n", game->player.dir.y, game->player.dir.x);
-	// 	printf("step.y: %i, step.x: %i\n", step.y, step.x);
-	// 	g_map[(int)(game->player.pos.y - 1)][(int)(game->player.pos.x)] = -g_map[(int)(game->player.pos.y - 1)][(int)(game->player.pos.x)];
-	// }
+	t_point step;
+
+	if (fabs(game->player.dir.x) > fabs(game->player.dir.y))
+	{
+		// Prioritize horizontal movement
+		if (game->player.dir.x > 0)
+			step.x = 1;  // Facing right
+		else
+			step.x = -1; // Facing left
+		step.y = 0;  // No vertical movement
+	}
+	else
+	{
+		// Prioritize vertical movement
+		if (game->player.dir.y > 0)
+			step.y = 1;  // Facing down
+		else
+			step.y = -1; // Facing up
+		step.x = 0;  // No horizontal movement
+	}
+	if (key == XK_g)
+	{
+		int player_x = (int)game->player.pos.x;
+		int player_y = (int)game->player.pos.y;
+
+		// Determine the target cell in front of the player
+		int target_x = player_x + step.x;
+		int target_y = player_y + step.y;
+
+		// Toggle door state by negating the value
+		if (g_map[target_y][target_x] != 0)  // Assuming non-zero values are doors
+		{
+			g_map[target_y][target_x] = -g_map[target_y][target_x];
+		}
+	}
 	change_target_fps(key, game);
 	return (0);
 }
