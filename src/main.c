@@ -491,8 +491,6 @@ void	handle_keystate(unsigned int key, int state, t_game *game)
 		game->keys[CROUCH] = state;
 	if (key == XK_space)
 		game->keys[JUMP] = state;
-	// if (key == XK_g)
-	// 	interact(game);
 }
 
 int	key_release(unsigned int key, t_game *game)
@@ -823,8 +821,8 @@ void	render_viewport(t_game *game)
 {
 	const float		camera_x_factor = 2.0 / RES_X;
 	float			camera_x;
-	int			 	x;
-	t_point			map;
+	int				x;
+	t_fpoint		map;
 	t_fpoint		ray_dir;
 	t_fpoint		side_dist;
 	t_fpoint		delta_dist;
@@ -891,7 +889,9 @@ void	render_viewport(t_game *game)
 				map.y += step.y;
 				side = HORIZONTAL;
 			}
-			if (g_map[map.y][map.x] != 0)
+			if (out_of_bounds(map))
+				return ;
+			if (g_map[(int)map.y][(int)map.x] > 0)
 				break ;
 		}
 		if (side == VERTICAL)
@@ -917,7 +917,7 @@ void	render_viewport(t_game *game)
 		wall_x -= floorf(wall_x);
 		tex.x = (int)(wall_x * WALL);
 		t_img	*wall_tex;
-		if (g_map[map.y][map.x] == 2)
+		if (g_map[(int)map.y][(int)map.x] == 2)
 			wall_tex = &game->tex[T_DOOR_OPEN];
 		else
 		{
