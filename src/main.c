@@ -460,6 +460,13 @@ void	change_target_fps(unsigned int key, t_game *game)
 	}
 }
 
+// void	interact(t_game *game)
+// {
+// 	t_fpoint		ray_dir;
+// 	ray_dir.x = game->player.dir.x + game->player.plane.x;
+// 	ray_dir.y = game->player.dir.y + game->player.plane.y;
+// }
+
 void	handle_keystate(unsigned int key, int state, t_game *game)
 {
 	if (key == XK_Up || key == XK_w)
@@ -484,6 +491,8 @@ void	handle_keystate(unsigned int key, int state, t_game *game)
 		game->keys[CROUCH] = state;
 	if (key == XK_space)
 		game->keys[JUMP] = state;
+	// if (key == XK_g)
+	// 	interact(game);
 }
 
 int	key_release(unsigned int key, t_game *game)
@@ -503,41 +512,6 @@ int	key_press(unsigned int key, t_game *game)
 		toggle_mouse(game);
 	if (key == XK_m)
 		game->keys[MAP] = !game->keys[MAP];
-	t_point step;
-
-	if (fabs(game->player.dir.x) > fabs(game->player.dir.y))
-	{
-		// Prioritize horizontal movement
-		if (game->player.dir.x > 0)
-			step.x = 1;  // Facing right
-		else
-			step.x = -1; // Facing left
-		step.y = 0;  // No vertical movement
-	}
-	else
-	{
-		// Prioritize vertical movement
-		if (game->player.dir.y > 0)
-			step.y = 1;  // Facing down
-		else
-			step.y = -1; // Facing up
-		step.x = 0;  // No horizontal movement
-	}
-	if (key == XK_g)
-	{
-		int player_x = (int)game->player.pos.x;
-		int player_y = (int)game->player.pos.y;
-
-		// Determine the target cell in front of the player
-		int target_x = player_x + step.x;
-		int target_y = player_y + step.y;
-
-		// Toggle door state by negating the value
-		if (g_map[target_y][target_x] != 0)  // Assuming non-zero values are doors
-		{
-			g_map[target_y][target_x] = -g_map[target_y][target_x];
-		}
-	}
 	change_target_fps(key, game);
 	return (0);
 }
@@ -622,23 +596,25 @@ void	normalize_movement(float *move_x, float *move_y)
 
 void	check_collision(t_game *game, t_fpoint new_pos, t_fpoint move, float radius)
 {
-	t_fpoint	side;
+	(void)move;
+	(void)radius;
+	// t_fpoint	side;
 
-	if (move.x < 0)
-		side.x = -radius;
-	else
-		side.x = radius;
-	if (move.y < 0)
-		side.y = -radius;
-	else
-		side.y = radius;
-	if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x - radius)] < 1
-		&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x + side.x)] < 1
-		&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x + side.x)] < 1)
+	// if (move.x < 0)
+	// 	side.x = -radius;
+	// else
+	// 	side.x = radius;
+	// if (move.y < 0)
+	// 	side.y = -radius;
+	// else
+	// 	side.y = radius;
+	// if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x - radius)] < 1
+	// 	&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x + side.x)] < 1
+	// 	&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x + side.x)] < 1)
 		game->player.pos.x = new_pos.x;
-	if (g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x)] < 1
-		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x - radius)] < 1
-		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x + radius)] < 1)
+	// if (g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x)] < 1
+	// 	&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x - radius)] < 1
+	// 	&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x + radius)] < 1)
 		game->player.pos.y = new_pos.y;
 }
 
@@ -807,9 +783,9 @@ void	draw_minimap(t_game *game)
 		&game->tex[T_WIN]);
 }
 
-int	out_of_bounds(t_point map)
+int	out_of_bounds(t_fpoint map)
 {
-	if (map.x < 0 || map.y < 0 || map.x > g_map_x || map.y > g_map_y)
+	if (map.x < 0 || map.y < 0 || map.x >= g_map_x || map.y >= g_map_y)
 		return (1);
 	return (0);
 }
@@ -847,7 +823,7 @@ void	render_viewport(t_game *game)
 {
 	const float		camera_x_factor = 2.0 / RES_X;
 	float			camera_x;
-	int				x;
+	int			 	x;
 	t_point			map;
 	t_fpoint		ray_dir;
 	t_fpoint		side_dist;
@@ -863,14 +839,16 @@ void	render_viewport(t_game *game)
 	put_img((t_point){0, RES_Y * 0.5 - game->player.pitch}, &game->tex[T_FLOOR], &game->tex[T_WIN]);
 	put_img_scale((t_point){0, RES_Y * 0.5 - game->player.pitch}, &game->tex[T_DITHER], &game->tex[T_WIN], 
 				(t_fpoint){1, (1 - (P_MAX_HEIGHT - game->player.height) / (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
+	if (out_of_bounds(game->player.pos))
+		return ;
 	x = 0;
 	while (x < RES_X)
 	{
+		map.x = (int)game->player.pos.x;
+		map.y = (int)game->player.pos.y;
 		camera_x = (x * camera_x_factor - 1);
 		ray_dir.x = game->player.dir.x * game->player.zoom + game->player.plane.x * camera_x;
 		ray_dir.y = game->player.dir.y * game->player.zoom + game->player.plane.y * camera_x;
-		map.x = (int)game->player.pos.x;
-		map.y = (int)game->player.pos.y;
 		if (ray_dir.x == 0)
 			delta_dist.x = 1E+37;
 		else
@@ -913,9 +891,7 @@ void	render_viewport(t_game *game)
 				map.y += step.y;
 				side = HORIZONTAL;
 			}
-			if (out_of_bounds(map))
-				return ;
-			if (g_map[map.y][map.x] > 0)
+			if (g_map[map.y][map.x] != 0)
 				break ;
 		}
 		if (side == VERTICAL)
@@ -1020,8 +996,8 @@ int	game_loop(t_game *game)
 			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 26, WHITE,
 				"MOUSE DISABLED");
 		display_fps_counter(game);
-		if (out_of_bounds((t_point){(int)game->player.pos.x, (int)game->player.pos.y}))
-			cleanup(game, 0, "cub3D: Out of bounds\n");
+		// if (out_of_bounds((t_point){(int)game->player.pos.x, (int)game->player.pos.y}))
+		// 	cleanup(game, 0, "cub3D: Out of bounds\n");
 	}
 	return (0);
 }
@@ -1101,13 +1077,13 @@ int	init_game(t_game *game)
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
 		|| init_bg(game, BLACK, 0x2C2E33) == -1)
 		return (-1);
+	load_xpms(game);
 	init_framedata(&game->frame);
 	init_keystate(game);
 	init_player(&game->player);
 	game->light.min = 0.25;
 	game->light.max = 2.5;
 	game->light.ambient = 0.25;
-	load_xpms(game);
 	mlx_mouse_move(game->mlx_ptr, game->win_ptr, RES_X * 0.5, RES_Y * 0.5);
 	return (0);
 }
