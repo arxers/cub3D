@@ -143,7 +143,8 @@ int	load_xpms(t_game *game)
 	load_xpm(game->mlx_ptr, "textures/wall/wall2.xpm", &game->tex[T_SOUTH]);
 	load_xpm(game->mlx_ptr, "textures/wall/wall3.xpm", &game->tex[T_EAST]);
 	load_xpm(game->mlx_ptr, "textures/wall/wall4.xpm", &game->tex[T_WEST]);
-	load_xpm(game->mlx_ptr, "textures/door.xpm", &game->tex[T_DOOR_OPEN]);
+	load_xpm(game->mlx_ptr, "textures/door_open.xpm", &game->tex[T_DOOR_OPEN]);
+	load_xpm(game->mlx_ptr, "textures/door.xpm", &game->tex[T_DOOR_CLOSE]);
 	load_xpm(game->mlx_ptr, "textures/shift_tab.xpm", &game->tex[T_PAUSE]);
 	load_xpm(game->mlx_ptr, "textures/bg_dither.xpm", &game->tex[T_DITHER]);
 	return (0);
@@ -594,25 +595,23 @@ void	normalize_movement(float *move_x, float *move_y)
 
 void	check_collision(t_game *game, t_fpoint new_pos, t_fpoint move, float radius)
 {
-	(void)move;
-	(void)radius;
-	// t_fpoint	side;
+	t_fpoint	side;
 
-	// if (move.x < 0)
-	// 	side.x = -radius;
-	// else
-	// 	side.x = radius;
-	// if (move.y < 0)
-	// 	side.y = -radius;
-	// else
-	// 	side.y = radius;
-	// if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x - radius)] < 1
-	// 	&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x + side.x)] < 1
-	// 	&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x + side.x)] < 1)
+	if (move.x < 0)
+		side.x = -radius;
+	else
+		side.x = radius;
+	if (move.y < 0)
+		side.y = -radius;
+	else
+		side.y = radius;
+	if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x - radius)] < 1
+		&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x + side.x)] < 1
+		&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x + side.x)] < 1)
 		game->player.pos.x = new_pos.x;
-	// if (g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x)] < 1
-	// 	&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x - radius)] < 1
-	// 	&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x + radius)] < 1)
+	if (g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x)] < 1
+		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x - radius)] < 1
+		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x + radius)] < 1)
 		game->player.pos.y = new_pos.y;
 }
 
@@ -794,6 +793,8 @@ unsigned int	darken(unsigned int color, float factor)
 	unsigned int	g;
 	unsigned int	b;
 
+	if ((color >> 24) & 0xFF)
+		return (color);
 	r = (color >> 16) & 0xFF;
 	g = (color >> 8) & 0xFF;
 	b = (color >> 0) & 0xFF;
@@ -918,7 +919,7 @@ void	render_viewport(t_game *game)
 		tex.x = (int)(wall_x * WALL);
 		t_img	*wall_tex;
 		if (g_map[(int)map.y][(int)map.x] == 2)
-			wall_tex = &game->tex[T_DOOR_OPEN];
+			wall_tex = &game->tex[T_DOOR_CLOSE];
 		else
 		{
 			if (side == VERTICAL)
@@ -948,7 +949,7 @@ void	render_viewport(t_game *game)
 		{
 			tex.y = (int)tex_pos & (WALL - 1);
 			unsigned int	color = get_pixel(wall_tex, tex.x, tex.y);
-			color = darken(get_pixel(wall_tex, tex.x, tex.y), intensity);
+			color = darken(color, intensity);
 			tex_pos += tex_step;
 			set_pixel(&game->tex[T_WIN], x, y, color);
 			y++;
