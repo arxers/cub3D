@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/13 23:50:45 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/16 17:24:51 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ typedef struct s_frame_data
 
 typedef struct s_map
 {
-	int				*grid;
+	int				**grid;
 	t_point			size;
 	t_point			offset;
 }					t_map;

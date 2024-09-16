@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/14 00:03:53 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/16 18:43:53 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -925,7 +925,7 @@ void	calculate_wall_projection(t_game *game, t_ray *r, t_texture_map *tex)
 	else
 		r->wall_dist = r->side_dist.y - r->delta_dist.y;
 	r->line_height = (int)(RES_Y / r->wall_dist);
-	r->draw_start = (-r->line_height + RES_Y) * 0.5 - game->player.pitch
+	r->draw_start = (RES_Y - r->line_height) * 0.5 - game->player.pitch
 		+ (r->line_height * game->player.height);
 	if (r->draw_start < 0)
 		r->draw_start = 0;
@@ -933,7 +933,7 @@ void	calculate_wall_projection(t_game *game, t_ray *r, t_texture_map *tex)
 		+ (r->line_height * game->player.height);
 	if (r->draw_end >= RES_Y)
 		r->draw_end = RES_Y;
-	if (r->side == 0)
+	if (r->side == VERTICAL)
 		tex->hit.x = game->player.pos.y + r->wall_dist * r->dir.y;
 	else
 		tex->hit.x = game->player.pos.x + r->wall_dist * r->dir.x;
@@ -1064,18 +1064,18 @@ void	init_player_plane(t_player *player)
 		player->plane.y = 0;
 	}
 }
-
+//x: left to right, y: top to bottom, starts from top left
 void	init_player(t_player *player)
 {
 	t_fpoint	pos;
 
-	pos.x = 8;
-	pos.y = 6;
+	pos.x = 1;
+	pos.y = 1;
 	player->pitch = 0;
 	player->pos.x = pos.x + 0.5;
 	player->pos.y = pos.y + 0.5;
-	player->dir.x = 0;
-	player->dir.y = -1;
+	player->dir.x = -1;
+	player->dir.y = 0;
 	player->zoom = 1.0;
 	player->height = 0.0;
 	init_player_plane(player);
