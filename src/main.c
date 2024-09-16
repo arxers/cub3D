@@ -886,8 +886,6 @@ void	vertical_slice_loop(t_game *game, t_ray *r, t_texture_map *tex)
 	unsigned int	color;
 
 	intensity = set_intensity(&game->light, r->wall_dist * game->player.zoom);
-	tex->hit.x -= floorf(tex->hit.x);
-	tex->coords.x = (int)(tex->hit.x * WALL);
 	tex->tex_step = 1.0 * WALL / r->line_height;
 	r->pix.y = r->draw_start;
 	tex->hit.y = (r->draw_start + game->player.pitch
@@ -939,6 +937,8 @@ void	calculate_wall_projection(t_game *game, t_ray *r, t_texture_map *tex)
 		tex->hit.x = game->player.pos.y + r->wall_dist * r->dir.y;
 	else
 		tex->hit.x = game->player.pos.x + r->wall_dist * r->dir.x;
+	tex->hit.x -= floorf(tex->hit.x);
+	tex->coords.x = (int)(tex->hit.x * WALL);
 }
 
 void	calculate_ray_step(t_game *game, t_ray *r)
@@ -984,8 +984,8 @@ void	render_viewport(t_game *game)
 		calculate_ray_step(game, &r);
 		if (dda(&r) == -1)
 			return ;
-		assign_texture(game, &r, &tex);
 		calculate_wall_projection(game, &r, &tex);
+		assign_texture(game, &r, &tex);
 		vertical_slice_loop(game, &r, &tex);
 		r.pix.x++;
 	}
