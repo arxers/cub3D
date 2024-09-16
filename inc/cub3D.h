@@ -143,11 +143,34 @@ typedef struct s_light
 	float			max;
 }					t_light;
 
+typedef struct s_ray
+{
+	t_point			pix;
+	t_fpoint		map;
+	t_fpoint		dir;
+	t_fpoint		side_dist;
+	t_fpoint		delta_dist;
+	float			wall_dist;
+	t_point			step;
+	int				side;
+	double			line_height;
+	int				draw_start;
+	int				draw_end;
+}					t_ray;
+
+typedef struct s_texture_map
+{
+	t_img			*wall_tex;
+	t_point			coords;
+	t_fpoint		hit;
+	float			tex_step;
+}					t_texture_map;
+
 typedef struct s_game
 {
-	t_img			tex[32];
-	void			*mlx_ptr;
-	void			*win_ptr;
+	t_img			img[32];
+	void			*mlx;
+	void			*win;
 	t_frame_data	frame;
 	t_player		player;
 	t_light			light;

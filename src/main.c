@@ -64,7 +64,8 @@ void	set_pixel(t_img *img, int x, int y, unsigned int color)
 	const int	step = (img->bits_per_pixel / 8);
 	char		*dst;
 
-	if (x < 0 || y < 0 || x >= img->size.x || y >= img->size.y || (color >> 24) & 0xFF)
+	if (x < 0 || y < 0 || x >= img->size.x || y >= img->size.y
+		|| (color >> 24) & 0xFF)
 		return ;
 	dst = img->addr + ((y * img->line_len) + x * step);
 	*(unsigned int *)dst = color;
@@ -139,14 +140,14 @@ int	load_xpm(void *mlx, char *path, t_img *img)
 
 int	load_xpms(t_game *game)
 {
-	load_xpm(game->mlx_ptr, "textures/wall/wall1.xpm", &game->tex[T_NORTH]);
-	load_xpm(game->mlx_ptr, "textures/wall/wall2.xpm", &game->tex[T_SOUTH]);
-	load_xpm(game->mlx_ptr, "textures/wall/wall3.xpm", &game->tex[T_EAST]);
-	load_xpm(game->mlx_ptr, "textures/wall/wall4.xpm", &game->tex[T_WEST]);
-	load_xpm(game->mlx_ptr, "textures/door_open.xpm", &game->tex[T_DOOR_OPEN]);
-	load_xpm(game->mlx_ptr, "textures/door.xpm", &game->tex[T_DOOR_CLOSE]);
-	load_xpm(game->mlx_ptr, "textures/shift_tab.xpm", &game->tex[T_PAUSE]);
-	load_xpm(game->mlx_ptr, "textures/bg_dither.xpm", &game->tex[T_DITHER]);
+	load_xpm(game->mlx, "textures/wall/wall1.xpm", &game->img[T_NORTH]);
+	load_xpm(game->mlx, "textures/wall/wall2.xpm", &game->img[T_SOUTH]);
+	load_xpm(game->mlx, "textures/wall/wall3.xpm", &game->img[T_EAST]);
+	load_xpm(game->mlx, "textures/wall/wall4.xpm", &game->img[T_WEST]);
+	load_xpm(game->mlx, "textures/door_open.xpm", &game->img[T_DOOR_OPEN]);
+	load_xpm(game->mlx, "textures/door.xpm", &game->img[T_DOOR_CLOSE]);
+	load_xpm(game->mlx, "textures/shift_tab.xpm", &game->img[T_PAUSE]);
+	load_xpm(game->mlx, "textures/bg_dither.xpm", &game->img[T_DITHER]);
 	return (0);
 }
 
@@ -322,17 +323,17 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 	int	i;
 
 	i = 0;
-	while (i < (int)(sizeof(game->tex) / sizeof(*game->tex)))
+	while (i < (int)(sizeof(game->img) / sizeof(*game->img)))
 	{
-		ft_destroy_image(game->mlx_ptr, &game->tex[i]);
+		ft_destroy_image(game->mlx, &game->img[i]);
 		i++;
 	}
-	if (game->win_ptr)
-		mlx_destroy_window(game->mlx_ptr, game->win_ptr);
-	game->win_ptr = NULL;
-	if (game->mlx_ptr)
-		mlx_destroy_display(game->mlx_ptr);
-	ft_free_void(&game->mlx_ptr);
+	if (game->win)
+		mlx_destroy_window(game->mlx, game->win);
+	game->win = NULL;
+	if (game->mlx)
+		mlx_destroy_display(game->mlx);
+	ft_free_void(&game->mlx);
 	ft_free(&game->frame.fps_str);
 	if (msg)
 		ft_putstr_fd(msg, 2);
@@ -352,11 +353,11 @@ int	init_bg(t_game *game, int ceiling, int floor)
 
 	size.x = RES_X;
 	size.y = RES_Y;
-	if (init_img(game->mlx_ptr, &game->tex[T_CEILING], RES_X, RES_Y) == -1
-		|| init_img(game->mlx_ptr, &game->tex[T_FLOOR], RES_X, RES_Y) == -1)
+	if (init_img(game->mlx, &game->img[T_CEILING], RES_X, RES_Y) == -1
+		|| init_img(game->mlx, &game->img[T_FLOOR], RES_X, RES_Y) == -1)
 		return (-1);
-	draw_rectangle(&game->tex[T_CEILING], (t_point){0, 0}, size, ceiling);
-	draw_rectangle(&game->tex[T_FLOOR], (t_point){0, 0}, size, floor);
+	draw_rectangle(&game->img[T_CEILING], (t_point){0, 0}, size, ceiling);
+	draw_rectangle(&game->img[T_FLOOR], (t_point){0, 0}, size, floor);
 	return (0);
 }
 
@@ -400,15 +401,15 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 	map.y = map_grid_size.y * MAP_CELL_SIZE;
 	mask.x = 24 * MAP_CELL_SIZE * 0.5;
 	mask.y = 24 * MAP_CELL_SIZE * 0.5;
-	if (init_img(game->mlx_ptr, &game->tex[T_MAP], map.x, map.y) == -1
-		|| init_img(game->mlx_ptr, &game->tex[T_MAP_MASK], mask.x, mask.y) == -1
-		|| init_img(game->mlx_ptr, &game->tex[T_MAP_BG], mask.x, mask.y) == -1)
+	if (init_img(game->mlx, &game->img[T_MAP], map.x, map.y) == -1
+		|| init_img(game->mlx, &game->img[T_MAP_MASK], mask.x, mask.y) == -1
+		|| init_img(game->mlx, &game->img[T_MAP_BG], mask.x, mask.y) == -1)
 		return (-1);
-	game->map.offset.x = RES_X - game->tex[T_MAP_MASK].size.x - RES_X / 50;
+	game->map.offset.x = RES_X - game->img[T_MAP_MASK].size.x - RES_X / 50;
 	game->map.offset.y = RES_X / 50;
-	draw_rectangle(&game->tex[T_MAP_BG], (t_point){0, 0}, game->tex[T_MAP_MASK].size,
+	draw_rectangle(&game->img[T_MAP_BG], (t_point){0, 0}, game->img[T_MAP_MASK].size,
 		BLACK);
-	draw_diagonal_lines(&game->tex[T_MAP_BG], game->tex[T_MAP_MASK].size, 0x333333);
+	draw_diagonal_lines(&game->img[T_MAP_BG], game->img[T_MAP_MASK].size, 0x333333);
 	return (0);
 }
 
@@ -425,7 +426,7 @@ void	toggle_mouse(t_game *game)
 	center.x = RES_X * 0.5;
 	center.y = RES_Y * 0.5;
 	if (game->keys[MOUSE] == 0)
-		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
+		mlx_mouse_move(game->mlx, game->win, center.x, center.y);
 	game->keys[MOUSE] = !game->keys[MOUSE];
 }
 
@@ -438,7 +439,7 @@ void	pause_game(t_game *game)
 	if (game->keys[RUN])
 		game->keys[PAUSE] = !game->keys[PAUSE];
 	if (!game->keys[PAUSE] && game->keys[MOUSE])
-		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
+		mlx_mouse_move(game->mlx, game->win, center.x, center.y);
 }
 
 void	change_target_fps(unsigned int key, t_game *game)
@@ -537,7 +538,7 @@ void	handle_mouse(t_game *game)
 	float			old_plane_x;
 	t_point			delta;
 
-	mlx_mouse_get_pos(game->mlx_ptr, game->win_ptr, &mouse.x, &mouse.y);
+	mlx_mouse_get_pos(game->mlx, game->win, &mouse.x, &mouse.y);
 	delta.x = mouse.x - center.x;
 	delta.y = mouse.y - center.y;
 	if (delta.x != 0 || delta.y != 0)
@@ -553,7 +554,7 @@ void	handle_mouse(t_game *game)
 		game->player.plane.y = old_plane_x * sin(MOUSE_SEN * delta.x)
 			+ game->player.plane.y * cos(MOUSE_SEN * delta.x);
 		vertical_look(game, delta.y);
-		mlx_mouse_move(game->mlx_ptr, game->win_ptr, center.x, center.y);
+		mlx_mouse_move(game->mlx, game->win, center.x, center.y);
 	}
 }
 
@@ -621,7 +622,8 @@ void	handle_movement_xy(t_game *game, float speed)
 	t_fpoint	new_pos;
 	float		radius;
 
-	if (!game->keys[UP] && !game->keys[DOWN] && !game->keys[LEFT] && !game->keys[RIGHT])
+	if (!game->keys[UP] && !game->keys[DOWN]
+		&& !game->keys[LEFT] && !game->keys[RIGHT])
 		return ;
 	radius = 0.25;
 	move.x = 0;
@@ -660,17 +662,25 @@ void	handle_yaw(t_game *game, float speed)
 	old_plane_x = game->player.plane.x;
 	if (game->keys[ROT_L])
 	{
-		game->player.dir.x = game->player.dir.x * cos(-speed) - game->player.dir.y * sin(-speed);
-		game->player.dir.y = old_dir_x * sin(-speed) + game->player.dir.y * cos(-speed);
-		game->player.plane.x = game->player.plane.x * cos(-speed) - game->player.plane.y * sin(-speed);
-		game->player.plane.y = old_plane_x * sin(-speed) + game->player.plane.y * cos(-speed);
+		game->player.dir.x = game->player.dir.x * cos(-speed)
+			- game->player.dir.y * sin(-speed);
+		game->player.dir.y = old_dir_x * sin(-speed)
+			+ game->player.dir.y * cos(-speed);
+		game->player.plane.x = game->player.plane.x
+			* cos(-speed) - game->player.plane.y * sin(-speed);
+		game->player.plane.y = old_plane_x * sin(-speed)
+			+ game->player.plane.y * cos(-speed);
 	}
 	else if (game->keys[ROT_R])
 	{
-		game->player.dir.x = game->player.dir.x * cos(speed) - game->player.dir.y * sin(speed);
-		game->player.dir.y = old_dir_x * sin(speed) + game->player.dir.y * cos(speed);
-		game->player.plane.x = game->player.plane.x * cos(speed) - game->player.plane.y * sin(speed);
-		game->player.plane.y = old_plane_x * sin(speed) + game->player.plane.y * cos(speed);
+		game->player.dir.x = game->player.dir.x * cos(speed)
+			- game->player.dir.y * sin(speed);
+		game->player.dir.y = old_dir_x * sin(speed)
+			+ game->player.dir.y * cos(speed);
+		game->player.plane.x = game->player.plane.x * cos(speed)
+			- game->player.plane.y * sin(speed);
+		game->player.plane.y = old_plane_x * sin(speed)
+			+ game->player.plane.y * cos(speed);
 	}
 }
 
@@ -765,19 +775,20 @@ int	should_render_frame(t_game *game)
 void	draw_minimap(t_game *game)
 {
 	t_fpoint	player_pos;
+	const int	center = game->img[T_MAP_MASK].size.x * 0.5;
 
 	player_pos.x = (int)((game->player.pos.x * (float)MAP_CELL_SIZE));
 	player_pos.y = (int)((game->player.pos.y * (float)MAP_CELL_SIZE));
-	draw_rectangle(&game->tex[T_MAP], (t_point){0, 0}, game->tex[T_MAP].size,
+	draw_rectangle(&game->img[T_MAP], (t_point){0, 0}, game->img[T_MAP].size,
 		MAP_COLOR);
-	draw_map_tiles(&game->tex[T_MAP]);
-	draw_map_player(&game->tex[T_MAP], game->player,
+	draw_map_tiles(&game->img[T_MAP]);
+	draw_map_player(&game->img[T_MAP], game->player,
 		(t_point){0, 0});
-	put_img((t_point){0, 0,}, &game->tex[T_MAP_BG], &game->tex[T_MAP_MASK]);
-	put_img((t_point){-player_pos.x + game->tex[T_MAP_MASK].size.x * 0.5, -player_pos.y + game->tex[T_MAP_MASK].size.y * 0.5},
-		&game->tex[T_MAP], &game->tex[T_MAP_MASK]);
-	put_img(game->map.offset, &game->tex[T_MAP_MASK],
-		&game->tex[T_WIN]);
+	put_img((t_point){0, 0,}, &game->img[T_MAP_BG], &game->img[T_MAP_MASK]);
+	put_img((t_point){-player_pos.x + center + 20, -player_pos.y + center},
+		&game->img[T_MAP], &game->img[T_MAP_MASK]);
+	put_img(game->map.offset, &game->img[T_MAP_MASK],
+		&game->img[T_WIN]);
 }
 
 int	out_of_bounds(t_fpoint map)
@@ -804,7 +815,7 @@ unsigned int	darken(unsigned int color, float factor)
 	return ((r << 16) | (g << 8) | b);
 }
 
-float	get_light_intensity(t_light *light, float dist)
+float	set_intensity(t_light *light, float dist)
 {
 	const float	inverse_range = 1.0 / (light->max - light->min);
 	float		intensity;
@@ -818,143 +829,165 @@ float	get_light_intensity(t_light *light, float dist)
 	return (intensity);
 }
 
+void	assign_texture(t_game *game, t_ray *r, t_texture_map *tex)
+{
+	tex->wall_tex = NULL;
+	if (g_map[(int)r->map.y][(int)r->map.x] == 2)
+	{
+		tex->wall_tex = &game->img[T_DOOR_CLOSE];
+		return ;
+	}
+	if (r->side == VERTICAL)
+	{
+		tex->wall_tex = &game->img[T_EAST];
+		if (r->dir.x <= 0)
+		{
+			tex->wall_tex = &game->img[T_WEST];
+			tex->coords.x = WALL - tex->coords.x - 1;
+		}
+	}
+	else if (r->side == HORIZONTAL)
+	{
+		tex->wall_tex = &game->img[T_NORTH];
+		if (r->dir.y >= 0)
+		{
+			tex->wall_tex = &game->img[T_SOUTH];
+			tex->coords.x = WALL - tex->coords.x - 1;
+		}
+	}
+}
+
+int	dda(t_ray *r)
+{
+	while (1)
+	{
+		if (r->side_dist.x < r->side_dist.y)
+		{
+			r->side_dist.x += r->delta_dist.x;
+			r->map.x += r->step.x;
+			r->side = VERTICAL;
+		}
+		else
+		{
+			r->side_dist.y += r->delta_dist.y;
+			r->map.y += r->step.y;
+			r->side = HORIZONTAL;
+		}
+		if (out_of_bounds(r->map))
+			return (-1);
+		if (g_map[(int)r->map.y][(int)r->map.x] > 0)
+			return (0);
+	}
+}
+
+void	vertical_slice_loop(t_game *game, t_ray *r, t_texture_map *tex)
+{
+	float			intensity;
+	unsigned int	color;
+
+	intensity = set_intensity(&game->light, r->wall_dist * game->player.zoom);
+	tex->hit.x -= floorf(tex->hit.x);
+	tex->coords.x = (int)(tex->hit.x * WALL);
+	tex->tex_step = 1.0 * WALL / r->line_height;
+	r->pix.y = r->draw_start;
+	tex->hit.y = (r->draw_start + game->player.pitch
+			- (r->line_height * game->player.height)
+			- (RES_Y + r->line_height) * 0.5) * tex->tex_step;
+	while (r->pix.y < r->draw_end)
+	{
+		tex->coords.y = (int)tex->hit.y & (WALL - 1);
+		color = get_pixel(tex->wall_tex, tex->coords.x, tex->coords.y);
+		color = darken(color, intensity);
+		tex->hit.y += tex->tex_step;
+		set_pixel(&game->img[T_WIN], r->pix.x, r->pix.y, color);
+		r->pix.y++;
+	}
+}
+
+void	set_ray_direction(t_game *game, t_ray *r, float camera_x)
+{
+	r->dir.x = game->player.dir.x * game->player.zoom
+		+ game->player.plane.x * camera_x;
+	r->dir.y = game->player.dir.y * game->player.zoom
+		+ game->player.plane.y * camera_x;
+	if (r->dir.x == 0)
+		r->delta_dist.x = 1E+37;
+	else
+		r->delta_dist.x = fabsf(1 / r->dir.x);
+	if (r->dir.y == 0)
+		r->delta_dist.y = 1E+37;
+	else
+		r->delta_dist.y = fabsf(1 / r->dir.y);
+}
+
+void	calculate_wall_projection(t_game *game, t_ray *r, t_texture_map *tex)
+{
+	if (r->side == VERTICAL)
+		r->wall_dist = r->side_dist.x - r->delta_dist.x;
+	else
+		r->wall_dist = r->side_dist.y - r->delta_dist.y;
+	r->line_height = (int)(RES_Y / r->wall_dist);
+	r->draw_start = (-r->line_height + RES_Y) * 0.5 - game->player.pitch
+		+ (r->line_height * game->player.height);
+	if (r->draw_start < 0)
+		r->draw_start = 0;
+	r->draw_end = (r->line_height + RES_Y) * 0.5 - game->player.pitch
+		+ (r->line_height * game->player.height);
+	if (r->draw_end >= RES_Y)
+		r->draw_end = RES_Y;
+	if (r->side == 0)
+		tex->hit.x = game->player.pos.y + r->wall_dist * r->dir.y;
+	else
+		tex->hit.x = game->player.pos.x + r->wall_dist * r->dir.x;
+}
+
+void	calculate_ray_step(t_game *game, t_ray *r)
+{
+	if (r->dir.x < 0)
+	{
+		r->step.x = -1;
+		r->side_dist.x = (game->player.pos.x - r->map.x) * r->delta_dist.x;
+	}
+	else
+	{
+		r->step.x = 1;
+		r->side_dist.x = (r->map.x + 1.0 - game->player.pos.x)
+			* r->delta_dist.x;
+	}
+	if (r->dir.y < 0)
+	{
+		r->step.y = -1;
+		r->side_dist.y = (game->player.pos.y - r->map.y) * r->delta_dist.y;
+	}
+	else
+	{
+		r->step.y = 1;
+		r->side_dist.y = (r->map.y + 1.0 - game->player.pos.y)
+			* r->delta_dist.y;
+	}
+}
+
 void	render_viewport(t_game *game)
 {
 	const float		camera_x_factor = 2.0 / RES_X;
-	float			camera_x;
-	int				x;
-	t_fpoint		map;
-	t_fpoint		ray_dir;
-	t_fpoint		side_dist;
-	t_fpoint		delta_dist;
-	float			perp_wall_dist;
-	t_point			step;
-	int				side;
-	double			line_height;
-	int				draw_start;
-	int				draw_end;
+	t_texture_map	tex;
+	t_ray			r;
 
-	put_img((t_point){0, 0}, &game->tex[T_CEILING], &game->tex[T_WIN]);
-	put_img((t_point){0, RES_Y * 0.5 - game->player.pitch}, &game->tex[T_FLOOR], &game->tex[T_WIN]);
-	put_img_scale((t_point){0, RES_Y * 0.5 - game->player.pitch}, &game->tex[T_DITHER], &game->tex[T_WIN], 
-				(t_fpoint){1, (1 - (P_MAX_HEIGHT - game->player.height) / (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
 	if (out_of_bounds(game->player.pos))
 		return ;
-	x = 0;
-	while (x < RES_X)
+	r.pix.x = 0;
+	while (r.pix.x < RES_X)
 	{
-		map.x = (int)game->player.pos.x;
-		map.y = (int)game->player.pos.y;
-		camera_x = (x * camera_x_factor - 1);
-		ray_dir.x = game->player.dir.x * game->player.zoom + game->player.plane.x * camera_x;
-		ray_dir.y = game->player.dir.y * game->player.zoom + game->player.plane.y * camera_x;
-		if (ray_dir.x == 0)
-			delta_dist.x = 1E+37;
-		else
-			delta_dist.x = fabsf(1 / ray_dir.x);
-		if (ray_dir.y == 0)
-			delta_dist.y = 1E+37;
-		else
-			delta_dist.y = fabsf(1 / ray_dir.y);
-		if (ray_dir.x < 0)
-		{
-			step.x = -1;
-			side_dist.x = (game->player.pos.x - map.x) * delta_dist.x;
-		}
-		else
-		{
-			step.x = 1;
-			side_dist.x = (map.x + 1.0 - game->player.pos.x) * delta_dist.x;
-		}
-		if (ray_dir.y < 0)
-		{
-			step.y = -1;
-			side_dist.y = (game->player.pos.y - map.y) * delta_dist.y;
-		}
-		else
-		{
-			step.y = 1;
-			side_dist.y = (map.y + 1.0 - game->player.pos.y) * delta_dist.y;
-		}
-		while (1)
-		{
-			if (side_dist.x < side_dist.y)
-			{
-				side_dist.x += delta_dist.x;
-				map.x += step.x;
-				side = VERTICAL;
-			}
-			else
-			{
-				side_dist.y += delta_dist.y;
-				map.y += step.y;
-				side = HORIZONTAL;
-			}
-			if (out_of_bounds(map))
-				return ;
-			if (g_map[(int)map.y][(int)map.x] > 0)
-				break ;
-		}
-		if (side == VERTICAL)
-			perp_wall_dist = side_dist.x - delta_dist.x;
-		else
-			perp_wall_dist = side_dist.y - delta_dist.y;
-		line_height = (int)(RES_Y / perp_wall_dist);
-		draw_start = (-line_height + RES_Y) * 0.5 - game->player.pitch + (line_height * game->player.height);
-		if (draw_start < 0)
-			draw_start = 0;
-		draw_end = (line_height + RES_Y) * 0.5 - game->player.pitch + (line_height * game->player.height);
-		if (draw_end >= RES_Y)
-			draw_end = RES_Y;
-		float wall_x;
-		t_point	tex;
-		float	tex_step;
-		float	tex_pos;
-		int	y;
-		if (side == 0)
-			wall_x = game->player.pos.y + perp_wall_dist * ray_dir.y;
-		else
-			wall_x = game->player.pos.x + perp_wall_dist * ray_dir.x;
-		wall_x -= floorf(wall_x);
-		tex.x = (int)(wall_x * WALL);
-		t_img	*wall_tex;
-		if (g_map[(int)map.y][(int)map.x] == 2)
-			wall_tex = &game->tex[T_DOOR_CLOSE];
-		else
-		{
-			if (side == VERTICAL)
-			{
-				wall_tex = &game->tex[T_EAST];
-				if (ray_dir.x <= 0)
-				{
-					wall_tex = &game->tex[T_WEST];
-					tex.x = WALL - tex.x - 1;
-				}
-			}
-			else if (side == HORIZONTAL)
-			{
-				wall_tex = &game->tex[T_NORTH];
-				if (ray_dir.y >= 0)
-				{
-					wall_tex = &game->tex[T_SOUTH];
-					tex.x = WALL - tex.x - 1;
-				}
-			}
-		}
-		tex_step = 1.0 * WALL / line_height;
-		y = draw_start;
-		tex_pos = (draw_start + game->player.pitch - (line_height * game->player.height) - (RES_Y + line_height) * 0.5) * tex_step;
-		float intensity = get_light_intensity(&game->light, perp_wall_dist * game->player.zoom);
-		while (y < draw_end)
-		{
-			tex.y = (int)tex_pos & (WALL - 1);
-			unsigned int	color = get_pixel(wall_tex, tex.x, tex.y);
-			color = darken(color, intensity);
-			tex_pos += tex_step;
-			set_pixel(&game->tex[T_WIN], x, y, color);
-			y++;
-		}
-		x++;
+		r.map.x = (int)game->player.pos.x;
+		r.map.y = (int)game->player.pos.y;
+		set_ray_direction(game, &r, r.pix.x * camera_x_factor - 1);
+		calculate_ray_step(game, &r);
+		if (dda(&r) == -1)
+			return ;
+		assign_texture(game, &r, &tex);
+		calculate_wall_projection(game, &r, &tex);
+		vertical_slice_loop(game, &r, &tex);
+		r.pix.x++;
 	}
 }
 
@@ -962,14 +995,25 @@ void	display_fps_counter(t_game *game)
 {
 	if (game->frame.fps_str)
 	{
-		mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 13, WHITE,
+		mlx_string_put(game->mlx, game->win, 4, 13, WHITE,
 			game->frame.fps_str);
-		mlx_string_put(game->mlx_ptr, game->win_ptr, 20, 13, WHITE,
+		mlx_string_put(game->mlx, game->win, 20, 13, WHITE,
 			"FPS");
 	}
 	else
-		mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 13, WHITE,
+		mlx_string_put(game->mlx, game->win, 4, 13, WHITE,
 			"INITIALIZING FPS...");
+}
+
+void	draw_bg(t_game *game)
+{
+	put_img((t_point){0, 0}, &game->img[T_CEILING], &game->img[T_WIN]);
+	put_img((t_point){0, RES_Y * 0.5 - game->player.pitch},
+		&game->img[T_FLOOR], &game->img[T_WIN]);
+	put_img_scale((t_point){0, RES_Y * 0.5 - game->player.pitch},
+		&game->img[T_DITHER], &game->img[T_WIN],
+		(t_fpoint){1, (1 - (P_MAX_HEIGHT - game->player.height)
+			/ (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
 }
 
 int	game_loop(t_game *game)
@@ -980,25 +1024,23 @@ int	game_loop(t_game *game)
 	{
 		if (game->keys[PAUSE])
 		{
-			put_img((t_point){0, 0}, &game->tex[T_PAUSE], &game->tex[T_WIN]);
-			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->tex[T_WIN].img, 0, 0);
+			put_img((t_point){0, 0}, &game->img[T_PAUSE], &game->img[T_WIN]);
+			mlx_put_image_to_window(game->mlx, game->win, game->img[T_WIN].img, 0, 0);
 		}
 		else
 		{
 			handle_keys(game);
+			draw_bg(game);
 			render_viewport(game);
 			if (game->keys[MAP] == 1)
 				draw_minimap(game);
-			mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
-				game->tex[T_WIN].img, 0, 0);
-			// update_lighting()
+			mlx_put_image_to_window(game->mlx, game->win,
+				game->img[T_WIN].img, 0, 0);
 		}
 		if (game->keys[MOUSE] == 0)
-			mlx_string_put(game->mlx_ptr, game->win_ptr, 4, 26, WHITE,
+			mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
 				"MOUSE DISABLED");
 		display_fps_counter(game);
-		// if (out_of_bounds((t_point){(int)game->player.pos.x, (int)game->player.pos.y}))
-		// 	cleanup(game, 0, "cub3D: Out of bounds\n");
 	}
 	return (0);
 }
@@ -1051,13 +1093,13 @@ void	init_game_struct(t_game *game)
 	int	i;
 
 	i = 0;
-	while (i < (int)(sizeof(game->tex) / sizeof(*game->tex)))
+	while (i < (int)(sizeof(game->img) / sizeof(*game->img)))
 	{
-		game->tex[i].img = NULL;
+		game->img[i].img = NULL;
 		i++;
 	}
-	game->mlx_ptr = NULL;
-	game->win_ptr = NULL;
+	game->mlx = NULL;
+	game->win = NULL;
 	game->frame.fps_str = NULL;
 }
 
@@ -1067,13 +1109,13 @@ int	init_game(t_game *game)
 	// game->map.size.y = (n columns);
 	// game->map.grid = malloc(game->map.size.y * sizeof(int *));
 	init_game_struct(game);
-	game->mlx_ptr = mlx_init();
-	if (game->mlx_ptr == NULL)
+	game->mlx = mlx_init();
+	if (game->mlx == NULL)
 		return (-1);
-	game->win_ptr = mlx_new_window(game->mlx_ptr, RES_X, RES_Y, "cub3D");
-	if (game->win_ptr == NULL)
+	game->win = mlx_new_window(game->mlx, RES_X, RES_Y, "cub3D");
+	if (game->win == NULL)
 		return (-1);
-	if (init_img(game->mlx_ptr, &game->tex[T_WIN], RES_X, RES_Y) == -1)
+	if (init_img(game->mlx, &game->img[T_WIN], RES_X, RES_Y) == -1)
 		return (-1);
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
 		|| init_bg(game, BLACK, 0x2C2E33) == -1)
@@ -1085,32 +1127,34 @@ int	init_game(t_game *game)
 	game->light.min = 0.25;
 	game->light.max = 2.5;
 	game->light.ambient = 0.25;
-	mlx_mouse_move(game->mlx_ptr, game->win_ptr, RES_X * 0.5, RES_Y * 0.5);
+	mlx_mouse_move(game->mlx, game->win, RES_X * 0.5, RES_Y * 0.5);
 	return (0);
 }
 
-int mwheel(unsigned int key, int x, int y, t_game *game)
+int	mwheel(unsigned int key, int x, int y, t_game *game)
 {
 	const float	step = 0.1;
-	const int	pitch_limit = RES_Y * 0.5;
+	const int	limit = RES_Y * 0.5;
 
 	(void)x;
 	(void)y;
 	if (key == 4 && game->player.zoom < 2)
 	{
 		game->player.zoom += step;
-		if (game->player.pitch != pitch_limit && game->player.pitch != -pitch_limit)
-			game->player.pitch *= game->player.zoom / (game->player.zoom - step);
+		if (game->player.pitch != limit && game->player.pitch != -limit)
+			game->player.pitch *= game->player.zoom
+				/ (game->player.zoom - step);
 	}
 	else if (key == 5 && game->player.zoom > 1)
 	{
 		game->player.zoom -= step;
-		if (game->player.pitch != pitch_limit && game->player.pitch != -pitch_limit)
-			game->player.pitch *= game->player.zoom / (game->player.zoom + step);
-		if (game->player.pitch > pitch_limit)
-			game->player.pitch = pitch_limit;
-		else if (game->player.pitch < -pitch_limit)
-			game->player.pitch = -pitch_limit;
+		if (game->player.pitch != limit && game->player.pitch != -limit)
+			game->player.pitch *= game->player.zoom
+				/ (game->player.zoom + step);
+		if (game->player.pitch > limit)
+			game->player.pitch = limit;
+		else if (game->player.pitch < -limit)
+			game->player.pitch = -limit;
 	}
 	return (0);
 }
@@ -1122,11 +1166,11 @@ int	main(int ac, char **av)
 	validate_input(ac, av);
 	if (init_game(&game) == -1)
 		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
-	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
-	mlx_hook(game.win_ptr, KeyRelease, KeyReleaseMask, &key_release, &game);
-	mlx_hook(game.win_ptr, ButtonPress, ButtonPressMask, &mwheel, &game);
-	mlx_hook(game.win_ptr, DestroyNotify, StructureNotifyMask, &exit_game, &game);
-	mlx_loop_hook(game.mlx_ptr, &game_loop, &game);
-	mlx_loop(game.mlx_ptr);
+	mlx_hook(game.win, KeyPress, KeyPressMask, &key_press, &game);
+	mlx_hook(game.win, KeyRelease, KeyReleaseMask, &key_release, &game);
+	mlx_hook(game.win, ButtonPress, ButtonPressMask, &mwheel, &game);
+	mlx_hook(game.win, DestroyNotify, StructureNotifyMask, &exit_game, &game);
+	mlx_loop_hook(game.mlx, &game_loop, &game);
+	mlx_loop(game.mlx);
 	return (0);
 }
