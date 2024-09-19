@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/16 17:24:51 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/19 22:14:57 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,14 +119,21 @@ typedef struct s_player
 	int				pitch;
 }					t_player;
 
+typedef struct s_enemy
+{
+	t_fpoint		pos;
+	t_fpoint		dist;
+}					t_enemy;
+
 typedef struct s_frame_data
 {
 	struct timeval	current;
 	struct timeval	last;
+	char			*fps_str;
 	long			elapsed;
 	float			time;
 	unsigned int	fps_target;
-	char			*fps_str;
+	int				fps;
 }					t_frame_data;
 
 typedef struct s_map
@@ -145,15 +152,15 @@ typedef struct s_light
 
 typedef struct s_ray
 {
-	t_point			pix;
+	double			line_height;
 	t_fpoint		map;
 	t_fpoint		dir;
 	t_fpoint		side_dist;
 	t_fpoint		delta_dist;
 	float			wall_dist;
+	t_point			pix;
 	t_point			step;
 	int				side;
-	double			line_height;
 	int				draw_start;
 	int				draw_end;
 }					t_ray;
@@ -173,6 +180,7 @@ typedef struct s_game
 	void			*win;
 	t_frame_data	frame;
 	t_player		player;
+	t_enemy			enemy;
 	t_light			light;
 	char			keys[32];
 	t_map			map;

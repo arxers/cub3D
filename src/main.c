@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/16 18:43:53 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/20 01:53:08 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,7 +250,7 @@ void	draw_line(t_img *img, t_point start, t_point end, unsigned int color)
 	err = -d.y;
 	if (d.x > d.y)
 		err = d.x;
-	err /= 2;
+	err *= 0.5;
 	max = 1000;
 	while ((start.x != end.x || start.y != end.y) && max > 0)
 	{
@@ -454,7 +454,7 @@ void	change_target_fps(unsigned int key, t_game *game)
 	}
 	else if (key == XK_bracketright)
 	{
-		if (game->frame.fps_target < 90)
+		if (game->frame.fps_target < 60)
 		{
 			game->frame.fps_target += 30;
 			game->frame.time = 1000.0 / game->frame.fps_target;
@@ -584,15 +584,29 @@ void	calculate_movement(t_game *game, float *move_x, float *move_y)
 
 void	normalize_movement(float *move_x, float *move_y)
 {
-	float	length;
+	float	len_sq;
+	float	multiplier;
 
-	length = sqrt(*move_x * *move_x + *move_y * *move_y);
-	if (length > 0)
+	len_sq = (*move_x * *move_x) + (*move_y * *move_y);
+	if (len_sq > 0)
 	{
-		*move_x /= length;
-		*move_y /= length;
+		multiplier = 1.0f / sqrt(len_sq);
+		*move_x *= multiplier;
+		*move_y *= multiplier;
 	}
 }
+
+// void	normalize_movement(float *move_x, float *move_y)
+// {
+// 	float	length;
+
+// 	length = sqrt(*move_x * *move_x + *move_y * *move_y);
+// 	if (length > 0)
+// 	{
+// 		*move_x /= length;
+// 		*move_y /= length;
+// 	}
+// }
 
 void	check_collision(t_game *game, t_fpoint new_pos, t_fpoint move, float radius)
 {
@@ -751,7 +765,6 @@ int	a_second_has_passed(void)
 
 int	should_render_frame(t_game *game)
 {
-	static int	fps = 0;
 	long		elapsed;
 
 	gettimeofday(&game->frame.current, NULL);
@@ -759,13 +772,13 @@ int	should_render_frame(t_game *game)
 		+ (game->frame.current.tv_usec - game->frame.last.tv_usec) * 0.001;
 	if (elapsed >= game->frame.time)
 	{
-		fps++;
+		game->frame.fps++;
 		game->frame.last = game->frame.current;
 		if (a_second_has_passed())
 		{
 			ft_free(&game->frame.fps_str);
-			game->frame.fps_str = ft_itoa(fps);
-			fps = 0;
+			game->frame.fps_str = ft_itoa(game->frame.fps);
+			game->frame.fps = 0;
 		}
 		return (1);
 	}
@@ -784,8 +797,11 @@ void	draw_minimap(t_game *game)
 	draw_map_tiles(&game->img[T_MAP]);
 	draw_map_player(&game->img[T_MAP], game->player,
 		(t_point){0, 0});
+	draw_circle(&game->img[T_MAP],
+		(t_point){(int)(game->enemy.pos.x * (float)MAP_CELL_SIZE),
+			(int)((game->enemy.pos.y * (float)MAP_CELL_SIZE))}, MAP_CELL_SIZE * 0.25, RED);
 	put_img((t_point){0, 0,}, &game->img[T_MAP_BG], &game->img[T_MAP_MASK]);
-	put_img((t_point){-player_pos.x + center + 20, -player_pos.y + center},
+	put_img((t_point){-player_pos.x + center + 8, -player_pos.y + center},
 		&game->img[T_MAP], &game->img[T_MAP_MASK]);
 	put_img(game->map.offset, &game->img[T_MAP_MASK],
 		&game->img[T_WIN]);
@@ -829,7 +845,7 @@ float	set_intensity(t_light *light, float dist)
 	return (intensity);
 }
 
-void	assign_texture(t_game *game, t_ray *r, t_texture_map *tex)
+void	assign_wall_texture(t_game *game, t_ray *r, t_texture_map *tex)
 {
 	tex->wall_tex = NULL;
 	if (g_map[(int)r->map.y][(int)r->map.x] == 2)
@@ -880,10 +896,9 @@ int	dda(t_ray *r)
 	}
 }
 
-void	vertical_slice_loop(t_game *game, t_ray *r, t_texture_map *tex)
+void	draw_wall_slices(t_game *game, t_ray *r, t_texture_map *tex)
 {
 	float			intensity;
-	unsigned int	color;
 
 	intensity = set_intensity(&game->light, r->wall_dist * game->player.zoom);
 	tex->tex_step = 1.0 * WALL / r->line_height;
@@ -894,10 +909,10 @@ void	vertical_slice_loop(t_game *game, t_ray *r, t_texture_map *tex)
 	while (r->pix.y < r->draw_end)
 	{
 		tex->coords.y = (int)tex->hit.y & (WALL - 1);
-		color = get_pixel(tex->wall_tex, tex->coords.x, tex->coords.y);
-		color = darken(color, intensity);
 		tex->hit.y += tex->tex_step;
-		set_pixel(&game->img[T_WIN], r->pix.x, r->pix.y, color);
+		set_pixel(&game->img[T_WIN], r->pix.x, r->pix.y,
+			darken(get_pixel(tex->wall_tex, tex->coords.x, tex->coords.y),
+				intensity));
 		r->pix.y++;
 	}
 }
@@ -941,7 +956,7 @@ void	calculate_wall_projection(t_game *game, t_ray *r, t_texture_map *tex)
 	tex->coords.x = (int)(tex->hit.x * WALL);
 }
 
-void	calculate_ray_step(t_game *game, t_ray *r)
+void	set_ray_step_direction(t_game *game, t_ray *r)
 {
 	if (r->dir.x < 0)
 	{
@@ -981,12 +996,12 @@ void	render_viewport(t_game *game)
 		r.map.x = (int)game->player.pos.x;
 		r.map.y = (int)game->player.pos.y;
 		set_ray_direction(game, &r, r.pix.x * camera_x_factor - 1);
-		calculate_ray_step(game, &r);
+		set_ray_step_direction(game, &r);
 		if (dda(&r) == -1)
 			return ;
 		calculate_wall_projection(game, &r, &tex);
-		assign_texture(game, &r, &tex);
-		vertical_slice_loop(game, &r, &tex);
+		assign_wall_texture(game, &r, &tex);
+		draw_wall_slices(game, &r, &tex);
 		r.pix.x++;
 	}
 }
@@ -1016,6 +1031,103 @@ void	draw_bg(t_game *game)
 			/ (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
 }
 
+void	update_enemy_pos(t_game *game)
+{
+	const float	speed = 0.02;
+	float		dist_sq;
+	float		normalized_speed;
+
+	game->enemy.dist.x = game->player.pos.x - game->enemy.pos.x;
+	game->enemy.dist.y = game->player.pos.y - game->enemy.pos.y;
+	dist_sq = game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y;
+	if (dist_sq < 0.5)
+	{
+		printf("i found you\n");
+		return ;
+	}
+	normalized_speed = speed / sqrtf(dist_sq);
+	game->enemy.pos.x += game->enemy.dist.x * normalized_speed;
+	game->enemy.pos.y += game->enemy.dist.y * normalized_speed;
+	printf("i smell you\nenemy.pos.x: %f, enemy.pos.y: %f\n",
+		game->enemy.pos.x, game->enemy.pos.y);
+}
+
+void render_enemy_sprite(t_game *game)
+{
+	float dist;
+	float dot;
+	float cross;
+	float screen_x;
+
+	// Calculate distance from player to enemy
+	dist = sqrt(game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y);
+	
+	// Dot product to check if the enemy is in front of the player
+	dot = game->player.dir.x * game->enemy.dist.x + game->player.dir.y * game->enemy.dist.y;
+	
+	// Cross product for horizontal offset
+	cross = (game->player.plane.y * game->enemy.dist.y) + (game->player.plane.x * game->enemy.dist.x);
+
+	// Only render if the enemy is in front
+	if (dot < 0)
+	{
+		screen_x = (RES_X * 0.5) * (1 + (cross * 2.0) / dot);
+		
+		// Adjust scaling based on distance with a constant factor
+		float scale_factor = (game->img[T_EAST].size.x / dist) * 0.1; // Adjust scaling_constant as needed
+		if (scale_factor < 0.5) scale_factor = 0.5; // Prevent scaling too small
+
+		// Create a t_fpoint for scaling
+		t_fpoint scale = { scale_factor * game->player.zoom, scale_factor * game->player.zoom}; // Uniform scaling
+
+		// Use put_img_scale to render the image with the calculated scale
+		put_img_scale((t_point){screen_x, ((RES_Y * 0.5) * (1 + game->player.height) - game->player.pitch)}, 
+			&game->img[T_EAST], &game->img[T_WIN], scale);
+	}
+}
+
+
+
+// void render_enemy(t_game *game)
+// {
+// 	const float base_size = 200; // Base size of the enemy
+// 	float dist;
+// 	float dot;
+// 	float cross;
+// 	float screen_x;
+
+// 	// Calculate the distance from the player to the enemy
+// 	dist = sqrt(game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y);
+	
+// 	// Dot product to check if the enemy is in front of the player
+// 	dot = game->player.dir.x * game->enemy.dist.x + game->player.dir.y * game->enemy.dist.y;
+	
+// 	// Cross product for horizontal offset
+// 	cross = (game->player.plane.y * game->enemy.dist.y) + (game->player.plane.x * game->enemy.dist.x);
+	
+// 	// Only render if the enemy is in front
+// 	if (dot < 0)
+// 	{
+// 		screen_x = (RES_X * 0.5) * (1 + (cross * 2.0) / dot);
+		
+// 		// Adjust the size based on distance
+// 		float size = base_size / dist; // You can modify this formula to change scaling behavior
+
+// 		draw_circle(&game->img[T_WIN], (t_point){screen_x, ((RES_Y * 0.5) * (1 + game->player.height) - game->player.pitch)}, size, RED);
+// 	}
+// }
+
+
+// void render_enemy(t_game *game)
+// {
+// 	const float size = 200;
+// 	float		dist_sq;
+
+// 	dist_sq = game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y;
+// 	if (dist_sq > 0)
+// 		draw_circle(&game->img[T_WIN], (t_point){RES_X * 0.5, RES_Y * 0.5}, size / dist_sq, RED);
+// }
+
 int	game_loop(t_game *game)
 {
 	if (game->keys[MOUSE] && !game->keys[PAUSE])
@@ -1034,6 +1146,8 @@ int	game_loop(t_game *game)
 			render_viewport(game);
 			if (game->keys[MAP] == 1)
 				draw_minimap(game);
+			update_enemy_pos(game);
+			render_enemy_sprite(game);
 			mlx_put_image_to_window(game->mlx, game->win,
 				game->img[T_WIN].img, 0, 0);
 		}
@@ -1069,12 +1183,12 @@ void	init_player(t_player *player)
 {
 	t_fpoint	pos;
 
-	pos.x = 1;
-	pos.y = 1;
+	pos.x = 3;
+	pos.y = 4;
 	player->pitch = 0;
 	player->pos.x = pos.x + 0.5;
 	player->pos.y = pos.y + 0.5;
-	player->dir.x = -1;
+	player->dir.x = 1;
 	player->dir.y = 0;
 	player->zoom = 1.0;
 	player->height = 0.0;
@@ -1083,6 +1197,7 @@ void	init_player(t_player *player)
 
 void	init_framedata(t_frame_data *frame)
 {
+	frame->fps = 0;
 	frame->fps_target = 60;
 	frame->time = 1000.0 / frame->fps_target;
 	gettimeofday(&frame->last, NULL);
@@ -1101,6 +1216,12 @@ void	init_game_struct(t_game *game)
 	game->mlx = NULL;
 	game->win = NULL;
 	game->frame.fps_str = NULL;
+}
+
+void	init_enemy(t_enemy *enemy)
+{
+	enemy->pos.x = 5.5;
+	enemy->pos.y = 4.5;
 }
 
 int	init_game(t_game *game)
@@ -1124,6 +1245,7 @@ int	init_game(t_game *game)
 	init_framedata(&game->frame);
 	init_keystate(game);
 	init_player(&game->player);
+	init_enemy(&game->enemy);
 	game->light.min = 0.25;
 	game->light.max = 2.5;
 	game->light.ambient = 0.25;
