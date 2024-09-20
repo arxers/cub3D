@@ -80,6 +80,37 @@ unsigned int	get_pixel(t_img *img, int x, int y)
 	return (*(unsigned int *)src);
 }
 
+void	put_img_scale_mid(t_point offset, t_img *src, t_img *dst, t_fpoint scale)
+{
+	t_fpoint	src_pos;
+	t_point		dst_pos;
+	t_point		center_src;
+
+	scale.x = 1.0 / scale.x;
+	scale.y = 1.0 / scale.y;
+
+	center_src.x = src->size.x * 0.5;
+	center_src.y = src->size.y * 0.5;
+
+	dst_pos.y = 0;
+	while (dst_pos.y < dst->size.y)
+	{
+		dst_pos.x = 0;
+		while (dst_pos.x < dst->size.x)
+		{
+			src_pos.x = (dst_pos.x - offset.x - dst->size.x * 0.5) * scale.x + center_src.x;
+			src_pos.y = (dst_pos.y - offset.y - dst->size.y * 0.5) * scale.y + center_src.y;
+			if (src_pos.x >= 0 && src_pos.x < src->size.x
+				&& src_pos.y >= 0 && src_pos.y < src->size.y)
+				set_pixel(dst, dst_pos.x, dst_pos.y,
+					get_pixel(src, src_pos.x, src_pos.y));
+			dst_pos.x++;
+		}
+		dst_pos.y++;
+	}
+}
+
+
 void	put_img_scale(t_point offset, t_img *src, t_img *dst, t_fpoint scale)
 {
 	t_fpoint	src_pos;
@@ -148,6 +179,7 @@ int	load_xpms(t_game *game)
 	load_xpm(game->mlx, "textures/door.xpm", &game->img[T_DOOR_CLOSE]);
 	load_xpm(game->mlx, "textures/shift_tab.xpm", &game->img[T_PAUSE]);
 	load_xpm(game->mlx, "textures/bg_dither.xpm", &game->img[T_DITHER]);
+	load_xpm(game->mlx, "textures/enemy.xpm", &game->img[T_ENEMY]);
 	return (0);
 }
 
@@ -1033,7 +1065,7 @@ void	draw_bg(t_game *game)
 
 void	update_enemy_pos(t_game *game)
 {
-	const float	speed = 0.02;
+	const float	speed = 0.00;
 	float		dist_sq;
 	float		normalized_speed;
 
@@ -1042,49 +1074,103 @@ void	update_enemy_pos(t_game *game)
 	dist_sq = game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y;
 	if (dist_sq < 0.5)
 	{
-		printf("i found you\n");
+		// printf("i found you\n");
 		return ;
 	}
 	normalized_speed = speed / sqrtf(dist_sq);
 	game->enemy.pos.x += game->enemy.dist.x * normalized_speed;
 	game->enemy.pos.y += game->enemy.dist.y * normalized_speed;
-	printf("i smell you\nenemy.pos.x: %f, enemy.pos.y: %f\n",
-		game->enemy.pos.x, game->enemy.pos.y);
+	// printf("i smell you\nenemy.pos.x: %f, enemy.pos.y: %f\n",
+		// game->enemy.pos.x, game->enemy.pos.y);
 }
+
+void set_ray_to_enemy(t_game *game, t_ray *r)
+{
+    r->dir.x = game->enemy.dist.x;
+    r->dir.y = game->enemy.dist.y;
+    r->map.x = (int)game->player.pos.x;
+    r->map.y = (int)game->player.pos.y;
+    r->delta_dist.x = fabsf(1 / r->dir.x);
+    r->delta_dist.y = fabsf(1 / r->dir.y);
+    set_ray_step_direction(game, r);
+}
+
+
+int dda_to_enemy(t_game *game, t_ray *r)
+{
+    while (1)
+    {
+        if (r->side_dist.x < r->side_dist.y)
+        {
+            r->side_dist.x += r->delta_dist.x;
+            r->map.x += r->step.x;
+            r->side = VERTICAL;
+        }
+        else
+        {
+            r->side_dist.y += r->delta_dist.y;
+            r->map.y += r->step.y;
+            r->side = HORIZONTAL;
+        }
+        if (out_of_bounds(r->map))
+            return (-1);
+        if (g_map[(int)r->map.y][(int)r->map.x] > 0)
+            return (0);
+        // Check if the ray has reached the enemy's position
+		printf("r->map.x: %f, r->map.y:%f\n", r->map.x, r->map.y);
+		printf("game->enemy.pos.x: %f, game->enemy.pos.y: %f\n", game->enemy.pos.x, game->enemy.pos.y);
+		printf("game->enemy.dist.x: %f, game->enemy.dist.y: %f\n", game->enemy.dist.x, game->enemy.dist.y);
+        if ((int)r->map.x == (int)game->enemy.dist.x && (int)r->map.y == (int)game->enemy.dist.y)
+            return (1);
+    }
+}
+
 
 void render_enemy_sprite(t_game *game)
 {
-	float dist;
-	float dot;
-	float cross;
-	float screen_x;
+    float dist_sqrt;
+    float dot;
+    float cross;
+    float screen_x;
+    float screen_y;
+    t_ray r;
 
-	// Calculate distance from player to enemy
-	dist = sqrt(game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y);
-	
-	// Dot product to check if the enemy is in front of the player
-	dot = game->player.dir.x * game->enemy.dist.x + game->player.dir.y * game->enemy.dist.y;
-	
-	// Cross product for horizontal offset
-	cross = (game->player.plane.y * game->enemy.dist.y) + (game->player.plane.x * game->enemy.dist.x);
+    // Calculate distance from player to enemy
+    dist_sqrt = sqrt(game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y);
+    
+    // Dot product to check if the enemy is in front of the player
+    dot = game->player.dir.x * game->enemy.dist.x + game->player.dir.y * game->enemy.dist.y;
+    
+    // Cross product for horizontal offset
+    cross = (game->player.plane.y * game->enemy.dist.y) + (game->player.plane.x * game->enemy.dist.x);
 
-	// Only render if the enemy is in front
-	if (dot < 0)
-	{
-		screen_x = (RES_X * 0.5) * (1 + (cross * 2.0) / dot);
-		
-		// Adjust scaling based on distance with a constant factor
-		float scale_factor = (game->img[T_EAST].size.x / dist) * 0.1; // Adjust scaling_constant as needed
-		if (scale_factor < 0.5) scale_factor = 0.5; // Prevent scaling too small
+    // Only render if the enemy is in front
+    if (dot < 0)
+    {
+        screen_x = ((RES_X * 0.5) * (1 + (cross * 2.0) / dot)) - RES_X * 0.5;
+        screen_y = (((RES_Y * 0.5) * (1 + game->player.height) - game->player.pitch) - RES_Y * 0.5);
+        
+        // Adjust scaling based on distance with a constant factor
+        float scale_factor = (game->img[T_EAST].size.x / dist_sqrt) * 0.1; // Adjust scaling_constant as needed
+        if (scale_factor < 0.1)
+            scale_factor = 0.1; // Prevent scaling too small
 
-		// Create a t_fpoint for scaling
-		t_fpoint scale = { scale_factor * game->player.zoom, scale_factor * game->player.zoom}; // Uniform scaling
+        // Create a t_fpoint for scaling
+        t_fpoint scale = {scale_factor * 2 * game->player.zoom, scale_factor * 2 * game->player.zoom}; // Uniform scaling
 
-		// Use put_img_scale to render the image with the calculated scale
-		put_img_scale((t_point){screen_x, ((RES_Y * 0.5) * (1 + game->player.height) - game->player.pitch)}, 
-			&game->img[T_EAST], &game->img[T_WIN], scale);
-	}
+        // Set up the ray to the enemy
+        set_ray_to_enemy(game, &r);
+
+        // Perform DDA to check for intersection
+        if (dda_to_enemy(game, &r) == 1)
+        {
+            // Use put_img_scale to render the image with the calculated scale
+            put_img_scale_mid((t_point){screen_x, screen_y}, 
+                &game->img[T_ENEMY], &game->img[T_WIN], scale);
+        }
+    }
 }
+
 
 
 

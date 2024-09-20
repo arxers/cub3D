@@ -67,6 +67,7 @@ typedef enum e_texture
 	T_DOOR_CLOSE,
 	T_PAUSE,
 	T_DITHER,
+	T_ENEMY,
 }					t_texture;
 
 typedef enum e_keystate
