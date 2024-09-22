@@ -179,7 +179,14 @@ int	load_xpms(t_game *game)
 	load_xpm(game->mlx, "textures/door.xpm", &game->img[T_DOOR_CLOSE]);
 	load_xpm(game->mlx, "textures/shift_tab.xpm", &game->img[T_PAUSE]);
 	load_xpm(game->mlx, "textures/bg_dither.xpm", &game->img[T_DITHER]);
-	load_xpm(game->mlx, "textures/enemy.xpm", &game->img[T_ENEMY]);
+	load_xpm(game->mlx, "textures/xeno0.xpm", &game->img[T_XENO0]);
+	load_xpm(game->mlx, "textures/xeno1.xpm", &game->img[T_XENO1]);
+	load_xpm(game->mlx, "textures/xeno2.xpm", &game->img[T_XENO2]);
+	load_xpm(game->mlx, "textures/xeno3.xpm", &game->img[T_XENO3]);
+	load_xpm(game->mlx, "textures/xeno4.xpm", &game->img[T_XENO4]);
+	load_xpm(game->mlx, "textures/xeno5.xpm", &game->img[T_XENO5]);
+	load_xpm(game->mlx, "textures/xeno6.xpm", &game->img[T_XENO6]);
+	load_xpm(game->mlx, "textures/xeno7.xpm", &game->img[T_XENO7]);
 	return (0);
 }
 
@@ -774,6 +781,28 @@ void	init_keystate(t_game *game)
 	game->keys[MOUSE] = 1;
 }
 
+int a_hundred_milliseconds_have_passed(void)
+{
+    static struct timeval start_time;
+    struct timeval current_time;
+    long ms_elapsed;
+
+    if (start_time.tv_sec == 0 && start_time.tv_usec == 0)
+    {
+        gettimeofday(&start_time, NULL);
+        return 0;
+    }
+    gettimeofday(&current_time, NULL);
+    ms_elapsed = (current_time.tv_sec - start_time.tv_sec) * 1000;
+    ms_elapsed += (current_time.tv_usec - start_time.tv_usec) / 1000;
+    if (ms_elapsed >= 100)
+    {
+        start_time = current_time;
+        return 1;
+    }
+    return 0;
+}
+
 int	a_second_has_passed(void)
 {
 	static struct timeval	start_time;
@@ -1065,7 +1094,7 @@ void	draw_bg(t_game *game)
 
 void	update_enemy_pos(t_game *game)
 {
-	const float	speed = 0.00;
+	const float	speed = 0.04;
 	float		dist_sq;
 	float		normalized_speed;
 
@@ -1084,10 +1113,16 @@ void	update_enemy_pos(t_game *game)
 		// game->enemy.pos.x, game->enemy.pos.y);
 }
 
+
 void set_ray_to_enemy(t_game *game, t_ray *r)
 {
-    r->dir.x = game->enemy.dist.x;
-    r->dir.y = game->enemy.dist.y;
+	float	magnitude;
+
+    r->dir.x = game->enemy.pos.x - game->player.pos.x;
+    r->dir.y = game->enemy.pos.y - game->player.pos.y;
+	magnitude = sqrtf(r->dir.x * r->dir.x + r->dir.y * r->dir.y);
+	r->dir.x /= magnitude;
+	r->dir.y /= magnitude;
     r->map.x = (int)game->player.pos.x;
     r->map.y = (int)game->player.pos.y;
     r->delta_dist.x = fabsf(1 / r->dir.x);
@@ -1098,6 +1133,9 @@ void set_ray_to_enemy(t_game *game, t_ray *r)
 
 int dda_to_enemy(t_game *game, t_ray *r)
 {
+	if ((int)game->enemy.pos.x == (int)game->player.pos.x
+		&& (int)game->enemy.pos.y == (int)game->player.pos.y)
+		return (1);
     while (1)
     {
         if (r->side_dist.x < r->side_dist.y)
@@ -1116,59 +1154,51 @@ int dda_to_enemy(t_game *game, t_ray *r)
             return (-1);
         if (g_map[(int)r->map.y][(int)r->map.x] > 0)
             return (0);
-        // Check if the ray has reached the enemy's position
-		printf("r->map.x: %f, r->map.y:%f\n", r->map.x, r->map.y);
-		printf("game->enemy.pos.x: %f, game->enemy.pos.y: %f\n", game->enemy.pos.x, game->enemy.pos.y);
-		printf("game->enemy.dist.x: %f, game->enemy.dist.y: %f\n", game->enemy.dist.x, game->enemy.dist.y);
-        if ((int)r->map.x == (int)game->enemy.dist.x && (int)r->map.y == (int)game->enemy.dist.y)
+        if ((int)r->map.x == (int)game->enemy.pos.x && (int)r->map.y == (int)game->enemy.pos.y)
             return (1);
     }
 }
 
+void	update_enemy_sprite(t_game *game)
+{
+	if (game->enemy.frame == T_XENO_END)
+		game->enemy.frame = T_XENO0;
+	game->enemy.img = game->img[game->enemy.frame];
+	game->enemy.frame++;
+}
 
 void render_enemy_sprite(t_game *game)
 {
-    float dist_sqrt;
-    float dot;
-    float cross;
-    float screen_x;
-    float screen_y;
-    t_ray r;
+	float	dist_sqrt;
+	float	dot;
+	float	cross;
+	float	screen_x;
+	float	screen_y;
+	t_ray	r;
+	t_fpoint	scale;
+	float	scale_factor;
 
-    // Calculate distance from player to enemy
-    dist_sqrt = sqrt(game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y);
-    
-    // Dot product to check if the enemy is in front of the player
-    dot = game->player.dir.x * game->enemy.dist.x + game->player.dir.y * game->enemy.dist.y;
-    
-    // Cross product for horizontal offset
-    cross = (game->player.plane.y * game->enemy.dist.y) + (game->player.plane.x * game->enemy.dist.x);
-
-    // Only render if the enemy is in front
+	dist_sqrt = sqrt(game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y);
+	dot = game->player.dir.x * game->enemy.dist.x + game->player.dir.y * game->enemy.dist.y;
+	cross = (game->player.plane.y * game->enemy.dist.y) + (game->player.plane.x * game->enemy.dist.x);
     if (dot < 0)
-    {
-        screen_x = ((RES_X * 0.5) * (1 + (cross * 2.0) / dot)) - RES_X * 0.5;
-        screen_y = (((RES_Y * 0.5) * (1 + game->player.height) - game->player.pitch) - RES_Y * 0.5);
-        
-        // Adjust scaling based on distance with a constant factor
-        float scale_factor = (game->img[T_EAST].size.x / dist_sqrt) * 0.1; // Adjust scaling_constant as needed
-        if (scale_factor < 0.1)
-            scale_factor = 0.1; // Prevent scaling too small
-
-        // Create a t_fpoint for scaling
-        t_fpoint scale = {scale_factor * 2 * game->player.zoom, scale_factor * 2 * game->player.zoom}; // Uniform scaling
-
-        // Set up the ray to the enemy
-        set_ray_to_enemy(game, &r);
-
-        // Perform DDA to check for intersection
-        if (dda_to_enemy(game, &r) == 1)
-        {
-            // Use put_img_scale to render the image with the calculated scale
-            put_img_scale_mid((t_point){screen_x, screen_y}, 
-                &game->img[T_ENEMY], &game->img[T_WIN], scale);
-        }
-    }
+	{
+		screen_x = ((RES_X * 0.5) * (1 + (cross * 2.0) / dot)) - RES_X * 0.5;
+		screen_y = (((RES_Y * 0.5) * (1 + game->player.height) - game->player.pitch) - RES_Y * 0.5);
+		scale_factor = (game->img[T_EAST].size.x / dist_sqrt) * game->player.zoom * 0.1;
+		if (scale_factor < 0.1)
+			scale_factor = 0.1;
+		scale.x = scale_factor;
+		scale.y = scale_factor;
+		set_ray_to_enemy(game, &r);
+		if (dda_to_enemy(game, &r) == 1)
+		{
+			if (a_hundred_milliseconds_have_passed())
+				update_enemy_sprite(game);
+			put_img_scale_mid((t_point){screen_x, screen_y},
+				&game->enemy.img, &game->img[T_WIN], scale);
+		}
+	}
 }
 
 
@@ -1230,10 +1260,10 @@ int	game_loop(t_game *game)
 			handle_keys(game);
 			draw_bg(game);
 			render_viewport(game);
-			if (game->keys[MAP] == 1)
-				draw_minimap(game);
 			update_enemy_pos(game);
 			render_enemy_sprite(game);
+			if (game->keys[MAP] == 1)
+				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
 				game->img[T_WIN].img, 0, 0);
 		}
@@ -1269,13 +1299,13 @@ void	init_player(t_player *player)
 {
 	t_fpoint	pos;
 
-	pos.x = 3;
-	pos.y = 4;
+	pos.x = 13;
+	pos.y = 22;
 	player->pitch = 0;
 	player->pos.x = pos.x + 0.5;
 	player->pos.y = pos.y + 0.5;
-	player->dir.x = 1;
-	player->dir.y = 0;
+	player->dir.x = 0;
+	player->dir.y = -1;
 	player->zoom = 1.0;
 	player->height = 0.0;
 	init_player_plane(player);
@@ -1306,8 +1336,9 @@ void	init_game_struct(t_game *game)
 
 void	init_enemy(t_enemy *enemy)
 {
-	enemy->pos.x = 5.5;
-	enemy->pos.y = 4.5;
+	enemy->pos.x = 13.5;
+	enemy->pos.y = 1.5;
+	enemy->frame = T_XENO0;
 }
 
 int	init_game(t_game *game)

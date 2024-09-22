@@ -67,7 +67,15 @@ typedef enum e_texture
 	T_DOOR_CLOSE,
 	T_PAUSE,
 	T_DITHER,
-	T_ENEMY,
+	T_XENO0,
+	T_XENO1,
+	T_XENO2,
+	T_XENO3,
+	T_XENO4,
+	T_XENO5,
+	T_XENO6,
+	T_XENO7,
+	T_XENO_END
 }					t_texture;
 
 typedef enum e_keystate
@@ -124,6 +132,8 @@ typedef struct s_enemy
 {
 	t_fpoint		pos;
 	t_fpoint		dist;
+	t_img			img;
+	int				frame;
 }					t_enemy;
 
 typedef struct s_frame_data
