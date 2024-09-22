@@ -42,6 +42,35 @@ int	g_map[24][24] =
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
+void	ft_destroy_image(void *mlx_ptr, t_img *img)
+{
+	if (mlx_ptr && img->img)
+		mlx_destroy_image(mlx_ptr, img->img);
+	img->img = NULL;
+}
+
+int	cleanup(t_game *game, unsigned char status, char *msg)
+{
+	int	i;
+
+	i = 0;
+	while (i < (int)(sizeof(game->img) / sizeof(*game->img)))
+	{
+		ft_destroy_image(game->mlx, &game->img[i]);
+		i++;
+	}
+	if (game->win)
+		mlx_destroy_window(game->mlx, game->win);
+	game->win = NULL;
+	if (game->mlx)
+		mlx_destroy_display(game->mlx);
+	ft_free_void(&game->mlx);
+	ft_free(&game->frame.fps_str);
+	if (msg)
+		ft_putstr_fd(msg, 2);
+	exit(status);
+}
+
 int	init_img(void *mlx_ptr, t_img *img, int width, int height)
 {
 	img->img = mlx_new_image(mlx_ptr, width, height);
@@ -88,10 +117,8 @@ void	put_img_scale_mid(t_point offset, t_img *src, t_img *dst, t_fpoint scale)
 
 	scale.x = 1.0 / scale.x;
 	scale.y = 1.0 / scale.y;
-
 	center_src.x = src->size.x * 0.5;
 	center_src.y = src->size.y * 0.5;
-
 	dst_pos.y = 0;
 	while (dst_pos.y < dst->size.y)
 	{
@@ -187,6 +214,8 @@ int	load_xpms(t_game *game)
 	load_xpm(game->mlx, "textures/xeno5.xpm", &game->img[T_XENO5]);
 	load_xpm(game->mlx, "textures/xeno6.xpm", &game->img[T_XENO6]);
 	load_xpm(game->mlx, "textures/xeno7.xpm", &game->img[T_XENO7]);
+	// printf("game->img[T_XENO7].size.x: %i, game->img[T_XENO7].size.x: %i\n", game->img[T_XENO7].size.x, game->img[T_XENO7].size.y);
+	// cleanup(game, 1, "lol\n");
 	return (0);
 }
 
@@ -350,35 +379,6 @@ void	validate_input(int ac, char **av)
 	(void)av;
 }
 
-void	ft_destroy_image(void *mlx_ptr, t_img *img)
-{
-	if (mlx_ptr && img->img)
-		mlx_destroy_image(mlx_ptr, img->img);
-	img->img = NULL;
-}
-
-int	cleanup(t_game *game, unsigned char status, char *msg)
-{
-	int	i;
-
-	i = 0;
-	while (i < (int)(sizeof(game->img) / sizeof(*game->img)))
-	{
-		ft_destroy_image(game->mlx, &game->img[i]);
-		i++;
-	}
-	if (game->win)
-		mlx_destroy_window(game->mlx, game->win);
-	game->win = NULL;
-	if (game->mlx)
-		mlx_destroy_display(game->mlx);
-	ft_free_void(&game->mlx);
-	ft_free(&game->frame.fps_str);
-	if (msg)
-		ft_putstr_fd(msg, 2);
-	exit(status);
-}
-
 t_point	center(t_point origin, t_point size)
 {
 	origin.x -= size.x * 0.5;
@@ -446,6 +446,7 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 		return (-1);
 	game->map.offset.x = RES_X - game->img[T_MAP_MASK].size.x - RES_X / 50;
 	game->map.offset.y = RES_X / 50;
+	game->map.enemy_toggle = 1;
 	draw_rectangle(&game->img[T_MAP_BG], (t_point){0, 0}, game->img[T_MAP_MASK].size,
 		BLACK);
 	draw_diagonal_lines(&game->img[T_MAP_BG], game->img[T_MAP_MASK].size, 0x333333);
@@ -809,7 +810,7 @@ int	a_second_has_passed(void)
 	struct timeval			current_time;
 	long					seconds_elapsed;
 
-	if (start_time.tv_sec == 0)
+	if (start_time.tv_sec == 0 && start_time.tv_usec == 0)
 	{
 		gettimeofday(&start_time, NULL);
 		return (0);
@@ -838,6 +839,7 @@ int	should_render_frame(t_game *game)
 		if (a_second_has_passed())
 		{
 			ft_free(&game->frame.fps_str);
+			// game->map.enemy_toggle = !game->map.enemy_toggle;
 			game->frame.fps_str = ft_itoa(game->frame.fps);
 			game->frame.fps = 0;
 		}
@@ -858,9 +860,10 @@ void	draw_minimap(t_game *game)
 	draw_map_tiles(&game->img[T_MAP]);
 	draw_map_player(&game->img[T_MAP], game->player,
 		(t_point){0, 0});
-	draw_circle(&game->img[T_MAP],
-		(t_point){(int)(game->enemy.pos.x * (float)MAP_CELL_SIZE),
-			(int)((game->enemy.pos.y * (float)MAP_CELL_SIZE))}, MAP_CELL_SIZE * 0.25, RED);
+	if (game->map.enemy_toggle)
+		draw_circle(&game->img[T_MAP],
+			(t_point){(int)(game->enemy.pos.x * (float)MAP_CELL_SIZE),
+				(int)((game->enemy.pos.y * (float)MAP_CELL_SIZE))}, MAP_CELL_SIZE * 0.5, MAP_COLOR);
 	put_img((t_point){0, 0,}, &game->img[T_MAP_BG], &game->img[T_MAP_MASK]);
 	put_img((t_point){-player_pos.x + center + 8, -player_pos.y + center},
 		&game->img[T_MAP], &game->img[T_MAP_MASK]);
@@ -1102,15 +1105,10 @@ void	update_enemy_pos(t_game *game)
 	game->enemy.dist.y = game->player.pos.y - game->enemy.pos.y;
 	dist_sq = game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y;
 	if (dist_sq < 0.5)
-	{
-		// printf("i found you\n");
-		return ;
-	}
+		cleanup(game, 1, "YOU DIED\n");
 	normalized_speed = speed / sqrtf(dist_sq);
 	game->enemy.pos.x += game->enemy.dist.x * normalized_speed;
 	game->enemy.pos.y += game->enemy.dist.y * normalized_speed;
-	// printf("i smell you\nenemy.pos.x: %f, enemy.pos.y: %f\n",
-		// game->enemy.pos.x, game->enemy.pos.y);
 }
 
 
@@ -1161,10 +1159,10 @@ int dda_to_enemy(t_game *game, t_ray *r)
 
 void	update_enemy_sprite(t_game *game)
 {
-	if (game->enemy.frame == T_XENO_END)
-		game->enemy.frame = T_XENO0;
 	game->enemy.img = game->img[game->enemy.frame];
 	game->enemy.frame++;
+	if (game->enemy.frame == T_XENO_END)
+		game->enemy.frame = T_XENO0;
 }
 
 void render_enemy_sprite(t_game *game)
@@ -1181,6 +1179,11 @@ void render_enemy_sprite(t_game *game)
 	dist_sqrt = sqrt(game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y);
 	dot = game->player.dir.x * game->enemy.dist.x + game->player.dir.y * game->enemy.dist.y;
 	cross = (game->player.plane.y * game->enemy.dist.y) + (game->player.plane.x * game->enemy.dist.x);
+	if (a_hundred_milliseconds_have_passed())
+	{
+		game->map.enemy_toggle = !game->map.enemy_toggle;
+		update_enemy_sprite(game);
+	}
     if (dot < 0)
 	{
 		screen_x = ((RES_X * 0.5) * (1 + (cross * 2.0) / dot)) - RES_X * 0.5;
@@ -1193,8 +1196,6 @@ void render_enemy_sprite(t_game *game)
 		set_ray_to_enemy(game, &r);
 		if (dda_to_enemy(game, &r) == 1)
 		{
-			if (a_hundred_milliseconds_have_passed())
-				update_enemy_sprite(game);
 			put_img_scale_mid((t_point){screen_x, screen_y},
 				&game->enemy.img, &game->img[T_WIN], scale);
 		}
@@ -1334,11 +1335,12 @@ void	init_game_struct(t_game *game)
 	game->frame.fps_str = NULL;
 }
 
-void	init_enemy(t_enemy *enemy)
+void	init_enemy(t_game *game)
 {
-	enemy->pos.x = 13.5;
-	enemy->pos.y = 1.5;
-	enemy->frame = T_XENO0;
+	game->enemy.pos.x = 13.5;
+	game->enemy.pos.y = 1.5;
+	game->enemy.frame = T_XENO0;
+	game->enemy.img = game->img[T_XENO0];
 }
 
 int	init_game(t_game *game)
@@ -1362,7 +1364,7 @@ int	init_game(t_game *game)
 	init_framedata(&game->frame);
 	init_keystate(game);
 	init_player(&game->player);
-	init_enemy(&game->enemy);
+	init_enemy(game);
 	game->light.min = 0.25;
 	game->light.max = 2.5;
 	game->light.ambient = 0.25;

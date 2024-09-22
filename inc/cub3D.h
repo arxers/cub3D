@@ -152,6 +152,7 @@ typedef struct s_map
 	int				**grid;
 	t_point			size;
 	t_point			offset;
+	int				enemy_toggle;
 }					t_map;
 
 typedef struct s_light
