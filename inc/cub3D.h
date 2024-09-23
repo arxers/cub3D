@@ -39,6 +39,7 @@
 # define MOV_SPD 0.001
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
+# define ENTITY_RADIUS 0.25
 
 // colors
 # define RED 0xFF0000
@@ -134,6 +135,7 @@ typedef struct s_enemy
 	t_fpoint		dist;
 	t_img			img;
 	int				frame;
+	int				seen;
 }					t_enemy;
 
 typedef struct s_frame_data

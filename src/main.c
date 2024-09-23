@@ -625,68 +625,54 @@ void	calculate_movement(t_game *game, float *move_x, float *move_y)
 void	normalize_movement(float *move_x, float *move_y)
 {
 	float	len_sq;
-	float	multiplier;
+	float	normalized_speed;
 
 	len_sq = (*move_x * *move_x) + (*move_y * *move_y);
 	if (len_sq > 0)
 	{
-		multiplier = 1.0f / sqrt(len_sq);
-		*move_x *= multiplier;
-		*move_y *= multiplier;
+		normalized_speed = 1.0 / sqrt(len_sq);
+		*move_x *= normalized_speed;
+		*move_y *= normalized_speed;
 	}
 }
 
-// void	normalize_movement(float *move_x, float *move_y)
-// {
-// 	float	length;
-
-// 	length = sqrt(*move_x * *move_x + *move_y * *move_y);
-// 	if (length > 0)
-// 	{
-// 		*move_x /= length;
-// 		*move_y /= length;
-// 	}
-// }
-
-void	check_collision(t_game *game, t_fpoint new_pos, t_fpoint move, float radius)
+void	check_collision(t_fpoint *pos, t_fpoint new_pos)
 {
 	t_fpoint	side;
 
-	if (move.x < 0)
-		side.x = -radius;
+	if (new_pos.x - pos->x < 0)
+		side.x = -ENTITY_RADIUS;
 	else
-		side.x = radius;
-	if (move.y < 0)
-		side.y = -radius;
+		side.x = ENTITY_RADIUS;
+	if (new_pos.y - pos->y < 0)
+		side.y = -ENTITY_RADIUS;
 	else
-		side.y = radius;
-	if (g_map[(int)(game->player.pos.y)][(int)(new_pos.x - radius)] < 1
-		&& g_map[(int)(game->player.pos.y - radius)][(int)(new_pos.x + side.x)] < 1
-		&& g_map[(int)(game->player.pos.y + radius)][(int)(new_pos.x + side.x)] < 1)
-		game->player.pos.x = new_pos.x;
-	if (g_map[(int)(new_pos.y - radius)][(int)(game->player.pos.x)] < 1
-		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x - radius)] < 1
-		&& g_map[(int)(new_pos.y + side.y)][(int)(game->player.pos.x + radius)] < 1)
-		game->player.pos.y = new_pos.y;
+		side.y = ENTITY_RADIUS;
+	if (g_map[(int)(pos->y)][(int)(new_pos.x - ENTITY_RADIUS)] < 1
+		&& g_map[(int)(pos->y - ENTITY_RADIUS)][(int)(new_pos.x + side.x)] < 1
+		&& g_map[(int)(pos->y + ENTITY_RADIUS)][(int)(new_pos.x + side.x)] < 1)
+		pos->x = new_pos.x;
+	if (g_map[(int)(new_pos.y - ENTITY_RADIUS)][(int)(pos->x)] < 1
+		&& g_map[(int)(new_pos.y + side.y)][(int)(pos->x - ENTITY_RADIUS)] < 1
+		&& g_map[(int)(new_pos.y + side.y)][(int)(pos->x + ENTITY_RADIUS)] < 1)
+		pos->y = new_pos.y;
 }
 
 void	handle_movement_xy(t_game *game, float speed)
 {
 	t_fpoint	move;
 	t_fpoint	new_pos;
-	float		radius;
 
 	if (!game->keys[UP] && !game->keys[DOWN]
 		&& !game->keys[LEFT] && !game->keys[RIGHT])
 		return ;
-	radius = 0.25;
 	move.x = 0;
 	move.y = 0;
 	calculate_movement(game, &move.x, &move.y);
 	normalize_movement(&move.x, &move.y);
 	new_pos.x = game->player.pos.x + move.x * speed;
 	new_pos.y = game->player.pos.y + move.y * speed;
-	check_collision(game, new_pos, move, radius);
+	check_collision(&game->player.pos, new_pos);
 }
 
 void	handle_movement_z(t_game *game)
@@ -1097,18 +1083,23 @@ void	draw_bg(t_game *game)
 
 void	update_enemy_pos(t_game *game)
 {
-	const float	speed = 0.04;
+	t_fpoint	new_pos;
 	float		dist_sq;
 	float		normalized_speed;
 
 	game->enemy.dist.x = game->player.pos.x - game->enemy.pos.x;
 	game->enemy.dist.y = game->player.pos.y - game->enemy.pos.y;
-	dist_sq = game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y;
-	if (dist_sq < 0.5)
-		cleanup(game, 1, "YOU DIED\n");
-	normalized_speed = speed / sqrtf(dist_sq);
-	game->enemy.pos.x += game->enemy.dist.x * normalized_speed;
-	game->enemy.pos.y += game->enemy.dist.y * normalized_speed;
+	// if (game->enemy.seen == 1)
+	// {
+		dist_sq = game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y;
+		if (dist_sq < 0.5)
+			cleanup(game, 1, "YOU DIED\n");
+		normalized_speed = (MOV_SPD * 2.1 * game->frame.time) / sqrtf(dist_sq);
+		new_pos.x = game->enemy.pos.x + game->enemy.dist.x * normalized_speed;
+		new_pos.y = game->enemy.pos.y + game->enemy.dist.y * normalized_speed;
+		check_collision(&game->enemy.pos, new_pos);
+	// 	return ;
+	// }
 }
 
 
@@ -1196,9 +1187,12 @@ void render_enemy_sprite(t_game *game)
 		set_ray_to_enemy(game, &r);
 		if (dda_to_enemy(game, &r) == 1)
 		{
+			game->enemy.seen = 1;
 			put_img_scale_mid((t_point){screen_x, screen_y},
 				&game->enemy.img, &game->img[T_WIN], scale);
 		}
+		else
+			game->enemy.seen = 0;
 	}
 }
 
@@ -1341,6 +1335,7 @@ void	init_enemy(t_game *game)
 	game->enemy.pos.y = 1.5;
 	game->enemy.frame = T_XENO0;
 	game->enemy.img = game->img[T_XENO0];
+	game->enemy.seen = 0;
 }
 
 int	init_game(t_game *game)
