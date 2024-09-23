@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/20 01:53:08 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/24 03:32:02 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1081,25 +1081,50 @@ void	draw_bg(t_game *game)
 			/ (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
 }
 
+int	d100(void)
+{
+	struct timeval	time;
+
+	gettimeofday(&time, NULL);
+	return (((time.tv_usec + 42) ^ 42) % 100);
+}
+
+void	hunt()
+{
+	int	seed;
+	
+	seed = d100();
+	if (seed >= 0 && seed <= 24)
+		printf("1\n");
+	else if (seed >= 25 && seed <= 49)
+		printf("2\n");
+	else if (seed >= 50 && seed <= 74)
+		printf("3\n");
+	else
+		printf("4\n");
+}
+
 void	update_enemy_pos(t_game *game)
 {
 	t_fpoint	new_pos;
 	float		dist_sq;
 	float		normalized_speed;
 
+	hunt();
 	game->enemy.dist.x = game->player.pos.x - game->enemy.pos.x;
 	game->enemy.dist.y = game->player.pos.y - game->enemy.pos.y;
-	// if (game->enemy.seen == 1)
-	// {
-		dist_sq = game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y;
-		if (dist_sq < 0.5)
-			cleanup(game, 1, "YOU DIED\n");
-		normalized_speed = (MOV_SPD * 2.1 * game->frame.time) / sqrtf(dist_sq);
-		new_pos.x = game->enemy.pos.x + game->enemy.dist.x * normalized_speed;
-		new_pos.y = game->enemy.pos.y + game->enemy.dist.y * normalized_speed;
-		check_collision(&game->enemy.pos, new_pos);
-	// 	return ;
-	// }
+	if (game->enemy.seen == 0)
+	{
+		return ;
+	}
+	dist_sq = game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y;
+	normalized_speed = (MOV_SPD * 2.1 * game->frame.time) / sqrtf(dist_sq);
+	if (dist_sq < 0.5)
+		return ;
+		// cleanup(game, 1, "YOU DIED\n");
+	new_pos.x = game->enemy.pos.x + game->enemy.dist.x * normalized_speed;
+	new_pos.y = game->enemy.pos.y + game->enemy.dist.y * normalized_speed;
+	check_collision(&game->enemy.pos, new_pos);
 }
 
 
