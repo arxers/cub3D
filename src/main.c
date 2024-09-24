@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/24 03:32:02 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/25 01:37:43 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1104,27 +1104,71 @@ void	hunt()
 		printf("4\n");
 }
 
+void set_player_look_at(t_player *player, t_fpoint enemy_pos)
+{
+    t_fpoint	dir;
+    float		magnitude;
+
+    dir.x = enemy_pos.x - player->pos.x;
+    dir.y = enemy_pos.y - player->pos.y;
+
+    magnitude = sqrtf(dir.x * dir.x + dir.y * dir.y);
+    if (magnitude != 0)
+    {
+        player->dir.x = dir.x / magnitude;
+        player->dir.y = dir.y / magnitude;
+    }
+    player->plane.x = -player->dir.y * 0.66;
+	player->plane.y = player->dir.x * 0.66;
+}
+
+void smooth_set_player_look_at(t_player *player, t_fpoint enemy_pos) {
+    t_fpoint target_direction;
+    float target_magnitude;
+
+    // Calculate the direction vector from the player to the enemy
+    target_direction.x = enemy_pos.x - player->pos.x;
+    target_direction.y = enemy_pos.y - player->pos.y;
+
+    // Normalize the target direction vector
+    target_magnitude = sqrtf(target_direction.x * target_direction.x + target_direction.y * target_direction.y);
+    if (target_magnitude != 0) {
+        target_direction.x /= target_magnitude;
+        target_direction.y /= target_magnitude;
+    }
+
+    // Smoothly interpolate between the current direction and the target direction
+    player->dir.x += (target_direction.x - player->dir.x) * 0.5;
+    player->dir.y += (target_direction.y - player->dir.y) * 0.5;
+
+    // Update the plane as well based on the new direction
+    player->plane.x = -player->dir.y * 0.66;
+    player->plane.y = player->dir.x * 0.66;
+}
+
 void	update_enemy_pos(t_game *game)
 {
 	t_fpoint	new_pos;
 	float		dist_sq;
 	float		normalized_speed;
 
-	hunt();
 	game->enemy.dist.x = game->player.pos.x - game->enemy.pos.x;
 	game->enemy.dist.y = game->player.pos.y - game->enemy.pos.y;
-	if (game->enemy.seen == 0)
-	{
-		return ;
-	}
+	// if (game->enemy.seen == 1)
+	// {
 	dist_sq = game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y;
 	normalized_speed = (MOV_SPD * 2.1 * game->frame.time) / sqrtf(dist_sq);
 	if (dist_sq < 0.5)
+	{
+		smooth_set_player_look_at(&game->player, game->enemy.pos);
 		return ;
-		// cleanup(game, 1, "YOU DIED\n");
+		cleanup(game, 1, "YOU DIED\n");
+	}
 	new_pos.x = game->enemy.pos.x + game->enemy.dist.x * normalized_speed;
 	new_pos.y = game->enemy.pos.y + game->enemy.dist.y * normalized_speed;
 	check_collision(&game->enemy.pos, new_pos);
+	// }
+
 }
 
 
@@ -1200,6 +1244,7 @@ void render_enemy_sprite(t_game *game)
 		game->map.enemy_toggle = !game->map.enemy_toggle;
 		update_enemy_sprite(game);
 	}
+	game->enemy.seen = 0;
     if (dot < 0)
 	{
 		screen_x = ((RES_X * 0.5) * (1 + (cross * 2.0) / dot)) - RES_X * 0.5;
@@ -1280,8 +1325,8 @@ int	game_loop(t_game *game)
 			handle_keys(game);
 			draw_bg(game);
 			render_viewport(game);
-			update_enemy_pos(game);
 			render_enemy_sprite(game);
+			update_enemy_pos(game);
 			if (game->keys[MAP] == 1)
 				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
@@ -1295,25 +1340,6 @@ int	game_loop(t_game *game)
 	return (0);
 }
 
-void	init_player_plane(t_player *player)
-{
-	if (player->dir.x != 0)
-	{
-		player->plane.x = 0;
-		if (player->dir.x > 0)
-			player->plane.y = 0.66;
-		else
-			player->plane.y = -0.66;
-	}
-	else
-	{
-		if (player->dir.y > 0)
-			player->plane.x = -0.66;
-		else
-			player->plane.x = 0.66;
-		player->plane.y = 0;
-	}
-}
 //x: left to right, y: top to bottom, starts from top left
 void	init_player(t_player *player)
 {
@@ -1326,9 +1352,10 @@ void	init_player(t_player *player)
 	player->pos.y = pos.y + 0.5;
 	player->dir.x = 0;
 	player->dir.y = -1;
+	player->plane.x = -player->dir.y * 0.66;
+	player->plane.y = player->dir.x * 0.66;
 	player->zoom = 1.0;
 	player->height = 0.0;
-	init_player_plane(player);
 }
 
 void	init_framedata(t_frame_data *frame)

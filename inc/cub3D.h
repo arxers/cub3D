@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/19 22:14:57 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/24 09:55:23 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@
 # define MOV_SPD 0.001
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
-# define ENTITY_RADIUS 0.25
+# define ENTITY_RADIUS 0.20
 
 // colors
 # define RED 0xFF0000
