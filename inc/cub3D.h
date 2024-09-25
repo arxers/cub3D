@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/24 09:55:23 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/26 04:14:33 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,8 @@
 # define MOV_SPD 0.001
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
-# define ENTITY_RADIUS 0.20
+# define PLAYER_RADIUS 0.20
+# define ENEMY_RADIUS 0.0
 
 // colors
 # define RED 0xFF0000
@@ -56,6 +57,7 @@ typedef enum e_texture
 {
 	T_WIN,
 	T_MAP,
+	T_MAP_TILES,
 	T_MAP_MASK,
 	T_MAP_BG,
 	T_CEILING,
@@ -97,6 +99,12 @@ typedef enum e_keystate
 	PAUSE
 }					t_keystate;
 
+typedef enum e_timer
+{
+	MS100,
+	MS1000
+}					t_timer;
+
 typedef struct s_fpoint
 {
 	float			x;
@@ -124,8 +132,8 @@ typedef struct s_player
 	t_fpoint		pos;
 	t_fpoint		plane;
 	t_fpoint		dir;
+	float			z;
 	float			zoom;
-	float			height;
 	int				pitch;
 }					t_player;
 
@@ -135,7 +143,7 @@ typedef struct s_enemy
 	t_fpoint		dist;
 	t_img			img;
 	int				frame;
-	int				seen;
+	int				eyes;
 }					t_enemy;
 
 typedef struct s_frame_data
