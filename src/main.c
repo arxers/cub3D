@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/25 01:37:43 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/25 19:41:07 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1236,7 +1236,7 @@ void render_enemy_sprite(t_game *game)
 	t_fpoint	scale;
 	float	scale_factor;
 
-	dist_sqrt = sqrt(game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y);
+	dist_sqrt = sqrtf(game->enemy.dist.x * game->enemy.dist.x + game->enemy.dist.y * game->enemy.dist.y);
 	dot = game->player.dir.x * game->enemy.dist.x + game->player.dir.y * game->enemy.dist.y;
 	cross = (game->player.plane.y * game->enemy.dist.y) + (game->player.plane.x * game->enemy.dist.x);
 	if (a_hundred_milliseconds_have_passed())
@@ -1248,7 +1248,7 @@ void render_enemy_sprite(t_game *game)
     if (dot < 0)
 	{
 		screen_x = ((RES_X * 0.5) * (1 + (cross * 2.0) / dot)) - RES_X * 0.5;
-		screen_y = (((RES_Y * 0.5) * (1 + game->player.height) - game->player.pitch) - RES_Y * 0.5);
+		screen_y = (((RES_Y * 0.5) * (1 + game->player.height / (dist_sqrt * 0.5)) - game->player.pitch) - RES_Y * 0.5);
 		scale_factor = (game->img[T_EAST].size.x / dist_sqrt) * game->player.zoom * 0.1;
 		if (scale_factor < 0.1)
 			scale_factor = 0.1;
@@ -1325,8 +1325,8 @@ int	game_loop(t_game *game)
 			handle_keys(game);
 			draw_bg(game);
 			render_viewport(game);
-			render_enemy_sprite(game);
 			update_enemy_pos(game);
+			render_enemy_sprite(game);
 			if (game->keys[MAP] == 1)
 				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
