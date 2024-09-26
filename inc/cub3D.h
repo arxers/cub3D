@@ -39,9 +39,9 @@
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
 # define PLAYER_SPD 0.001
-# define ENEMY_SPD 0.003
+# define ENEMY_SPD 0.0021
 # define PLAYER_RADIUS 0.20
-# define ENEMY_RADIUS 0.05
+# define ENEMY_RADIUS 0.00
 
 // colors
 # define RED 0xFF0000
@@ -143,6 +143,9 @@ typedef struct s_enemy
 {
 	t_fpoint		pos;
 	t_fpoint		dist;
+	t_fpoint		last_seen;
+	t_fpoint		last_dist;
+	t_fpoint		last_ppos;
 	t_img			img;
 	int				frame;
 	int				eyes;

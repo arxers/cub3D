@@ -28,7 +28,7 @@ int	g_map[24][24] = {
   {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,4,4,4,4,4,4,4,4,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -550,7 +550,7 @@ int	key_press(unsigned int key, t_game *game)
 		exit_game(game);
 	if (key == XK_p)
 		toggle_mouse(game);
-	if (key == XK_m)
+	if (key == XK_1)
 		game->keys[MAP] = !game->keys[MAP];
 	change_target_fps(key, game);
 	return (0);
@@ -860,9 +860,14 @@ void	draw_minimap(t_game *game)
 		draw_circle_outline(&game->img[T_MAP], ofs, MAP_CELL_SIZE * 0.5, BLACK);
 	}
 	put_img((t_point){0, 0,}, &game->img[T_MAP_BG], &game->img[T_MAP_MASK]);
+	if (game->enemy.last_ppos.x && game->enemy.last_ppos.y)
+		draw_line(&game->img[T_MAP], ofs, (t_point){(int)(game->enemy.last_ppos.x * MAP_CELL_SIZE), (int)(game->enemy.last_ppos.y * MAP_CELL_SIZE)}, RED);
 	put_img((t_point){-player_pos.x + center, -player_pos.y + center},
 		&game->img[T_MAP], &game->img[T_MAP_MASK]);
-	put_img(game->map.offset, &game->img[T_MAP_MASK], &game->img[T_WIN]);
+	if (game->keys[MAP] == 1)
+		put_img(game->map.offset, &game->img[T_MAP_MASK], &game->img[T_WIN]);
+	else
+		put_img((t_point){RES_X * 0.5 - game->img[T_MAP].size.x * 0.5, RES_Y * 0.5 - game->img[T_MAP].size.x * 0.5}, &game->img[T_MAP], &game->img[T_WIN]);
 }
 
 int	out_of_bounds(t_fpoint map)
@@ -1165,27 +1170,39 @@ void	hunt(t_game *game)
 
 void	update_enemy_pos(t_game *game)
 {
-	t_fpoint	new_pos;
 	float		dist_sq;
 	float		normalized_speed;
 
 	game->enemy.dist.x = game->player.pos.x - game->enemy.pos.x;
 	game->enemy.dist.y = game->player.pos.y - game->enemy.pos.y;
-	if (game->enemy.eyes == 0)
-		return (hunt(game));
-	printf("i see you\n");
 	dist_sq = game->enemy.dist.x * game->enemy.dist.x
 		+ game->enemy.dist.y * game->enemy.dist.y;
 	normalized_speed = (ENEMY_SPD * game->frame.time) / sqrtf(dist_sq);
+	if (game->enemy.eyes == 0
+		&& (game->enemy.last_seen.x == 0 && game->enemy.last_seen.y == 0))
+		return (hunt(game));
+	if (game->enemy.eyes == 1)
+	{
+		game->enemy.last_ppos.x = game->player.pos.x;
+		game->enemy.last_ppos.y = game->player.pos.y;
+		game->enemy.last_dist.x = game->enemy.dist.x;
+		game->enemy.last_dist.y = game->enemy.dist.y;
+	}
+	game->enemy.last_seen.x = game->enemy.pos.x + game->enemy.last_dist.x * normalized_speed;
+	game->enemy.last_seen.y = game->enemy.pos.y + game->enemy.last_dist.y * normalized_speed;
 	if (dist_sq < 0.5)
 	{
 		set_player_look_at(&game->player, game->enemy.pos);
 		// cleanup(game, 1, "i got you\n");
 		return ;
 	}
-	new_pos.x = game->enemy.pos.x + game->enemy.dist.x * normalized_speed;
-	new_pos.y = game->enemy.pos.y + game->enemy.dist.y * normalized_speed;
-	check_collision(&game->enemy.pos, new_pos, ENEMY_RADIUS);
+	if (check_collision(&game->enemy.pos, game->enemy.last_seen, ENEMY_RADIUS))
+	{
+		game->enemy.last_ppos.x = 0;
+		game->enemy.last_ppos.y = 0;
+		game->enemy.last_seen.x = 0;
+		game->enemy.last_seen.y = 0;
+	}
 }
 
 void	set_ray_to_enemy(t_game *game, t_ray *r)
@@ -1304,13 +1321,12 @@ int	game_loop(t_game *game)
 		}
 		else
 		{
+			update_enemy_pos(game);
 			handle_keys(game);
 			draw_bg(game);
 			render_viewport(game);
-			update_enemy_pos(game);
 			render_enemy_sprite(game);
-			if (game->keys[MAP] == 1)
-				draw_minimap(game);
+			draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
 				game->img[T_WIN].img, 0, 0);
 		}
@@ -1372,6 +1388,8 @@ void	init_enemy(t_game *game)
 	game->enemy.eyes = 0;
 	game->enemy.move_seed = 0;
 	game->enemy.move_inc = 0;
+	game->enemy.last_seen.x = 0;
+	game->enemy.last_seen.x = 0;
 }
 
 int	init_game(t_game *game)
