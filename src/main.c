@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/26 15:35:32 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/26 20:18:44 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,21 +17,21 @@ int	g_map_y = 24;
 int	g_map[24][24] = {
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,2,-2,-2,-2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1},
   {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1},
   {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,4,4,4,4,4,4,4,4,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -636,10 +636,12 @@ void	normalize_movement(float *move_x, float *move_y)
 	}
 }
 
-void	check_collision(t_fpoint *pos, t_fpoint new_pos, float radius)
+int	check_collision(t_fpoint *pos, t_fpoint new_pos, float radius)
 {
 	t_fpoint	side;
+	int			collision;
 
+	collision = 0;
 	if (new_pos.x - pos->x < 0)
 		side.x = -radius;
 	else
@@ -652,10 +654,15 @@ void	check_collision(t_fpoint *pos, t_fpoint new_pos, float radius)
 		&& g_map[(int)(pos->y - radius)][(int)(new_pos.x + side.x)] < 1
 		&& g_map[(int)(pos->y + radius)][(int)(new_pos.x + side.x)] < 1)
 		pos->x = new_pos.x;
+	else
+		collision = 1;
 	if (g_map[(int)(new_pos.y - radius)][(int)(pos->x)] < 1
 		&& g_map[(int)(new_pos.y + side.y)][(int)(pos->x - radius)] < 1
 		&& g_map[(int)(new_pos.y + side.y)][(int)(pos->x + radius)] < 1)
 		pos->y = new_pos.y;
+	else
+		collision = 1;
+	return (collision);
 }
 
 void	handle_movement_xy(t_game *game, float speed)
@@ -747,7 +754,7 @@ int	handle_keys(t_game *game)
 	run_speed = 1;
 	if (game->keys[RUN] == 1 && game->keys[UP])
 		run_speed = RUN_SPD;
-	handle_movement_xy(game, MOV_SPD * game->frame.time * run_speed);
+	handle_movement_xy(game, PLAYER_SPD * game->frame.time * run_speed);
 	handle_movement_z(game);
 	handle_pitch(game);
 	handle_yaw(game, ROT_SPD * game->frame.time);
@@ -770,7 +777,7 @@ void	init_keystate(t_game *game)
 
 int	delay_ms(unsigned int ms, t_timer id)
 {
-	static struct timeval	start_time[2] = {0};
+	static struct timeval	start_time[3] = {0};
 	struct timeval			current_time;
 	long					ms_elapsed;
 
@@ -836,24 +843,21 @@ int	should_render_frame(t_game *game)
 void	draw_minimap(t_game *game)
 {
 	t_fpoint	player_pos;
+	t_point		ofs;
 	const int	center = game->img[T_MAP_MASK].size.x * 0.5;
 
 	player_pos.x = (int)((game->player.pos.x * MAP_CELL_SIZE));
 	player_pos.y = (int)((game->player.pos.y * MAP_CELL_SIZE));
+	ofs.x = (int)(game->enemy.pos.x * MAP_CELL_SIZE);
+	ofs.y = (int)(game->enemy.pos.y * MAP_CELL_SIZE);
 	if (game->map.update)
 		update_map_tiles(game);
 	put_img((t_point){0, 0}, &game->img[T_MAP_TILES], &game->img[T_MAP]);
 	draw_map_player(&game->img[T_MAP], game->player, (t_point){0, 0});
 	if (game->map.enemy_toggle)
 	{
-		draw_circle(&game->img[T_MAP],
-			(t_point){(int)(game->enemy.pos.x * MAP_CELL_SIZE),
-			(int)((game->enemy.pos.y * MAP_CELL_SIZE))},
-			MAP_CELL_SIZE * 0.5, MAP_COLOR);
-		draw_circle_outline(&game->img[T_MAP],
-			(t_point){(int)(game->enemy.pos.x * MAP_CELL_SIZE),
-			(int)((game->enemy.pos.y * MAP_CELL_SIZE))},
-			MAP_CELL_SIZE * 0.5, BLACK);
+		draw_circle(&game->img[T_MAP], ofs, MAP_CELL_SIZE * 0.5, MAP_COLOR);
+		draw_circle_outline(&game->img[T_MAP], ofs, MAP_CELL_SIZE * 0.5, BLACK);
 	}
 	put_img((t_point){0, 0,}, &game->img[T_MAP_BG], &game->img[T_MAP_MASK]);
 	put_img((t_point){-player_pos.x + center, -player_pos.y + center},
@@ -1093,21 +1097,6 @@ int	d100(void)
 	return (((time.tv_usec + 42) ^ 42) % 100);
 }
 
-void	hunt()
-{
-	int	seed;
-
-	seed = d100();
-	if (seed >= 0 && seed <= 24)
-		printf("1\n");
-	else if (seed >= 25 && seed <= 49)
-		printf("2\n");
-	else if (seed >= 50 && seed <= 74)
-		printf("3\n");
-	else
-		printf("4\n");
-}
-
 void	set_player_look_at(t_player *player, t_fpoint enemy_pos)
 {
 	t_fpoint	new_dir;
@@ -1128,6 +1117,52 @@ void	set_player_look_at(t_player *player, t_fpoint enemy_pos)
 	player->plane.y = player->dir.x * 0.66;
 }
 
+void	move_enemy(t_game *game, int direction)
+{
+	t_fpoint	new_pos;
+	t_point		step_dir;
+
+	step_dir.x = 0;
+	step_dir.y = 0;
+	if (direction == UP)
+		step_dir.y = -1;
+	else if (direction == DOWN)
+		step_dir.y = 1;
+	else if (direction == LEFT)
+		step_dir.x = -1;
+	else if (direction == RIGHT)
+		step_dir.x = 1;
+	new_pos.x = game->enemy.pos.x + step_dir.x * ENEMY_SPD * game->frame.time;
+	new_pos.y = game->enemy.pos.y + step_dir.y * ENEMY_SPD * game->frame.time;
+	if (check_collision(&game->enemy.pos, new_pos, ENEMY_RADIUS))
+	{
+		game->enemy.move_seed = 0;
+		game->enemy.move_inc = 0;
+	}
+}
+
+void	hunt(t_game *game)
+{
+	if (game->enemy.move_seed == 0)
+		game->enemy.move_seed = d100();
+	else
+	{
+		if (delay_ms(3000 + game->enemy.move_inc, TIMER_ENEMY))
+		{
+			game->enemy.move_inc += 500;
+			game->enemy.move_seed = d100();
+		}
+	}
+	if (game->enemy.move_seed >= 0 && game->enemy.move_seed <= 24)
+		move_enemy(game, UP);
+	else if (game->enemy.move_seed >= 25 && game->enemy.move_seed <= 49)
+		move_enemy(game, DOWN);
+	else if (game->enemy.move_seed >= 50 && game->enemy.move_seed <= 74)
+		move_enemy(game, LEFT);
+	else
+		move_enemy(game, RIGHT);
+}
+
 void	update_enemy_pos(t_game *game)
 {
 	t_fpoint	new_pos;
@@ -1137,16 +1172,15 @@ void	update_enemy_pos(t_game *game)
 	game->enemy.dist.x = game->player.pos.x - game->enemy.pos.x;
 	game->enemy.dist.y = game->player.pos.y - game->enemy.pos.y;
 	if (game->enemy.eyes == 0)
-		printf("i smell you\n");
-	else
-		printf("i see you\n");
+		return (hunt(game));
+	printf("i see you\n");
 	dist_sq = game->enemy.dist.x * game->enemy.dist.x
 		+ game->enemy.dist.y * game->enemy.dist.y;
-	normalized_speed = (MOV_SPD * 2.1 * game->frame.time) / sqrtf(dist_sq);
+	normalized_speed = (ENEMY_SPD * game->frame.time) / sqrtf(dist_sq);
 	if (dist_sq < 0.5)
 	{
 		set_player_look_at(&game->player, game->enemy.pos);
-		cleanup(game, 1, "i got you\n");
+		// cleanup(game, 1, "i got you\n");
 		return ;
 	}
 	new_pos.x = game->enemy.pos.x + game->enemy.dist.x * normalized_speed;
@@ -1336,6 +1370,8 @@ void	init_enemy(t_game *game)
 	game->enemy.frame = T_XENO0;
 	game->enemy.img = game->img[T_XENO0];
 	game->enemy.eyes = 0;
+	game->enemy.move_seed = 0;
+	game->enemy.move_inc = 0;
 }
 
 int	init_game(t_game *game)

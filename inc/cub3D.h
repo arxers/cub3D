@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/26 13:33:59 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/26 20:10:26 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,12 @@
 
 // movement multipliers
 # define MOUSE_SEN 0.0025
-# define MOV_SPD 0.001
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
+# define PLAYER_SPD 0.001
+# define ENEMY_SPD 0.003
 # define PLAYER_RADIUS 0.20
-# define ENEMY_RADIUS 0.0
+# define ENEMY_RADIUS 0.05
 
 // colors
 # define RED 0xFF0000
@@ -102,7 +103,8 @@ typedef enum e_keystate
 typedef enum e_timer
 {
 	MS100,
-	MS1000
+	MS1000,
+	TIMER_ENEMY
 }					t_timer;
 
 typedef struct s_fpoint
@@ -144,6 +146,8 @@ typedef struct s_enemy
 	t_img			img;
 	int				frame;
 	int				eyes;
+	int				move_seed;
+	int				move_inc;
 }					t_enemy;
 
 typedef struct s_frame_data
