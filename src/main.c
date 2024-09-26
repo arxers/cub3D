@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/26 05:07:41 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/26 13:38:40 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -410,11 +410,13 @@ void	draw_tile(t_img *map, t_point origin, int tile)
 		draw_rectangle(map, origin, size, BLACK);
 }
 
-void	draw_map_tiles(t_img *map)
+void	update_map_tiles(t_game *game)
 {
 	t_point	count;
 	t_point	origin;
 
+	draw_rectangle(&game->img[T_MAP_TILES], (t_point){0, 0},
+		game->img[T_MAP_TILES].size, MAP_COLOR);
 	count.y = 0;
 	origin.y = 0;
 	while (count.y < g_map_y)
@@ -423,13 +425,14 @@ void	draw_map_tiles(t_img *map)
 		count.x = 0;
 		while (count.x < g_map_x)
 		{
-			draw_tile(map, origin, g_map[count.y][count.x]);
+			draw_tile(&game->img[T_MAP_TILES], origin, g_map[count.y][count.x]);
 			count.x++;
 			origin.x += MAP_CELL_SIZE;
 		}
 		count.y++;
 		origin.y += MAP_CELL_SIZE;
 	}
+	game->map.update = 0;
 }
 
 int	init_minimap(t_game *game, t_point map_grid_size)
@@ -453,9 +456,7 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 		game->img[T_MAP_MASK].size, BLACK);
 	draw_diagonal_lines(&game->img[T_MAP_BG],
 		game->img[T_MAP_MASK].size, 0x333333);
-	draw_rectangle(&game->img[T_MAP_TILES], (t_point){0, 0},
-		game->img[T_MAP_TILES].size, MAP_COLOR);
-	draw_map_tiles(&game->img[T_MAP_TILES]);
+	update_map_tiles(game);
 	return (0);
 }
 
@@ -839,13 +840,21 @@ void	draw_minimap(t_game *game)
 
 	player_pos.x = (int)((game->player.pos.x * MAP_CELL_SIZE));
 	player_pos.y = (int)((game->player.pos.y * MAP_CELL_SIZE));
+	if (game->map.update)
+		update_map_tiles(game);
 	put_img((t_point){0, 0}, &game->img[T_MAP_TILES], &game->img[T_MAP]);
 	draw_map_player(&game->img[T_MAP], game->player, (t_point){0, 0});
 	if (game->map.enemy_toggle)
+	{
 		draw_circle(&game->img[T_MAP],
 			(t_point){(int)(game->enemy.pos.x * MAP_CELL_SIZE),
 			(int)((game->enemy.pos.y * MAP_CELL_SIZE))},
 			MAP_CELL_SIZE * 0.5, MAP_COLOR);
+		draw_circle_outline(&game->img[T_MAP],
+			(t_point){(int)(game->enemy.pos.x * MAP_CELL_SIZE),
+			(int)((game->enemy.pos.y * MAP_CELL_SIZE))},
+			MAP_CELL_SIZE * 0.5, BLACK);
+	}
 	put_img((t_point){0, 0,}, &game->img[T_MAP_BG], &game->img[T_MAP_MASK]);
 	put_img((t_point){-player_pos.x + center, -player_pos.y + center},
 		&game->img[T_MAP], &game->img[T_MAP_MASK]);

@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/26 04:14:33 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/26 13:33:59 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,6 +163,7 @@ typedef struct s_map
 	t_point			size;
 	t_point			offset;
 	int				enemy_toggle;
+	int				update;
 }					t_map;
 
 typedef struct s_light
