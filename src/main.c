@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/26 13:38:40 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/26 15:35:32 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1309,7 +1309,7 @@ void	init_player(t_player *player)
 void	init_framedata(t_frame_data *frame)
 {
 	frame->fps = 0;
-	frame->fps_target = 60;
+	frame->fps_target = 30;
 	frame->time = 1000.0 / frame->fps_target;
 	gettimeofday(&frame->last, NULL);
 }
