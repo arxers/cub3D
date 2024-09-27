@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/27 19:08:23 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/27 19:43:19 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -581,7 +581,10 @@ int	out_of_bounds(t_fpoint map)
 
 int	dda_door(t_ray *r)
 {
-	while (1)
+	int	i;
+
+	i = 0;
+	while (i < 3)
 	{
 		if (r->side_dist.x < r->side_dist.y)
 		{
@@ -597,9 +600,12 @@ int	dda_door(t_ray *r)
 		}
 		if (out_of_bounds(r->map))
 			return (-1);
-		if (g_map[(int)r->map.y][(int)r->map.x] == 2)
-			return (0);
+		if (g_map[(int)r->map.y][(int)r->map.x] == 2
+			|| g_map[(int)r->map.y][(int)r->map.x] == -2)
+			return (1);
+		i++;
 	}
+	return (0);
 }
 
 void	set_ray_direction(t_game *game, t_ray *r, float camera_x)
@@ -649,12 +655,16 @@ void	interact(t_game *game)
 	t_ray			r;
 	const float		camera_x_factor = 2.0 / RES_X;
 
+	r.map.x = (int)game->player.pos.x;
+	r.map.y = (int)game->player.pos.y;
 	set_ray_direction(game, &r, RES_X * 0.5 * camera_x_factor - 1);
 	set_ray_step_direction(game, &r);
-	if (dda_door(&r) == -1)
-		return ;
-	printf("", r.map.x, r.map.y);
-	g_map[(int)r.map.y][(int)r.map.x] = !g_map[(int)r.map.y][(int)r.map.x];
+	if (dda_door(&r) == 1)
+	{
+		printf("x:%f :f%f\n", r.map.x, r.map.y);
+		game->map.update = 1;
+		g_map[(int)r.map.y][(int)r.map.x] = -g_map[(int)r.map.y][(int)r.map.x];
+	}
 	(void)game;
 }
 
@@ -933,6 +943,10 @@ int	should_render_frame(t_game *game)
 		game->frame.last = game->frame.current;
 		if (delay_ms(1000, MS1000))
 		{
+			// if (game->light.ambient == 1)
+			// 	game->light.ambient = 0.15;
+			// else if (game->light.ambient == 0.15)
+				// game->light.ambient = 1;
 			ft_free(&game->frame.fps_str);
 			game->frame.fps_str = ft_itoa(game->frame.fps);
 			game->frame.fps = 0;
@@ -1332,9 +1346,9 @@ int	dda_to_enemy(t_game *game, t_ray *r)
 void	update_enemy_sprite(t_game *game)
 {
 	game->enemy.img = game->img[game->enemy.frame];
-	game->enemy.frame++;
-	if (game->enemy.frame == T_XENO_END)
-		game->enemy.frame = T_XENO0;
+	game->enemy.frame--;
+	if (game->enemy.frame == T_XENO0 - 1)
+		game->enemy.frame = T_XENO7;
 }
 
 float	dot_product(t_fpoint a, t_fpoint b)
