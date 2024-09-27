@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/26 20:18:44 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/27 12:25:16 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -876,9 +876,12 @@ int	should_render_frame(t_game *game)
 void	draw_map_enemy(t_game *game)
 {
 	t_point		enemy_map_pos;
+	t_point		memory;
 
 	enemy_map_pos.x = (int)(game->enemy.pos.x * MAP_CELL_SIZE);
 	enemy_map_pos.y = (int)(game->enemy.pos.y * MAP_CELL_SIZE);
+	memory.x = (int)(game->enemy.memory.x * MAP_CELL_SIZE);
+	memory.y = (int)(game->enemy.last * MAP_CELL_SIZE);
 	if (delay_ms(200, TIMER_ENEMY_PATH))
 		draw_circle(&game->img[T_MAP_ENEMY_PATH], enemy_map_pos, 1, WHITE);
 	if (game->enemy.toggle_path)
@@ -888,6 +891,7 @@ void	draw_map_enemy(t_game *game)
 	draw_line(&game->img[T_MAP], enemy_map_pos,
 		(t_point){(int)(game->enemy.last_seen.x * MAP_CELL_SIZE),
 		(int)(game->enemy.last_seen.y * MAP_CELL_SIZE)}, RED);
+	draw_circle(&game->img[T_MAP], memory, 1, RED);
 	if (game->map.enemy_toggle)
 	{
 		draw_circle(&game->img[T_MAP], enemy_map_pos,
