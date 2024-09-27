@@ -39,7 +39,7 @@
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
 # define PLAYER_SPD 0.002
-# define ENEMY_SPD 0.002
+# define ENEMY_SPD 0.00
 # define PLAYER_RADIUS 0.20
 # define ENEMY_RADIUS 0.00
 

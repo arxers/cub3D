@@ -572,9 +572,88 @@ int	key_release(unsigned int key, t_game *game)
 	return (0);
 }
 
+int	out_of_bounds(t_fpoint map)
+{
+	if (map.x < 0 || map.y < 0 || map.x >= g_map_x || map.y >= g_map_y)
+		return (1);
+	return (0);
+}
+
+int	dda_door(t_ray *r)
+{
+	while (1)
+	{
+		if (r->side_dist.x < r->side_dist.y)
+		{
+			r->side_dist.x += r->delta_dist.x;
+			r->map.x += r->step.x;
+			r->side = VERTICAL;
+		}
+		else
+		{
+			r->side_dist.y += r->delta_dist.y;
+			r->map.y += r->step.y;
+			r->side = HORIZONTAL;
+		}
+		if (out_of_bounds(r->map))
+			return (-1);
+		if (g_map[(int)r->map.y][(int)r->map.x] == 2)
+			return (0);
+	}
+}
+
+void	set_ray_direction(t_game *game, t_ray *r, float camera_x)
+{
+	r->dir.x = game->player.dir.x * game->player.zoom
+		+ game->player.plane.x * camera_x;
+	r->dir.y = game->player.dir.y * game->player.zoom
+		+ game->player.plane.y * camera_x;
+	if (r->dir.x == 0)
+		r->delta_dist.x = 1E+37;
+	else
+		r->delta_dist.x = fabsf(1 / r->dir.x);
+	if (r->dir.y == 0)
+		r->delta_dist.y = 1E+37;
+	else
+		r->delta_dist.y = fabsf(1 / r->dir.y);
+}
+
+void	set_ray_step_direction(t_game *game, t_ray *r)
+{
+	if (r->dir.x < 0)
+	{
+		r->step.x = -1;
+		r->side_dist.x = (game->player.pos.x - r->map.x) * r->delta_dist.x;
+	}
+	else
+	{
+		r->step.x = 1;
+		r->side_dist.x = (r->map.x + 1.0 - game->player.pos.x)
+			* r->delta_dist.x;
+	}
+	if (r->dir.y < 0)
+	{
+		r->step.y = -1;
+		r->side_dist.y = (game->player.pos.y - r->map.y) * r->delta_dist.y;
+	}
+	else
+	{
+		r->step.y = 1;
+		r->side_dist.y = (r->map.y + 1.0 - game->player.pos.y)
+			* r->delta_dist.y;
+	}
+}
+
 void	interact(t_game *game)
 {
-	
+	t_ray			r;
+	const float		camera_x_factor = 2.0 / RES_X;
+
+	set_ray_direction(game, &r, RES_X * 0.5 * camera_x_factor - 1);
+	set_ray_step_direction(game, &r);
+	if (dda_door(&r) == -1)
+		return ;
+	g_map[(int)r.map.y][(int)r.map.x] = !g_map[(int)r.map.y][(int)r.map.x];
 	(void)game;
 }
 
@@ -915,13 +994,6 @@ void	draw_minimap(t_game *game)
 			&game->img[T_MAP], &game->img[T_WIN]);
 }
 
-int	out_of_bounds(t_fpoint map)
-{
-	if (map.x < 0 || map.y < 0 || map.x >= g_map_x || map.y >= g_map_y)
-		return (1);
-	return (0);
-}
-
 unsigned int	darken(unsigned int color, float factor)
 {
 	unsigned int	r;
@@ -1025,22 +1097,6 @@ void	draw_wall_slices(t_game *game, t_ray *r, t_texture_map *tex)
 	}
 }
 
-void	set_ray_direction(t_game *game, t_ray *r, float camera_x)
-{
-	r->dir.x = game->player.dir.x * game->player.zoom
-		+ game->player.plane.x * camera_x;
-	r->dir.y = game->player.dir.y * game->player.zoom
-		+ game->player.plane.y * camera_x;
-	if (r->dir.x == 0)
-		r->delta_dist.x = 1E+37;
-	else
-		r->delta_dist.x = fabsf(1 / r->dir.x);
-	if (r->dir.y == 0)
-		r->delta_dist.y = 1E+37;
-	else
-		r->delta_dist.y = fabsf(1 / r->dir.y);
-}
-
 void	calculate_wall_projection(t_game *game, t_ray *r, t_texture_map *tex)
 {
 	if (r->side == VERTICAL)
@@ -1064,37 +1120,11 @@ void	calculate_wall_projection(t_game *game, t_ray *r, t_texture_map *tex)
 	tex->coords.x = (int)(tex->hit.x * WALL);
 }
 
-void	set_ray_step_direction(t_game *game, t_ray *r)
-{
-	if (r->dir.x < 0)
-	{
-		r->step.x = -1;
-		r->side_dist.x = (game->player.pos.x - r->map.x) * r->delta_dist.x;
-	}
-	else
-	{
-		r->step.x = 1;
-		r->side_dist.x = (r->map.x + 1.0 - game->player.pos.x)
-			* r->delta_dist.x;
-	}
-	if (r->dir.y < 0)
-	{
-		r->step.y = -1;
-		r->side_dist.y = (game->player.pos.y - r->map.y) * r->delta_dist.y;
-	}
-	else
-	{
-		r->step.y = 1;
-		r->side_dist.y = (r->map.y + 1.0 - game->player.pos.y)
-			* r->delta_dist.y;
-	}
-}
-
 void	render_viewport(t_game *game)
 {
-	const float		camera_x_factor = 2.0 / RES_X;
 	t_texture_map	tex;
 	t_ray			r;
+	const float		camera_x_factor = 2.0 / RES_X;
 
 	if (out_of_bounds(game->player.pos))
 		return ;
