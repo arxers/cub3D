@@ -1334,7 +1334,7 @@ void	render_enemy(t_game *game)
 	game->enemy.eyes = 1;
 	dist_sqrt = sqrtf(game->enemy.dist.x * game->enemy.dist.x
 			+ game->enemy.dist.y * game->enemy.dist.y);
-	view.x = dot_product(game->player.dir, game->enemy.dist);
+	view.x = dot_product(game->player.dir, game->enemy.dist) * 0.9;
 	if (view.x >= 0)
 		return ;
 	view.y = dot_product(game->player.plane, game->enemy.dist);
