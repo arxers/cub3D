@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/27 15:52:38 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/27 19:08:23 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -653,6 +653,7 @@ void	interact(t_game *game)
 	set_ray_step_direction(game, &r);
 	if (dda_door(&r) == -1)
 		return ;
+	printf("", r.map.x, r.map.y);
 	g_map[(int)r.map.y][(int)r.map.x] = !g_map[(int)r.map.y][(int)r.map.x];
 	(void)game;
 }
@@ -1265,9 +1266,10 @@ void	update_enemy_pos(t_game *game)
 	}
 	game->enemy.memory.x = game->enemy.pos.x + game->enemy.last_dist.x * normalized_speed;
 	game->enemy.memory.y = game->enemy.pos.y + game->enemy.last_dist.y * normalized_speed;
-	if (dist_sq < 0.5)
+	if (dist_sq < 1)
 	{
 		set_player_look_at(&game->player, game->enemy.pos);
+		write(1, "\a", 1);
 		// cleanup(game, 1, "i got you\n");
 		return ;
 	}
