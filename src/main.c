@@ -92,8 +92,19 @@ void	set_pixel(t_img *img, int x, int y, unsigned int color)
 	const int	step = (img->bits_per_pixel / 8);
 	char		*dst;
 
+	if (x < 0 || y < 0 || x >= img->size.x || y >= img->size.y)
+		return ;
+	dst = img->addr + ((y * img->line_len) + x * step);
+	*(unsigned int *)dst = color;
+}
+
+void	set_pixel_alpha(t_img *img, int x, int y, unsigned int color)
+{
+	const int	step = (img->bits_per_pixel / 8);
+	char		*dst;
+
 	if (x < 0 || y < 0 || x >= img->size.x || y >= img->size.y
-		|| (color >> 24) & 0xFF)
+		|| (color >> 24) & 0xFF || color == MAGENTA)
 		return ;
 	dst = img->addr + ((y * img->line_len) + x * step);
 	*(unsigned int *)dst = color;
@@ -128,7 +139,7 @@ void	put_img_scale_mid(t_point ofs, t_img *src, t_img *dst, t_fpoint scale)
 			sp.y = (dp.y - ofs.y - dst->size.y * 0.5) * scale.y + s_mid.y;
 			if (sp.x >= 0 && sp.x < src->size.x
 				&& sp.y >= 0 && sp.y < src->size.y)
-				set_pixel(dst, dp.x, dp.y,
+				set_pixel_alpha(dst, dp.x, dp.y,
 					get_pixel(src, sp.x, sp.y));
 			dp.x++;
 		}
@@ -153,7 +164,7 @@ void	put_img_scale(t_point offset, t_img *src, t_img *dst, t_fpoint scale)
 			src_pos.y = (dst_pos.y - offset.y) * scale.y;
 			if (src_pos.x >= 0 && src_pos.x < src->size.x
 				&& src_pos.y >= 0 && src_pos.y < src->size.y)
-				set_pixel(dst, dst_pos.x, dst_pos.y,
+				set_pixel_alpha(dst, dst_pos.x, dst_pos.y,
 					get_pixel(src, src_pos.x, src_pos.y));
 			dst_pos.x++;
 		}
@@ -176,7 +187,7 @@ void	put_img(t_point offset, t_img *src, t_img *dst)
 			dst_pos.y = src_pos.y + offset.y;
 			if (dst_pos.x >= 0 && dst_pos.x < dst->size.x
 				&& dst_pos.y >= 0 && dst_pos.y < dst->size.y)
-				set_pixel(dst, dst_pos.x, dst_pos.y,
+				set_pixel_alpha(dst, dst_pos.x, dst_pos.y,
 					get_pixel(src, src_pos.x, src_pos.y));
 			src_pos.x++;
 		}
@@ -227,7 +238,7 @@ void	draw_rectangle(t_img *dst, t_point origin, t_point size,
 		x = 0;
 		while (x < size.x)
 		{
-			set_pixel(dst, x + origin.x, y + origin.y, color);
+			set_pixel_alpha(dst, x + origin.x, y + origin.y, color);
 			x++;
 		}
 		y++;
@@ -250,7 +261,7 @@ void	draw_circle(t_img *dst, t_point origin, int radius, unsigned int color)
 			d.x = p.x - origin.x;
 			d.y = p.y - origin.y;
 			if ((d.x * d.x) + (d.y * d.y) <= r_sq)
-				set_pixel(dst, p.x, p.y, color);
+				set_pixel_alpha(dst, p.x, p.y, color);
 			p.x++;
 		}
 		p.y++;
@@ -275,7 +286,7 @@ void	draw_circle_outline(t_img *dst, t_point origin, int radius,
 			d.y = p.y - origin.y;
 			if ((d.x * d.x) + (d.y * d.y) >= r_sq - radius + 1
 				&& (d.x * d.x) + (d.y * d.y) <= r_sq + radius - 1)
-				set_pixel(dst, p.x, p.y, color);
+				set_pixel_alpha(dst, p.x, p.y, color);
 			p.x++;
 		}
 		p.y++;
@@ -319,7 +330,7 @@ void	draw_line(t_img *img, t_point start, t_point end, unsigned int color)
 	while ((start.x != end.x || start.y != end.y) && max > 0)
 	{
 		brasenham(&err, &start, d, s);
-		set_pixel(img, start.x, start.y, color);
+		set_pixel_alpha(img, start.x, start.y, color);
 		max--;
 	}
 }
@@ -342,23 +353,23 @@ void	draw_diagonal_lines(t_img *img, t_point size, unsigned int color)
 	}
 }
 
-void	draw_map_player(t_img *img, t_player p, t_point origin)
+void	draw_map_player(t_img *img, t_player p)
 {
 	t_point			player_pos;
 	t_point			pointer_pos;
 	float			dir_radius;
 	float			dir_dist;
 
-	player_pos.x = (int)((p.pos.x * (float)MAP_CELL_SIZE) + origin.x);
-	player_pos.y = (int)((p.pos.y * (float)MAP_CELL_SIZE) + origin.y);
+	player_pos.x = (int)((p.pos.x * (float)MAP_CELL_SIZE));
+	player_pos.y = (int)((p.pos.y * (float)MAP_CELL_SIZE));
 	draw_circle(img, player_pos, MAP_CELL_SIZE * 0.15, WHITE);
 	draw_circle_outline(img, player_pos, MAP_CELL_SIZE * 0.25, WHITE);
 	dir_radius = MAP_CELL_SIZE * 0.15;
 	dir_dist = 0.25;
 	pointer_pos.x = (int)((p.pos.x + (p.dir.x * dir_dist * p.zoom))
-			* (float)MAP_CELL_SIZE) + origin.x;
+			* (float)MAP_CELL_SIZE);
 	pointer_pos.y = (int)((p.pos.y + (p.dir.y * dir_dist * p.zoom))
-			* (float)MAP_CELL_SIZE) + origin.y;
+			* (float)MAP_CELL_SIZE);
 	draw_circle(img, pointer_pos, dir_radius, WHITE);
 }
 
@@ -435,6 +446,24 @@ void	update_map_tiles(t_game *game)
 	game->map.update = 0;
 }
 
+void	fill_img(t_img *img, unsigned int color)
+{
+	int	x;
+	int	y;
+
+	y = 0;
+	while (y < img->size.y)
+	{
+		x = 0;
+		while (x < img->size.x)
+		{
+			set_pixel(img, x, y, color);
+			x++;
+		}
+		y++;
+	}
+}
+
 int	init_minimap(t_game *game, t_point map_grid_size)
 {
 	t_point	map;
@@ -445,12 +474,14 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 	mask.x = 24 * MAP_CELL_SIZE * 0.5;
 	mask.y = 24 * MAP_CELL_SIZE * 0.5;
 	if (init_img(game->mlx, &game->img[T_MAP], map.x, map.y) == -1
+		|| init_img(game->mlx, &game->img[T_MAP_ENEMY_PATH], map.x, map.y) == -1
 		|| init_img(game->mlx, &game->img[T_MAP_TILES], map.x, map.y) == -1
 		|| init_img(game->mlx, &game->img[T_MAP_MASK], mask.x, mask.y) == -1
 		|| init_img(game->mlx, &game->img[T_MAP_BG], mask.x, mask.y) == -1)
 		return (-1);
-	game->map.offset.x = RES_X - game->img[T_MAP_MASK].size.x - RES_X / 50;
-	game->map.offset.y = RES_X / 50;
+	fill_img(&game->img[T_MAP_ENEMY_PATH], MAGENTA);
+	game->map.offset.x = RES_X * 0.5 - game->img[T_MAP_MASK].size.x * 0.5;
+	game->map.offset.y = RES_Y - game->img[T_MAP_MASK].size.x - MAP_CELL_SIZE;
 	game->map.enemy_toggle = 1;
 	draw_rectangle(&game->img[T_MAP_BG], (t_point){0, 0},
 		game->img[T_MAP_MASK].size, BLACK);
@@ -552,6 +583,8 @@ int	key_press(unsigned int key, t_game *game)
 		toggle_mouse(game);
 	if (key == XK_1)
 		game->keys[MAP] = !game->keys[MAP];
+	if (key == XK_2)
+		game->enemy.toggle_path = !game->enemy.toggle_path;
 	change_target_fps(key, game);
 	return (0);
 }
@@ -777,7 +810,7 @@ void	init_keystate(t_game *game)
 
 int	delay_ms(unsigned int ms, t_timer id)
 {
-	static struct timeval	start_time[3] = {0};
+	static struct timeval	start_time[4] = {0};
 	struct timeval			current_time;
 	long					ms_elapsed;
 
@@ -840,34 +873,52 @@ int	should_render_frame(t_game *game)
 	return (0);
 }
 
+void	draw_map_enemy(t_game *game)
+{
+	t_point		enemy_map_pos;
+
+	enemy_map_pos.x = (int)(game->enemy.pos.x * MAP_CELL_SIZE);
+	enemy_map_pos.y = (int)(game->enemy.pos.y * MAP_CELL_SIZE);
+	if (delay_ms(200, TIMER_ENEMY_PATH))
+		draw_circle(&game->img[T_MAP_ENEMY_PATH], enemy_map_pos, 1, WHITE);
+	if (game->enemy.toggle_path)
+		put_img((t_point){0, 0},
+			&game->img[T_MAP_ENEMY_PATH], &game->img[T_MAP]);
+	if (game->enemy.last_seen.x && game->enemy.last_seen.y)
+	draw_line(&game->img[T_MAP], enemy_map_pos,
+		(t_point){(int)(game->enemy.last_seen.x * MAP_CELL_SIZE),
+		(int)(game->enemy.last_seen.y * MAP_CELL_SIZE)}, RED);
+	if (game->map.enemy_toggle)
+	{
+		draw_circle(&game->img[T_MAP], enemy_map_pos,
+			MAP_CELL_SIZE * 0.5, MAP_COLOR);
+		draw_circle_outline(&game->img[T_MAP], enemy_map_pos,
+			MAP_CELL_SIZE * 0.5, BLACK);
+	}
+}
+
 void	draw_minimap(t_game *game)
 {
 	t_fpoint	player_pos;
-	t_point		ofs;
+
 	const int	center = game->img[T_MAP_MASK].size.x * 0.5;
 
 	player_pos.x = (int)((game->player.pos.x * MAP_CELL_SIZE));
 	player_pos.y = (int)((game->player.pos.y * MAP_CELL_SIZE));
-	ofs.x = (int)(game->enemy.pos.x * MAP_CELL_SIZE);
-	ofs.y = (int)(game->enemy.pos.y * MAP_CELL_SIZE);
 	if (game->map.update)
 		update_map_tiles(game);
 	put_img((t_point){0, 0}, &game->img[T_MAP_TILES], &game->img[T_MAP]);
-	draw_map_player(&game->img[T_MAP], game->player, (t_point){0, 0});
-	if (game->map.enemy_toggle)
-	{
-		draw_circle(&game->img[T_MAP], ofs, MAP_CELL_SIZE * 0.5, MAP_COLOR);
-		draw_circle_outline(&game->img[T_MAP], ofs, MAP_CELL_SIZE * 0.5, BLACK);
-	}
+	draw_map_player(&game->img[T_MAP], game->player);
+	draw_map_enemy(game);
 	put_img((t_point){0, 0,}, &game->img[T_MAP_BG], &game->img[T_MAP_MASK]);
-	if (game->enemy.last_ppos.x && game->enemy.last_ppos.y)
-		draw_line(&game->img[T_MAP], ofs, (t_point){(int)(game->enemy.last_ppos.x * MAP_CELL_SIZE), (int)(game->enemy.last_ppos.y * MAP_CELL_SIZE)}, RED);
 	put_img((t_point){-player_pos.x + center, -player_pos.y + center},
 		&game->img[T_MAP], &game->img[T_MAP_MASK]);
 	if (game->keys[MAP] == 1)
 		put_img(game->map.offset, &game->img[T_MAP_MASK], &game->img[T_WIN]);
 	else
-		put_img((t_point){RES_X * 0.5 - game->img[T_MAP].size.x * 0.5, RES_Y * 0.5 - game->img[T_MAP].size.x * 0.5}, &game->img[T_MAP], &game->img[T_WIN]);
+		put_img((t_point){RES_X * 0.5 - game->img[T_MAP].size.x * 0.5,
+			RES_Y - game->img[T_MAP].size.x - MAP_CELL_SIZE},
+			&game->img[T_MAP], &game->img[T_WIN]);
 }
 
 int	out_of_bounds(t_fpoint map)
@@ -973,7 +1024,7 @@ void	draw_wall_slices(t_game *game, t_ray *r, t_texture_map *tex)
 	{
 		tex->coords.y = (int)tex->hit.y & (WALL - 1);
 		tex->hit.y += tex->tex_step;
-		set_pixel(&game->img[T_WIN], r->pix.x, r->pix.y,
+		set_pixel_alpha(&game->img[T_WIN], r->pix.x, r->pix.y,
 			darken(get_pixel(tex->wall_tex, tex->coords.x, tex->coords.y),
 				intensity));
 		r->pix.y++;
@@ -1152,9 +1203,9 @@ void	hunt(t_game *game)
 		game->enemy.move_seed = d100();
 	else
 	{
-		if (delay_ms(3000 + game->enemy.move_inc, TIMER_ENEMY))
+		if (delay_ms(1000 + game->enemy.move_inc, TIMER_ENEMY))
 		{
-			game->enemy.move_inc += 500;
+			game->enemy.move_inc += 1000;
 			game->enemy.move_seed = d100();
 		}
 	}
@@ -1179,29 +1230,31 @@ void	update_enemy_pos(t_game *game)
 		+ game->enemy.dist.y * game->enemy.dist.y;
 	normalized_speed = (ENEMY_SPD * game->frame.time) / sqrtf(dist_sq);
 	if (game->enemy.eyes == 0
-		&& (game->enemy.last_seen.x == 0 && game->enemy.last_seen.y == 0))
+		&& (game->enemy.memory.x == 0 && game->enemy.memory.y == 0))
 		return (hunt(game));
 	if (game->enemy.eyes == 1)
 	{
-		game->enemy.last_ppos.x = game->player.pos.x;
-		game->enemy.last_ppos.y = game->player.pos.y;
+		game->enemy.last_seen.x = game->player.pos.x;
+		game->enemy.last_seen.y = game->player.pos.y;
 		game->enemy.last_dist.x = game->enemy.dist.x;
 		game->enemy.last_dist.y = game->enemy.dist.y;
 	}
-	game->enemy.last_seen.x = game->enemy.pos.x + game->enemy.last_dist.x * normalized_speed;
-	game->enemy.last_seen.y = game->enemy.pos.y + game->enemy.last_dist.y * normalized_speed;
+	game->enemy.memory.x = game->enemy.pos.x + game->enemy.last_dist.x * normalized_speed;
+	game->enemy.memory.y = game->enemy.pos.y + game->enemy.last_dist.y * normalized_speed;
 	if (dist_sq < 0.5)
 	{
 		set_player_look_at(&game->player, game->enemy.pos);
 		// cleanup(game, 1, "i got you\n");
 		return ;
 	}
-	if (check_collision(&game->enemy.pos, game->enemy.last_seen, ENEMY_RADIUS))
+	if (((int)game->enemy.pos.x == (int)game->enemy.last_seen.x
+		&& (int)game->enemy.pos.y == (int)game->enemy.last_seen.y)
+		|| check_collision(&game->enemy.pos, game->enemy.memory, ENEMY_RADIUS))
 	{
-		game->enemy.last_ppos.x = 0;
-		game->enemy.last_ppos.y = 0;
 		game->enemy.last_seen.x = 0;
 		game->enemy.last_seen.y = 0;
+		game->enemy.memory.x = 0;
+		game->enemy.memory.y = 0;
 	}
 }
 
@@ -1388,8 +1441,9 @@ void	init_enemy(t_game *game)
 	game->enemy.eyes = 0;
 	game->enemy.move_seed = 0;
 	game->enemy.move_inc = 0;
-	game->enemy.last_seen.x = 0;
-	game->enemy.last_seen.x = 0;
+	game->enemy.memory.x = 0;
+	game->enemy.memory.x = 0;
+	game->enemy.toggle_path = 0;
 }
 
 int	init_game(t_game *game)
