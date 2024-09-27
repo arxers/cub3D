@@ -581,10 +581,12 @@ int	key_press(unsigned int key, t_game *game)
 		exit_game(game);
 	if (key == XK_p)
 		toggle_mouse(game);
+	if (key == XK_m)
+		game->keys[MAP_DISABLE] = !game->keys[MAP_DISABLE];
 	if (key == XK_1)
-		game->keys[MAP] = !game->keys[MAP];
+		game->keys[MAP_BIG] = !game->keys[MAP_BIG];
 	if (key == XK_2)
-		game->enemy.toggle_path = !game->enemy.toggle_path;
+		game->keys[SHOW_ENEMY_PATH] = !game->keys[SHOW_ENEMY_PATH];
 	change_target_fps(key, game);
 	return (0);
 }
@@ -785,7 +787,7 @@ int	handle_keys(t_game *game)
 	int	run_speed;
 
 	run_speed = 1;
-	if (game->keys[RUN] == 1 && game->keys[UP])
+	if (game->keys[RUN] == 1)
 		run_speed = RUN_SPD;
 	handle_movement_xy(game, PLAYER_SPD * game->frame.time * run_speed);
 	handle_movement_z(game);
@@ -804,7 +806,7 @@ void	init_keystate(t_game *game)
 		game->keys[i] = 0;
 		i++;
 	}
-	game->keys[MAP] = 1;
+	game->keys[MAP_BIG] = 1;
 	game->keys[MOUSE] = 1;
 }
 
@@ -875,28 +877,29 @@ int	should_render_frame(t_game *game)
 
 void	draw_map_enemy(t_game *game)
 {
-	t_point		enemy_map_pos;
-	t_point		memory;
+	t_point		start;
+	t_point		end;
 
-	enemy_map_pos.x = (int)(game->enemy.pos.x * MAP_CELL_SIZE);
-	enemy_map_pos.y = (int)(game->enemy.pos.y * MAP_CELL_SIZE);
-	memory.x = (int)(game->enemy.memory.x * MAP_CELL_SIZE);
-	memory.y = (int)(game->enemy.last * MAP_CELL_SIZE);
+	start.x = (int)(game->enemy.pos.x * MAP_CELL_SIZE);
+	start.y = (int)(game->enemy.pos.y * MAP_CELL_SIZE);
+	end.x = (int)(game->enemy.last_seen.x * MAP_CELL_SIZE);
+	end.y = (int)(game->enemy.last_seen.y * MAP_CELL_SIZE);
 	if (delay_ms(200, TIMER_ENEMY_PATH))
-		draw_circle(&game->img[T_MAP_ENEMY_PATH], enemy_map_pos, 1, WHITE);
-	if (game->enemy.toggle_path)
+		draw_circle(&game->img[T_MAP_ENEMY_PATH], start, 1, WHITE);
+	if (game->keys[SHOW_ENEMY_PATH])
 		put_img((t_point){0, 0},
 			&game->img[T_MAP_ENEMY_PATH], &game->img[T_MAP]);
 	if (game->enemy.last_seen.x && game->enemy.last_seen.y)
-	draw_line(&game->img[T_MAP], enemy_map_pos,
-		(t_point){(int)(game->enemy.last_seen.x * MAP_CELL_SIZE),
-		(int)(game->enemy.last_seen.y * MAP_CELL_SIZE)}, RED);
-	draw_circle(&game->img[T_MAP], memory, 1, RED);
+	{
+		draw_line(&game->img[T_MAP], start, end, RED);
+		draw_circle(&game->img[T_MAP], end, MAP_CELL_SIZE * 0.15, RED);
+		draw_circle_outline(&game->img[T_MAP], end, MAP_CELL_SIZE * 0.25, RED);
+	}
 	if (game->map.enemy_toggle)
 	{
-		draw_circle(&game->img[T_MAP], enemy_map_pos,
+		draw_circle(&game->img[T_MAP], start,
 			MAP_CELL_SIZE * 0.5, MAP_COLOR);
-		draw_circle_outline(&game->img[T_MAP], enemy_map_pos,
+		draw_circle_outline(&game->img[T_MAP], start,
 			MAP_CELL_SIZE * 0.5, BLACK);
 	}
 }
@@ -912,12 +915,12 @@ void	draw_minimap(t_game *game)
 	if (game->map.update)
 		update_map_tiles(game);
 	put_img((t_point){0, 0}, &game->img[T_MAP_TILES], &game->img[T_MAP]);
-	draw_map_player(&game->img[T_MAP], game->player);
 	draw_map_enemy(game);
+	draw_map_player(&game->img[T_MAP], game->player);
 	put_img((t_point){0, 0,}, &game->img[T_MAP_BG], &game->img[T_MAP_MASK]);
 	put_img((t_point){-player_pos.x + center, -player_pos.y + center},
 		&game->img[T_MAP], &game->img[T_MAP_MASK]);
-	if (game->keys[MAP] == 1)
+	if (game->keys[MAP_BIG] == 1)
 		put_img(game->map.offset, &game->img[T_MAP_MASK], &game->img[T_WIN]);
 	else
 		put_img((t_point){RES_X * 0.5 - game->img[T_MAP].size.x * 0.5,
@@ -1383,7 +1386,8 @@ int	game_loop(t_game *game)
 			draw_bg(game);
 			render_viewport(game);
 			render_enemy_sprite(game);
-			draw_minimap(game);
+			if (!game->keys[MAP_DISABLE])
+				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
 				game->img[T_WIN].img, 0, 0);
 		}
@@ -1447,7 +1451,6 @@ void	init_enemy(t_game *game)
 	game->enemy.move_inc = 0;
 	game->enemy.memory.x = 0;
 	game->enemy.memory.x = 0;
-	game->enemy.toggle_path = 0;
 }
 
 int	init_game(t_game *game)

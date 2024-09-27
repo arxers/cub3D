@@ -94,12 +94,14 @@ typedef enum e_keystate
 	ROT_D,
 	ROT_L,
 	ROT_R,
-	MAP,
+	MAP_DISABLE,
+	MAP_BIG,
 	MOUSE,
 	RUN,
 	CROUCH,
 	JUMP,
-	PAUSE
+	PAUSE,
+	SHOW_ENEMY_PATH
 }					t_keystate;
 
 typedef enum e_timer
@@ -154,7 +156,6 @@ typedef struct s_enemy
 	int				eyes;
 	int				move_seed;
 	int				move_inc;
-	int				toggle_path;
 }					t_enemy;
 
 typedef struct s_frame_data
