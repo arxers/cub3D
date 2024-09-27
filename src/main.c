@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/27 12:25:16 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/27 15:52:38 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -572,6 +572,12 @@ int	key_release(unsigned int key, t_game *game)
 	return (0);
 }
 
+void	interact(t_game *game)
+{
+	
+	(void)game;
+}
+
 int	key_press(unsigned int key, t_game *game)
 {
 	handle_keystate(key, 1, game);
@@ -581,6 +587,8 @@ int	key_press(unsigned int key, t_game *game)
 		exit_game(game);
 	if (key == XK_p)
 		toggle_mouse(game);
+	if (key == XK_3)
+		interact(game);
 	if (key == XK_m)
 		game->keys[MAP_DISABLE] = !game->keys[MAP_DISABLE];
 	if (key == XK_1)
@@ -782,7 +790,7 @@ void	handle_pitch(t_game *game)
 		game->player.pitch = limit;
 }
 
-int	handle_keys(t_game *game)
+int	handle_movement(t_game *game)
 {
 	int	run_speed;
 
@@ -831,27 +839,6 @@ int	delay_ms(unsigned int ms, t_timer id)
 	}
 	return (0);
 }
-
-// int	a_second_has_passed(void)
-// {
-// 	static struct timeval	start_time;
-// 	struct timeval			current_time;
-// 	long					seconds_elapsed;
-
-// 	if (start_time.tv_sec == 0 && start_time.tv_usec == 0)
-// 	{
-// 		gettimeofday(&start_time, NULL);
-// 		return (0);
-// 	}
-// 	gettimeofday(&current_time, NULL);
-// 	seconds_elapsed = current_time.tv_sec - start_time.tv_sec;
-// 	if (seconds_elapsed >= 1)
-// 	{
-// 		start_time = current_time;
-// 		return (1);
-// 	}
-// 	return (0);
-// }
 
 int	should_render_frame(t_game *game)
 {
@@ -1382,7 +1369,7 @@ int	game_loop(t_game *game)
 		else
 		{
 			update_enemy_pos(game);
-			handle_keys(game);
+			handle_movement(game);
 			draw_bg(game);
 			render_viewport(game);
 			render_enemy_sprite(game);

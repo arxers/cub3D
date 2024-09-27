@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/27 12:19:55 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/27 15:41:11 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,9 +192,9 @@ typedef struct s_ray
 	t_fpoint		dir;
 	t_fpoint		side_dist;
 	t_fpoint		delta_dist;
-	float			wall_dist;
 	t_point			pix;
 	t_point			step;
+	float			wall_dist;
 	int				side;
 	int				draw_start;
 	int				draw_end;
@@ -210,6 +210,7 @@ typedef struct s_texture_map
 
 typedef struct s_game
 {
+	char			keys[32];
 	t_img			img[32];
 	void			*mlx;
 	void			*win;
@@ -217,7 +218,6 @@ typedef struct s_game
 	t_player		player;
 	t_enemy			enemy;
 	t_light			light;
-	char			keys[32];
 	t_map			map;
 }					t_game;
 
