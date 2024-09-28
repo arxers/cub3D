@@ -36,7 +36,7 @@ int	g_map[24][24] = {
   {1,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,4,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,1},
   {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
@@ -608,11 +608,16 @@ int	dda_door(t_ray *r)
 	return (0);
 }
 
-void	set_ray_direction(t_game *game, t_ray *r, float camera_x)
+void	set_ray_direction(t_game *game, t_ray *r, float camera_x, int incl_zoom)
 {
-	r->dir.x = game->player.dir.x * game->player.zoom
+	float	zoom;
+
+	zoom = game->player.zoom;
+	if (!incl_zoom)
+		zoom = 1;
+	r->dir.x = game->player.dir.x * zoom
 		+ game->player.plane.x * camera_x;
-	r->dir.y = game->player.dir.y * game->player.zoom
+	r->dir.y = game->player.dir.y * zoom
 		+ game->player.plane.y * camera_x;
 	if (r->dir.x == 0)
 		r->delta_dist.x = 1E+37;
@@ -650,6 +655,33 @@ void	set_ray_step_direction(t_game *game, t_ray *r)
 	}
 }
 
+void	set_entity_pos(t_fpoint *pos, float x, float y)
+{
+	if (out_of_bounds((t_fpoint){x, y}))
+		return ;
+	*pos = (t_fpoint){x, y};
+}
+
+void	unstuck_player(t_game *game, t_ray r)
+{
+	t_point	pos;
+
+	pos.x = (int)game->player.pos.x - (int)r.map.x;
+	pos.y = (int)game->player.pos.y - (int)r.map.y;
+	if (pos.x == -1)
+		set_entity_pos(&game->player.pos,
+		game->player.pos.x - PLAYER_RADIUS, game->player.pos.y);
+	if (pos.x == 1)
+		set_entity_pos(&game->player.pos,
+		game->player.pos.x + PLAYER_RADIUS, game->player.pos.y);
+	if (pos.y == -1)
+		set_entity_pos(&game->player.pos,
+		game->player.pos.x, game->player.pos.y - PLAYER_RADIUS);
+	if (pos.y == 1)
+		set_entity_pos(&game->player.pos,
+		game->player.pos.x, game->player.pos.y + PLAYER_RADIUS);
+}
+
 void	interact(t_game *game)
 {
 	t_ray			r;
@@ -657,15 +689,22 @@ void	interact(t_game *game)
 
 	r.map.x = (int)game->player.pos.x;
 	r.map.y = (int)game->player.pos.y;
-	set_ray_direction(game, &r, RES_X * 0.5 * camera_x_factor - 1);
+	set_ray_direction(game, &r, RES_X * 0.5 * camera_x_factor - 1, 0);
 	set_ray_step_direction(game, &r);
 	if (dda_door(&r) == 1)
 	{
-		printf("x:%f :f%f\n", r.map.x, r.map.y);
-		game->map.update = 1;
-		g_map[(int)r.map.y][(int)r.map.x] = -g_map[(int)r.map.y][(int)r.map.x];
+		if (r.side == VERTICAL)
+			r.wall_dist = r.side_dist.x - r.delta_dist.x;
+		else
+			r.wall_dist = r.side_dist.y - r.delta_dist.y;
+		if (r.wall_dist <= 2.0)
+		{
+			g_map[(int)r.map.y][(int)r.map.x] = -g_map[(int)r.map.y][(int)r.map.x];
+			if (r.wall_dist <= PLAYER_RADIUS)
+				unstuck_player(game, r);
+			game->map.update = 1;
+		}
 	}
-	(void)game;
 }
 
 int	key_press(unsigned int key, t_game *game)
@@ -1148,7 +1187,7 @@ void	render_viewport(t_game *game)
 	{
 		r.map.x = (int)game->player.pos.x;
 		r.map.y = (int)game->player.pos.y;
-		set_ray_direction(game, &r, r.pix.x * camera_x_factor - 1);
+		set_ray_direction(game, &r, r.pix.x * camera_x_factor - 1, 1);
 		set_ray_step_direction(game, &r);
 		if (dda(&r) == -1)
 			return ;
