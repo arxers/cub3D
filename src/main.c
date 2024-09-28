@@ -1346,9 +1346,9 @@ int	dda_to_enemy(t_game *game, t_ray *r)
 void	update_enemy_sprite(t_game *game)
 {
 	game->enemy.img = game->img[game->enemy.frame];
-	game->enemy.frame--;
-	if (game->enemy.frame == T_XENO0 - 1)
-		game->enemy.frame = T_XENO7;
+	game->enemy.frame++;
+	if (game->enemy.frame == T_XENO_END)
+		game->enemy.frame = T_XENO0;
 }
 
 float	dot_product(t_fpoint a, t_fpoint b)
@@ -1483,7 +1483,7 @@ void	init_enemy(t_game *game)
 	game->enemy.move_seed = 0;
 	game->enemy.move_inc = 0;
 	game->enemy.memory.x = 0;
-	game->enemy.memory.x = 0;
+	game->enemy.memory.y = 0;
 }
 
 int	init_game(t_game *game)
