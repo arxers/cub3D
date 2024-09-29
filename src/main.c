@@ -1277,6 +1277,20 @@ void	move_enemy(t_game *game, int direction)
 		game->enemy.move_inc = 0;
 	}
 }
+void	enemy_open_door(t_game *game)
+{
+	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x] == 2)
+		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x] = -2;
+	if (g_map[(int)game->enemy.pos.y - 1][(int)game->enemy.pos.x] == 2)
+		g_map[(int)game->enemy.pos.y - 1][(int)game->enemy.pos.x] = -2;
+	if (g_map[(int)game->enemy.pos.y + 1][(int)game->enemy.pos.x] == 2)
+		g_map[(int)game->enemy.pos.y + 1][(int)game->enemy.pos.x] = -2;
+	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x - 1] == 2)
+		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x - 1] = -2;
+	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x + 1] == 2)
+		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x + 1] = -2;
+	game->map.update = 1;
+}
 
 void	hunt(t_game *game)
 {
@@ -1298,6 +1312,7 @@ void	hunt(t_game *game)
 		move_enemy(game, LEFT);
 	else
 		move_enemy(game, RIGHT);
+	enemy_open_door(game);
 }
 
 void	update_enemy_pos(t_game *game)
@@ -1333,6 +1348,7 @@ void	update_enemy_pos(t_game *game)
 		&& (int)game->enemy.pos.y == (int)game->enemy.last_seen.y)
 		|| check_collision(&game->enemy.pos, game->enemy.memory, ENEMY_RADIUS))
 	{
+		enemy_open_door(game);
 		game->enemy.last_seen.x = 0;
 		game->enemy.last_seen.y = 0;
 		game->enemy.memory.x = 0;
@@ -1526,6 +1542,8 @@ void	init_enemy(t_game *game)
 	game->enemy.move_inc = 0;
 	game->enemy.memory.x = 0;
 	game->enemy.memory.y = 0;
+	game->enemy.last_seen.x = 0;
+	game->enemy.last_seen.y = 0;
 }
 
 int	init_game(t_game *game)
