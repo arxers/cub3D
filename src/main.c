@@ -6,39 +6,43 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/27 19:43:19 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/30 20:36:41 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3D.h"
 
-int	g_map_x = 24;
-int	g_map_y = 24;
-int	g_map[24][24] = {
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,1,-2,-2,-2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
-  {1,0,0,0,0,0,1,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,1,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1},
-  {1,0,0,0,0,1,1,1,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
-  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,2,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,4,4,4,4,4,4,4,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,1},
-  {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+int	g_map_x = 40;
+int	g_map_y = 28;
+int	g_map[28][40] = {
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,2,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,0,1},
+{1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,1,0,0,1,1,1},
+{1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1},
+{1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
+{1,0,0,1,0,0,0,2,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+{1,0,0,1,0,0,0,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+{1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
+{1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1},
+{1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,0,0,2,0,1,0,2,0,0,0,0,0,0,0,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,1,2,1,1,1,0,1,1,0,0,0,0,1,0,0,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,1,0,1,1,1,2,1,1,1,0,0,0,1,0,0,2,0,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,1,1,1,1,0,0,0,1,1,0,0,0,1,0,0,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1,0,2,0,0,0,0,0,0,0,0,1,0,0,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,2,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
 void	ft_destroy_image(void *mlx_ptr, t_img *img)
@@ -53,6 +57,7 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 	int	i;
 
 	i = 0;
+	mlx_do_key_autorepeaton(game->mlx);
 	while (i < (int)(sizeof(game->img) / sizeof(*game->img)))
 	{
 		ft_destroy_image(game->mlx, &game->img[i]);
@@ -554,9 +559,9 @@ void	handle_keystate(unsigned int key, int state, t_game *game)
 		game->keys[ROT_U] = state;
 	if (key == XK_f)
 		game->keys[ROT_D] = state;
-	if (key == XK_Left || key == XK_q)
+	if (key == XK_Left)
 		game->keys[ROT_L] = state;
-	if (key == XK_Right || key == XK_e)
+	if (key == XK_Right)
 		game->keys[ROT_R] = state;
 	if (key == XK_Shift_L)
 		game->keys[RUN] = state;
@@ -716,7 +721,7 @@ int	key_press(unsigned int key, t_game *game)
 		exit_game(game);
 	if (key == XK_p)
 		toggle_mouse(game);
-	if (key == XK_3)
+	if (key == XK_e)
 		interact(game);
 	if (key == XK_m)
 		game->keys[MAP_DISABLE] = !game->keys[MAP_DISABLE];
@@ -925,7 +930,10 @@ int	handle_movement(t_game *game)
 
 	run_speed = 1;
 	if (game->keys[RUN] == 1)
+	{
+		game->keys[MAP_BIG] = 1;
 		run_speed = RUN_SPD;
+	}
 	handle_movement_xy(game, PLAYER_SPD * game->frame.time * run_speed);
 	handle_movement_z(game);
 	handle_pitch(game);
@@ -1044,7 +1052,7 @@ void	draw_minimap(t_game *game)
 		put_img(game->map.offset, &game->img[T_MAP_MASK], &game->img[T_WIN]);
 	else
 		put_img((t_point){RES_X * 0.5 - game->img[T_MAP].size.x * 0.5,
-			RES_Y - game->img[T_MAP].size.x - MAP_CELL_SIZE},
+			RES_Y * 0.5 - game->img[T_MAP].size.y * 0.5},
 			&game->img[T_MAP], &game->img[T_WIN]);
 }
 
@@ -1254,7 +1262,22 @@ void	set_player_look_at(t_player *player, t_fpoint enemy_pos)
 	player->plane.y = player->dir.x * 0.66;
 }
 
-void	move_enemy(t_game *game, int direction)
+void	enemy_open_door(t_game *game)
+{
+	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x] == 2)
+		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x] = -2;
+	if (g_map[(int)game->enemy.pos.y - 1][(int)game->enemy.pos.x] == 2)
+		g_map[(int)game->enemy.pos.y - 1][(int)game->enemy.pos.x] = -2;
+	if (g_map[(int)game->enemy.pos.y + 1][(int)game->enemy.pos.x] == 2)
+		g_map[(int)game->enemy.pos.y + 1][(int)game->enemy.pos.x] = -2;
+	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x - 1] == 2)
+		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x - 1] = -2;
+	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x + 1] == 2)
+		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x + 1] = -2;
+	game->map.update = 1;
+}
+
+void	move_enemy_cardinal(t_game *game, int direction)
 {
 	t_fpoint	new_pos;
 	t_point		step_dir;
@@ -1277,19 +1300,35 @@ void	move_enemy(t_game *game, int direction)
 		game->enemy.move_inc = 0;
 	}
 }
-void	enemy_open_door(t_game *game)
+
+void	move_enemy_diagonal(t_game *game, int direction)
 {
-	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x] == 2)
-		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x] = -2;
-	if (g_map[(int)game->enemy.pos.y - 1][(int)game->enemy.pos.x] == 2)
-		g_map[(int)game->enemy.pos.y - 1][(int)game->enemy.pos.x] = -2;
-	if (g_map[(int)game->enemy.pos.y + 1][(int)game->enemy.pos.x] == 2)
-		g_map[(int)game->enemy.pos.y + 1][(int)game->enemy.pos.x] = -2;
-	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x - 1] == 2)
-		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x - 1] = -2;
-	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x + 1] == 2)
-		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x + 1] = -2;
-	game->map.update = 1;
+	t_fpoint	new_pos;
+	t_point		step_dir;
+
+	step_dir.x = 0;
+	step_dir.y = 0;
+	if (direction == UP_LEFT || direction == UP_RIGHT)
+	{
+		step_dir.x = -1;
+		step_dir.y = -1;
+		if (direction == UP_RIGHT)
+			step_dir.x = 1;
+	}
+	else if (direction == DOWN_LEFT || direction == DOWN_RIGHT)
+	{
+		step_dir.x = -1;
+		step_dir.y = 1;
+		if (direction == DOWN_RIGHT)
+			step_dir.x = 1;
+	}
+	new_pos.x = game->enemy.pos.x + step_dir.x * ENEMY_SPD * game->frame.time;
+	new_pos.y = game->enemy.pos.y + step_dir.y * ENEMY_SPD * game->frame.time;
+	if (check_collision(&game->enemy.pos, new_pos, ENEMY_RADIUS))
+	{
+		game->enemy.move_seed = 0;
+		game->enemy.move_inc = 0;
+	}
 }
 
 void	hunt(t_game *game)
@@ -1298,36 +1337,34 @@ void	hunt(t_game *game)
 		game->enemy.move_seed = d100();
 	else
 	{
-		if (delay_ms(1000 + game->enemy.move_inc, TIMER_ENEMY))
+		if (delay_ms(game->enemy.move_inc, TIMER_ENEMY))
 		{
 			game->enemy.move_inc += 1000;
 			game->enemy.move_seed = d100();
 		}
 	}
-	if (game->enemy.move_seed >= 0 && game->enemy.move_seed <= 24)
-		move_enemy(game, UP);
-	else if (game->enemy.move_seed >= 25 && game->enemy.move_seed <= 49)
-		move_enemy(game, DOWN);
-	else if (game->enemy.move_seed >= 50 && game->enemy.move_seed <= 74)
-		move_enemy(game, LEFT);
+	if (game->enemy.move_seed >= 0 && game->enemy.move_seed <= 12)
+		move_enemy_cardinal(game, UP);
+	else if (game->enemy.move_seed >= 13 && game->enemy.move_seed <= 25)
+		move_enemy_cardinal(game, DOWN);
+	else if (game->enemy.move_seed >= 26 && game->enemy.move_seed <= 38)
+		move_enemy_cardinal(game, LEFT);
+	else if (game->enemy.move_seed >= 39 && game->enemy.move_seed <= 51)
+		move_enemy_cardinal(game, RIGHT);
+	else if (game->enemy.move_seed >= 52 && game->enemy.move_seed <= 63)
+		move_enemy_diagonal(game, UP_LEFT);
+	else if (game->enemy.move_seed >= 64 && game->enemy.move_seed <= 75)
+		move_enemy_diagonal(game, UP_RIGHT);
+	else if (game->enemy.move_seed >= 76 && game->enemy.move_seed <= 87)
+		move_enemy_diagonal(game, DOWN_LEFT);
 	else
-		move_enemy(game, RIGHT);
-	enemy_open_door(game);
+		move_enemy_diagonal(game, DOWN_RIGHT);
+	if (d100() == 1)
+		enemy_open_door(game);
 }
 
-void	update_enemy_pos(t_game *game)
+void	chase(t_game *game, float dist_sq, float speed)
 {
-	float		dist_sq;
-	float		normalized_speed;
-
-	game->enemy.dist.x = game->player.pos.x - game->enemy.pos.x;
-	game->enemy.dist.y = game->player.pos.y - game->enemy.pos.y;
-	dist_sq = game->enemy.dist.x * game->enemy.dist.x
-		+ game->enemy.dist.y * game->enemy.dist.y;
-	normalized_speed = (ENEMY_SPD * game->frame.time) / sqrtf(dist_sq);
-	if (game->enemy.eyes == 0
-		&& (game->enemy.memory.x == 0 && game->enemy.memory.y == 0))
-		return (hunt(game));
 	if (game->enemy.eyes == 1)
 	{
 		game->enemy.last_seen.x = game->player.pos.x;
@@ -1335,20 +1372,18 @@ void	update_enemy_pos(t_game *game)
 		game->enemy.last_dist.x = game->enemy.dist.x;
 		game->enemy.last_dist.y = game->enemy.dist.y;
 	}
-	game->enemy.memory.x = game->enemy.pos.x + game->enemy.last_dist.x * normalized_speed;
-	game->enemy.memory.y = game->enemy.pos.y + game->enemy.last_dist.y * normalized_speed;
-	if (dist_sq < 1)
+	game->enemy.memory.x = game->enemy.pos.x + game->enemy.last_dist.x * speed;
+	game->enemy.memory.y = game->enemy.pos.y + game->enemy.last_dist.y * speed;
+	if (dist_sq < 1.42)
 	{
 		set_player_look_at(&game->player, game->enemy.pos);
-		write(1, "\a", 1);
-		// cleanup(game, 1, "i got you\n");
 		return ;
 	}
+	enemy_open_door(game);
 	if (((int)game->enemy.pos.x == (int)game->enemy.last_seen.x
 		&& (int)game->enemy.pos.y == (int)game->enemy.last_seen.y)
 		|| check_collision(&game->enemy.pos, game->enemy.memory, ENEMY_RADIUS))
 	{
-		enemy_open_door(game);
 		game->enemy.last_seen.x = 0;
 		game->enemy.last_seen.y = 0;
 		game->enemy.memory.x = 0;
@@ -1356,12 +1391,28 @@ void	update_enemy_pos(t_game *game)
 	}
 }
 
-void	set_ray_to_enemy(t_game *game, t_ray *r)
+void	update_enemy_pos(t_game *game)
+{
+	float		dist_sq;
+	float		normalized_speed;
+
+	if (game->enemy.eyes == 0
+		&& (game->enemy.memory.x == 0 && game->enemy.memory.y == 0))
+		return (hunt(game));
+	game->enemy.dist.x = game->player.pos.x - game->enemy.pos.x;
+	game->enemy.dist.y = game->player.pos.y - game->enemy.pos.y;
+	dist_sq = game->enemy.dist.x * game->enemy.dist.x
+		+ game->enemy.dist.y * game->enemy.dist.y;
+	normalized_speed = (ENEMY_SPD * game->frame.time) / sqrtf(dist_sq);
+	chase(game, dist_sq, normalized_speed);
+}
+
+void	set_ray_to_target(t_game *game, t_ray *r, t_fpoint target_pos)
 {
 	float	magnitude;
 
-	r->dir.x = game->enemy.pos.x - game->player.pos.x;
-	r->dir.y = game->enemy.pos.y - game->player.pos.y;
+	r->dir.x = target_pos.x - game->player.pos.x;
+	r->dir.y = target_pos.y - game->player.pos.y;
 	magnitude = sqrtf(r->dir.x * r->dir.x + r->dir.y * r->dir.y);
 	r->dir.x /= magnitude;
 	r->dir.y /= magnitude;
@@ -1372,10 +1423,10 @@ void	set_ray_to_enemy(t_game *game, t_ray *r)
 	set_ray_step_direction(game, r);
 }
 
-int	dda_to_enemy(t_game *game, t_ray *r)
+int	dda_to_target(t_game *game, t_ray *r, t_fpoint target_pos)
 {
-	if ((int)game->enemy.pos.x == (int)game->player.pos.x
-		&& (int)game->enemy.pos.y == (int)game->player.pos.y)
+	if ((int)target_pos.x == (int)game->player.pos.x
+		&& (int)target_pos.y == (int)game->player.pos.y)
 		return (1);
 	while (1)
 	{
@@ -1395,8 +1446,8 @@ int	dda_to_enemy(t_game *game, t_ray *r)
 			return (-1);
 		if (g_map[(int)r->map.y][(int)r->map.x] > 0)
 			return (0);
-		if ((int)r->map.x == (int)game->enemy.pos.x
-			&& (int)r->map.y == (int)game->enemy.pos.y)
+		if ((int)r->map.x == (int)target_pos.x
+			&& (int)r->map.y == (int)target_pos.y)
 			return (1);
 	}
 }
@@ -1423,11 +1474,11 @@ void	render_enemy(t_game *game)
 	float		scaling;
 
 	game->enemy.eyes = 1;
-	dist_sqrt = sqrtf(game->enemy.dist.x * game->enemy.dist.x
-			+ game->enemy.dist.y * game->enemy.dist.y);
 	view.x = dot_product(game->player.dir, game->enemy.dist) * 0.9;
 	if (view.x >= 0)
 		return ;
+	dist_sqrt = sqrtf(game->enemy.dist.x * game->enemy.dist.x
+			+ game->enemy.dist.y * game->enemy.dist.y);
 	view.y = dot_product(game->player.plane, game->enemy.dist);
 	screen.x = (RES_X * (view.y * 2.0) / (2 * view.x)) * game->player.zoom;
 	screen.y = ((RES_Y * game->player.z) / dist_sqrt - game->player.pitch);
@@ -1449,14 +1500,56 @@ void	render_enemy_sprite(t_game *game)
 		game->map.enemy_toggle = !game->map.enemy_toggle;
 		update_enemy_sprite(game);
 	}
-	set_ray_to_enemy(game, &r);
-	if (dda_to_enemy(game, &r) != 1)
+	set_ray_to_target(game, &r, game->enemy.pos);
+	if (dda_to_target(game, &r, game->enemy.pos) != 1)
 	{
 		game->enemy.eyes = 0;
 		return ;
 	}
 	render_enemy(game);
 }
+
+// void	render_item_sprite(t_game *game)
+// {
+// 	t_fpoint	view;
+// 	t_fpoint	screen;
+// 	t_fpoint	scale;
+// 	float		dist_sqrt;
+// 	float		scaling;
+
+// 	game->item[i].dist.x = game->player.pos.x - game->item[i].pos.x;
+// 	game->item[i].dist.y = game->player.pos.y - game->item[i].pos.y;
+// 	view.x = dot_product(game->player.dir, game->item[i].dist) * 0.9;
+// 	if (view.x >= 0)
+// 		return ;
+// 	dist_sqrt = sqrtf(game->item[i].dist.x * game->item[i].dist.x
+// 			+ item[i].dist.y * item[i].dist.y);
+// 	view.y = dot_product(game->player.plane, item[i].dist);
+// 	screen.x = (RES_X * (view.y * 2.0) / (2 * view.x)) * game->player.zoom;
+// 	screen.y = ((RES_Y * game->player.z) / dist_sqrt - game->player.pitch);
+// 	scaling = fmaxf((game->img[T_ITEM].size.x / dist_sqrt)
+// 			* game->player.zoom * 0.1, 0.1);
+// 	scale.x = scaling;
+// 	scale.y = scaling;
+// 	if (view.x < 0)
+// 		put_img_scale_mid((t_point){screen.x, screen.y},
+// 			&game->enemy.img, &game->img[T_ITEM], scale);
+// }
+
+// void	render_item()
+// {
+// 	t_ray	r;
+// 	int		i;
+
+
+// 	set_ray_to_target(game, &r, game->item[i]);
+// 	if (dda_to_target(game, &r) != 1)
+// 	{
+// 		game->enemy.eyes = 0;
+// 		return ;
+// 	}
+// 	render_enemy(game);
+// }
 
 int	game_loop(t_game *game)
 {
@@ -1477,6 +1570,7 @@ int	game_loop(t_game *game)
 			draw_bg(game);
 			render_viewport(game);
 			render_enemy_sprite(game);
+			// render_item(game);
 			if (!game->keys[MAP_DISABLE])
 				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
@@ -1495,8 +1589,8 @@ void	init_player(t_player *player)
 {
 	t_fpoint	pos;
 
-	pos.x = 13;
-	pos.y = 22;
+	pos.x = 6;
+	pos.y = 12;
 	player->pitch = 0;
 	player->pos.x = pos.x + 0.5;
 	player->pos.y = pos.y + 0.5;
@@ -1533,8 +1627,8 @@ void	init_game_struct(t_game *game)
 
 void	init_enemy(t_game *game)
 {
-	game->enemy.pos.x = 13.5;
-	game->enemy.pos.y = 1.5;
+	game->enemy.pos.x = 37.5;
+	game->enemy.pos.y = 12.5;
 	game->enemy.frame = T_XENO0;
 	game->enemy.img = game->img[T_XENO0];
 	game->enemy.eyes = 0;
@@ -1610,6 +1704,7 @@ int	main(int ac, char **av)
 	validate_input(ac, av);
 	if (init_game(&game) == -1)
 		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
+	mlx_do_key_autorepeatoff(game.mlx);
 	mlx_hook(game.win, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win, KeyRelease, KeyReleaseMask, &key_release, &game);
 	mlx_hook(game.win, ButtonPress, ButtonPressMask, &mwheel, &game);

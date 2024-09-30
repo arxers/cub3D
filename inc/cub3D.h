@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/27 19:32:35 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/09/30 20:08:46 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,10 +81,11 @@ typedef enum e_texture
 	T_XENO5,
 	T_XENO6,
 	T_XENO7,
-	T_XENO_END
+	T_XENO_END,
+	T_ITEM
 }					t_texture;
 
-typedef enum e_keystate
+typedef enum e_directions
 {
 	UP,
 	DOWN,
@@ -103,6 +104,14 @@ typedef enum e_keystate
 	PAUSE,
 	SHOW_ENEMY_PATH
 }					t_keystate;
+
+typedef enum e_direction
+{
+	UP_LEFT,
+	UP_RIGHT,
+	DOWN_LEFT,
+	DOWN_RIGHT,
+}					t_direction;
 
 typedef enum e_timer
 {
@@ -133,6 +142,12 @@ typedef struct s_img
 	int				line_len;
 	int				endian;
 }					t_img;
+
+typedef struct s_item
+{
+	t_fpoint		pos;
+	int				collected;
+}					t_item;
 
 typedef struct s_player
 {
@@ -219,6 +234,7 @@ typedef struct s_game
 	t_enemy			enemy;
 	t_light			light;
 	t_map			map;
+	t_item			*item;
 }					t_game;
 
 #endif
