@@ -417,11 +417,11 @@ void	draw_tile(t_img *map, t_point origin, int tile)
 	const t_point	size = (t_point){MAP_CELL_SIZE - 1, MAP_CELL_SIZE - 1};
 
 	if (tile == 2)
-		draw_rectangle(map, (t_point){origin.x + 5, origin.y + 5},
-			(t_point){5, 5}, BLACK);
+		draw_rectangle(map, (t_point){origin.x + MAP_CELL_SIZE * 0.3, origin.y + MAP_CELL_SIZE * 0.3},
+			(t_point){MAP_CELL_SIZE * 0.3, MAP_CELL_SIZE * 0.3}, BLACK);
 	else if (tile == -2)
-		draw_rectangle(map, (t_point){origin.x + 1, origin.y + 2},
-			(t_point){13, 12}, BLACK);
+		draw_rectangle(map, (t_point){origin.x + MAP_CELL_SIZE * 0.1, origin.y + MAP_CELL_SIZE * 0.1},
+			(t_point){MAP_CELL_SIZE * 0.8, MAP_CELL_SIZE * 0.8}, BLACK);
 	else if (tile == 0)
 		draw_rectangle(map, origin, size, BLACK);
 }
@@ -476,8 +476,8 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 
 	map.x = map_grid_size.x * MAP_CELL_SIZE;
 	map.y = map_grid_size.y * MAP_CELL_SIZE;
-	mask.x = 24 * MAP_CELL_SIZE * 0.5;
-	mask.y = 24 * MAP_CELL_SIZE * 0.5;
+	mask.x = 16 * MAP_CELL_SIZE * 0.5;
+	mask.y = 16 * MAP_CELL_SIZE * 0.5;
 	if (init_img(game->mlx, &game->img[T_MAP], map.x, map.y) == -1
 		|| init_img(game->mlx, &game->img[T_MAP_ENEMY_PATH], map.x, map.y) == -1
 		|| init_img(game->mlx, &game->img[T_MAP_TILES], map.x, map.y) == -1
@@ -957,7 +957,7 @@ void	init_keystate(t_game *game)
 
 int	delay_ms(unsigned int ms, t_timer id)
 {
-	static struct timeval	start_time[4] = {0};
+	static struct timeval	start_time[5] = {0};
 	struct timeval			current_time;
 	long					ms_elapsed;
 
@@ -1367,6 +1367,7 @@ void	chase(t_game *game, float dist_sq, float speed)
 {
 	if (game->enemy.eyes == 1)
 	{
+		write(1, "\a", 1);
 		game->enemy.last_seen.x = game->player.pos.x;
 		game->enemy.last_seen.y = game->player.pos.y;
 		game->enemy.last_dist.x = game->enemy.dist.x;
@@ -1376,6 +1377,7 @@ void	chase(t_game *game, float dist_sq, float speed)
 	game->enemy.memory.y = game->enemy.pos.y + game->enemy.last_dist.y * speed;
 	if (dist_sq < 1.42)
 	{
+		game->keys[MAP_DISABLE] = 1;
 		set_player_look_at(&game->player, game->enemy.pos);
 		return ;
 	}
@@ -1496,10 +1498,7 @@ void	render_enemy_sprite(t_game *game)
 	t_ray	r;
 
 	if (delay_ms(100, MS100))
-	{
-		game->map.enemy_toggle = !game->map.enemy_toggle;
 		update_enemy_sprite(game);
-	}
 	set_ray_to_target(game, &r, game->enemy.pos);
 	if (dda_to_target(game, &r, game->enemy.pos) != 1)
 	{

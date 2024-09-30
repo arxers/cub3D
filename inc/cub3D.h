@@ -31,7 +31,7 @@
 # define WALL 64
 
 // map
-# define MAP_CELL_SIZE 16
+# define MAP_CELL_SIZE 24
 # define MAP_COLOR 0x0ADAF3
 
 // movement multipliers
@@ -39,7 +39,7 @@
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
 # define PLAYER_SPD 0.002
-# define ENEMY_SPD 0.002
+# define ENEMY_SPD 0.0035
 # define PLAYER_RADIUS 0.20
 # define ENEMY_RADIUS 0.00
 
@@ -85,7 +85,7 @@ typedef enum e_texture
 	T_ITEM
 }					t_texture;
 
-typedef enum e_directions
+typedef enum e_keystate
 {
 	UP,
 	DOWN,
@@ -118,6 +118,7 @@ typedef enum e_timer
 	MS100,
 	MS1000,
 	TIMER_ENEMY,
+	TIMER_ENEMY_MAP,
 	TIMER_ENEMY_PATH,
 }					t_timer;
 
