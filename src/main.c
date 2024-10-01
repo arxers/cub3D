@@ -228,7 +228,7 @@ int	load_xpms(t_game *game)
 	load_xpm(game->mlx, "textures/xeno5.xpm", &game->img[T_XENO5]);
 	load_xpm(game->mlx, "textures/xeno6.xpm", &game->img[T_XENO6]);
 	load_xpm(game->mlx, "textures/xeno7.xpm", &game->img[T_XENO7]);
-	load_xpm(game->mlx, "textures/door.xpm", &game->img[T_ITEM]);
+	load_xpm(game->mlx, "textures/item.xpm", &game->img[T_ITEM]);
 	return (0);
 }
 
