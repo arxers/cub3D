@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/30 20:08:46 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/01 18:21:05 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
 # define PLAYER_SPD 0.002
-# define ENEMY_SPD 0.0035
+# define ENEMY_SPD 0.003
 # define PLAYER_RADIUS 0.20
 # define ENEMY_RADIUS 0.00
 
@@ -147,6 +147,7 @@ typedef struct s_img
 typedef struct s_item
 {
 	t_fpoint		pos;
+	t_fpoint		dist;
 	int				collected;
 }					t_item;
 
@@ -236,6 +237,7 @@ typedef struct s_game
 	t_light			light;
 	t_map			map;
 	t_item			*item;
+	int				item_count;
 }					t_game;
 
 #endif

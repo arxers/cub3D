@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/09/30 20:36:41 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/01 19:32:57 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ int	g_map[28][40] = {
 {1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,0,1},
 {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1},
-{1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
+{1,0,0,2,0,0,-3,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
 {1,0,0,1,0,0,0,2,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 {1,0,0,1,0,0,0,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 {1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
@@ -228,6 +228,7 @@ int	load_xpms(t_game *game)
 	load_xpm(game->mlx, "textures/xeno5.xpm", &game->img[T_XENO5]);
 	load_xpm(game->mlx, "textures/xeno6.xpm", &game->img[T_XENO6]);
 	load_xpm(game->mlx, "textures/xeno7.xpm", &game->img[T_XENO7]);
+	load_xpm(game->mlx, "textures/door.xpm", &game->img[T_ITEM]);
 	return (0);
 }
 
@@ -1367,7 +1368,6 @@ void	chase(t_game *game, float dist_sq, float speed)
 {
 	if (game->enemy.eyes == 1)
 	{
-		write(1, "\a", 1);
 		game->enemy.last_seen.x = game->player.pos.x;
 		game->enemy.last_seen.y = game->player.pos.y;
 		game->enemy.last_dist.x = game->enemy.dist.x;
@@ -1409,7 +1409,7 @@ void	update_enemy_pos(t_game *game)
 	chase(game, dist_sq, normalized_speed);
 }
 
-void	set_ray_to_target(t_game *game, t_ray *r, t_fpoint target_pos)
+void	init_ray_to_target(t_game *game, t_ray *r, t_fpoint target_pos)
 {
 	float	magnitude;
 
@@ -1499,7 +1499,7 @@ void	render_enemy_sprite(t_game *game)
 
 	if (delay_ms(100, MS100))
 		update_enemy_sprite(game);
-	set_ray_to_target(game, &r, game->enemy.pos);
+	init_ray_to_target(game, &r, game->enemy.pos);
 	if (dda_to_target(game, &r, game->enemy.pos) != 1)
 	{
 		game->enemy.eyes = 0;
@@ -1508,47 +1508,47 @@ void	render_enemy_sprite(t_game *game)
 	render_enemy(game);
 }
 
-// void	render_item_sprite(t_game *game)
-// {
-// 	t_fpoint	view;
-// 	t_fpoint	screen;
-// 	t_fpoint	scale;
-// 	float		dist_sqrt;
-// 	float		scaling;
+void	render_item_sprite(t_game *game, t_item item)
+{
+	t_fpoint	view;
+	t_fpoint	screen;
+	t_fpoint	scale;
+	float		dist_sqrt;
+	float		scaling;
 
-// 	game->item[i].dist.x = game->player.pos.x - game->item[i].pos.x;
-// 	game->item[i].dist.y = game->player.pos.y - game->item[i].pos.y;
-// 	view.x = dot_product(game->player.dir, game->item[i].dist) * 0.9;
-// 	if (view.x >= 0)
-// 		return ;
-// 	dist_sqrt = sqrtf(game->item[i].dist.x * game->item[i].dist.x
-// 			+ item[i].dist.y * item[i].dist.y);
-// 	view.y = dot_product(game->player.plane, item[i].dist);
-// 	screen.x = (RES_X * (view.y * 2.0) / (2 * view.x)) * game->player.zoom;
-// 	screen.y = ((RES_Y * game->player.z) / dist_sqrt - game->player.pitch);
-// 	scaling = fmaxf((game->img[T_ITEM].size.x / dist_sqrt)
-// 			* game->player.zoom * 0.1, 0.1);
-// 	scale.x = scaling;
-// 	scale.y = scaling;
-// 	if (view.x < 0)
-// 		put_img_scale_mid((t_point){screen.x, screen.y},
-// 			&game->enemy.img, &game->img[T_ITEM], scale);
-// }
+	item.dist.x = game->player.pos.x - item.pos.x;
+	item.dist.y = game->player.pos.y - item.pos.y;
+	view.x = dot_product(game->player.dir, item.dist) * 0.9;
+	if (view.x >= 0)
+		return ;
+	dist_sqrt = sqrtf(item.dist.x * item.dist.x + item.dist.y * item.dist.y);
+	view.y = dot_product(game->player.plane, item.dist);
+	screen.x = (RES_X * (view.y * 2.0) / (2 * view.x)) * game->player.zoom;
+	screen.y = ((RES_Y * game->player.z) / dist_sqrt - game->player.pitch);
+	scaling = fmaxf((game->img[T_ITEM].size.x / dist_sqrt)
+			* game->player.zoom * 0.1, 0.1);
+	scale.x = scaling;
+	scale.y = scaling;
+	if (view.x < 0)
+		put_img_scale_mid((t_point){screen.x, screen.y},
+			&game->img[T_ITEM], &game->img[T_WIN], scale);
+}
 
-// void	render_item()
-// {
-// 	t_ray	r;
-// 	int		i;
+void	render_item(t_game *game)
+{
+	t_ray	r;
+	int		i;
 
-
-// 	set_ray_to_target(game, &r, game->item[i]);
-// 	if (dda_to_target(game, &r) != 1)
-// 	{
-// 		game->enemy.eyes = 0;
-// 		return ;
-// 	}
-// 	render_enemy(game);
-// }
+	i = 0;
+	while (i < game->item_count)
+	{
+		init_ray_to_target(game, &r, game->item[i].pos);
+		if (dda_to_target(game, &r, game->item[i].pos) != 1)
+			break ;
+		render_item_sprite(game, game->item[i]);
+		i++;
+	}
+}
 
 int	game_loop(t_game *game)
 {
@@ -1569,7 +1569,7 @@ int	game_loop(t_game *game)
 			draw_bg(game);
 			render_viewport(game);
 			render_enemy_sprite(game);
-			// render_item(game);
+			render_item(game);
 			if (!game->keys[MAP_DISABLE])
 				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
@@ -1639,6 +1639,59 @@ void	init_enemy(t_game *game)
 	game->enemy.last_seen.y = 0;
 }
 
+int	count_tile(t_game *game, int n)
+{
+	int	x;
+	int	y;
+	int	count;
+
+	y = 0;
+	count = 0;
+	while (y < g_map_y - 1)
+	{
+		x = 0;
+		while (x < g_map_x - 1)
+		{
+			if (g_map[y][x] == n)
+				count++;
+			x++;
+		}
+		y++;
+	}
+	(void)game;
+	return (count);
+}
+
+void	init_items(t_game *game)
+{
+	int	x;
+	int	y;
+	int	i;
+
+	game->item = ft_calloc(count_tile(game, -3), sizeof(int));
+	i = 0;
+	y = 0;
+	while (y < g_map_y - 1)
+	{
+		x = 0;
+		while (x < g_map_x - 1)
+		{
+			if (g_map[y][x] == -3)
+			{
+				game->item[i].pos.x = (float)x + 0.5;
+				game->item[i].pos.y = (float)y + 0.5;
+				game->item[i].dist.x = 0;
+				game->item[i].dist.y = 0;
+				game->item[i].collected = 0;
+				i++;
+			}
+			x++;
+		}
+		y++;
+	}
+	(void)game;
+}
+
 int	init_game(t_game *game)
 {
 	// game->map.size.x = (n rows);
@@ -1661,6 +1714,7 @@ int	init_game(t_game *game)
 	init_keystate(game);
 	init_player(&game->player);
 	init_enemy(game);
+	init_items(game);
 	game->light.min = 0.25;
 	game->light.max = 2.5;
 	game->light.ambient = 0.15;
