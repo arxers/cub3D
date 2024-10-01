@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/01 18:21:05 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/01 19:59:57 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,7 @@ typedef struct s_item
 {
 	t_fpoint		pos;
 	t_fpoint		dist;
+	int				seen;
 	int				collected;
 }					t_item;
 

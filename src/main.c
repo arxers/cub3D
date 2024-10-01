@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/01 19:32:57 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/01 20:05:23 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@ int	g_map[28][40] = {
 {1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,0,1},
 {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1},
-{1,0,0,2,0,0,-3,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-{1,0,0,1,0,0,0,2,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+{1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
+{1,0,0,1,0,0,-3,2,-3,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 {1,0,0,1,0,0,0,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 {1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
 {1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1},
@@ -56,8 +56,8 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 {
 	int	i;
 
-	i = 0;
 	mlx_do_key_autorepeaton(game->mlx);
+	i = 0;
 	while (i < (int)(sizeof(game->img) / sizeof(*game->img)))
 	{
 		ft_destroy_image(game->mlx, &game->img[i]);
@@ -69,6 +69,7 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 	if (game->mlx)
 		mlx_destroy_display(game->mlx);
 	ft_free_void(&game->mlx);
+	ft_free_void((void **)&game->item);
 	ft_free(&game->frame.fps_str);
 	if (msg)
 		ft_putstr_fd(msg, 2);
@@ -134,6 +135,34 @@ void	put_img_scale_mid(t_point ofs, t_img *src, t_img *dst, t_fpoint scale)
 	scale.y = 1.0 / scale.y;
 	s_mid.x = src->size.x * 0.5;
 	s_mid.y = src->size.y * 0.5;
+	dp.y = 0;
+	while (dp.y < dst->size.y)
+	{
+		dp.x = 0;
+		while (dp.x < dst->size.x)
+		{
+			sp.x = (dp.x - ofs.x - dst->size.x * 0.5) * scale.x + s_mid.x;
+			sp.y = (dp.y - ofs.y - dst->size.y * 0.5) * scale.y + s_mid.y;
+			if (sp.x >= 0 && sp.x < src->size.x
+				&& sp.y >= 0 && sp.y < src->size.y)
+				set_pixel_alpha(dst, dp.x, dp.y,
+					get_pixel(src, sp.x, sp.y));
+			dp.x++;
+		}
+		dp.y++;
+	}
+}
+
+void	put_img_scale_mid_bot(t_point ofs, t_img *src, t_img *dst, t_fpoint scale)
+{
+	t_fpoint	sp;
+	t_point		dp;
+	t_point		s_mid;
+
+	scale.x = 1.0 / scale.x;
+	scale.y = 1.0 / scale.y;
+	s_mid.x = src->size.x * 0.5;
+	s_mid.y = -src->size.x;
 	dp.y = 0;
 	while (dp.y < dst->size.y)
 	{
@@ -1526,11 +1555,11 @@ void	render_item_sprite(t_game *game, t_item item)
 	screen.x = (RES_X * (view.y * 2.0) / (2 * view.x)) * game->player.zoom;
 	screen.y = ((RES_Y * game->player.z) / dist_sqrt - game->player.pitch);
 	scaling = fmaxf((game->img[T_ITEM].size.x / dist_sqrt)
-			* game->player.zoom * 0.1, 0.1);
+			* game->player.zoom * 0.05, 0.05);
 	scale.x = scaling;
 	scale.y = scaling;
 	if (view.x < 0)
-		put_img_scale_mid((t_point){screen.x, screen.y},
+		put_img_scale_mid_bot((t_point){screen.x, screen.y},
 			&game->img[T_ITEM], &game->img[T_WIN], scale);
 }
 
@@ -1545,6 +1574,8 @@ void	render_item(t_game *game)
 		init_ray_to_target(game, &r, game->item[i].pos);
 		if (dda_to_target(game, &r, game->item[i].pos) != 1)
 			break ;
+		if (game->item[i].seen == 0)
+			game->item[i].seen = 1;
 		render_item_sprite(game, game->item[i]);
 		i++;
 	}
@@ -1668,7 +1699,8 @@ void	init_items(t_game *game)
 	int	y;
 	int	i;
 
-	game->item = ft_calloc(count_tile(game, -3), sizeof(int));
+	game->item_count = count_tile(game, -3);
+	game->item = malloc(game->item_count * sizeof(t_item));
 	i = 0;
 	y = 0;
 	while (y < g_map_y - 1)
@@ -1682,8 +1714,11 @@ void	init_items(t_game *game)
 				game->item[i].pos.y = (float)y + 0.5;
 				game->item[i].dist.x = 0;
 				game->item[i].dist.y = 0;
+				game->item[i].seen = 0;
 				game->item[i].collected = 0;
 				i++;
+				if (i == game->item_count)
+					return ;
 			}
 			x++;
 		}
@@ -1701,6 +1736,7 @@ int	init_game(t_game *game)
 	game->mlx = mlx_init();
 	if (game->mlx == NULL)
 		return (-1);
+	mlx_do_key_autorepeatoff(game->mlx);
 	game->win = mlx_new_window(game->mlx, RES_X, RES_Y, "cub3D");
 	if (game->win == NULL)
 		return (-1);
