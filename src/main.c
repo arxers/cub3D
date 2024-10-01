@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/01 20:05:23 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/01 23:27:05 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,22 +19,22 @@ int	g_map[28][40] = {
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,-3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,2,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,0,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,-3,1},
 {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1},
 {1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-{1,0,0,1,0,0,-3,2,-3,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+{1,0,0,1,0,0,0,2,-3,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 {1,0,0,1,0,0,0,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 {1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-{1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1},
+{1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,-3,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1},
 {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,0,0,2,0,1,0,2,0,0,0,0,0,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,1,2,1,1,1,0,1,1,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,1,0,1,1,1,2,1,1,1,0,0,0,1,0,0,2,0,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,1,1,1,1,0,0,0,1,1,0,0,0,1,0,0,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1,0,2,0,0,0,0,0,0,0,0,1,0,0,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1,-3,2,0,0,0,0,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,2,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1},
@@ -447,13 +447,19 @@ void	draw_tile(t_img *map, t_point origin, int tile)
 	const t_point	size = (t_point){MAP_CELL_SIZE - 1, MAP_CELL_SIZE - 1};
 
 	if (tile == 2)
-		draw_rectangle(map, (t_point){origin.x + MAP_CELL_SIZE * 0.3, origin.y + MAP_CELL_SIZE * 0.3},
+		draw_rectangle(map, (t_point){origin.x + MAP_CELL_SIZE * 0.3,
+			origin.y + MAP_CELL_SIZE * 0.3},
 			(t_point){MAP_CELL_SIZE * 0.3, MAP_CELL_SIZE * 0.3}, BLACK);
 	else if (tile == -2)
-		draw_rectangle(map, (t_point){origin.x + MAP_CELL_SIZE * 0.1, origin.y + MAP_CELL_SIZE * 0.1},
+		draw_rectangle(map, (t_point){origin.x + MAP_CELL_SIZE * 0.1,
+			origin.y + MAP_CELL_SIZE * 0.1},
 			(t_point){MAP_CELL_SIZE * 0.8, MAP_CELL_SIZE * 0.8}, BLACK);
-	else if (tile == 0)
+	else if (tile <= 0)
 		draw_rectangle(map, origin, size, BLACK);
+	if (tile == -3)
+		draw_circle(map, (t_point){origin.x + MAP_CELL_SIZE * 0.5 - 1,
+			origin.y + MAP_CELL_SIZE * 0.5 - 1},
+			MAP_CELL_SIZE * 0.25, 0xFFAD1A);
 }
 
 void	update_map_tiles(t_game *game)
@@ -517,7 +523,6 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 	fill_img(&game->img[T_MAP_ENEMY_PATH], MAGENTA);
 	game->map.offset.x = RES_X * 0.5 - game->img[T_MAP_MASK].size.x * 0.5;
 	game->map.offset.y = RES_Y - game->img[T_MAP_MASK].size.x - MAP_CELL_SIZE;
-	game->map.enemy_toggle = 1;
 	draw_rectangle(&game->img[T_MAP_BG], (t_point){0, 0},
 		game->img[T_MAP_MASK].size, BLACK);
 	draw_diagonal_lines(&game->img[T_MAP_BG],
@@ -538,9 +543,9 @@ void	toggle_mouse(t_game *game)
 
 	center.x = RES_X * 0.5;
 	center.y = RES_Y * 0.5;
-	if (game->keys[MOUSE] == 0)
+	if (game->state[MOUSE] == 0)
 		mlx_mouse_move(game->mlx, game->win, center.x, center.y);
-	game->keys[MOUSE] = !game->keys[MOUSE];
+	game->state[MOUSE] = !game->state[MOUSE];
 }
 
 void	pause_game(t_game *game)
@@ -549,9 +554,9 @@ void	pause_game(t_game *game)
 
 	center.x = RES_X * 0.5;
 	center.y = RES_Y * 0.5;
-	if (game->keys[RUN])
-		game->keys[PAUSE] = !game->keys[PAUSE];
-	if (!game->keys[PAUSE] && game->keys[MOUSE])
+	if (game->state[RUN])
+		game->state[PAUSE] = !game->state[PAUSE];
+	if (!game->state[PAUSE] && game->state[MOUSE])
 		mlx_mouse_move(game->mlx, game->win, center.x, center.y);
 }
 
@@ -578,27 +583,27 @@ void	change_target_fps(unsigned int key, t_game *game)
 void	handle_keystate(unsigned int key, int state, t_game *game)
 {
 	if (key == XK_Up || key == XK_w)
-		game->keys[UP] = state;
+		game->state[UP] = state;
 	if (key == XK_Down || key == XK_s)
-		game->keys[DOWN] = state;
+		game->state[DOWN] = state;
 	if (key == XK_a)
-		game->keys[LEFT] = state;
+		game->state[LEFT] = state;
 	if (key == XK_d)
-		game->keys[RIGHT] = state;
+		game->state[RIGHT] = state;
 	if (key == XK_r)
-		game->keys[ROT_U] = state;
+		game->state[ROT_U] = state;
 	if (key == XK_f)
-		game->keys[ROT_D] = state;
+		game->state[ROT_D] = state;
 	if (key == XK_Left)
-		game->keys[ROT_L] = state;
+		game->state[ROT_L] = state;
 	if (key == XK_Right)
-		game->keys[ROT_R] = state;
+		game->state[ROT_R] = state;
 	if (key == XK_Shift_L)
-		game->keys[RUN] = state;
+		game->state[RUN] = state;
 	if (key == XK_Control_L)
-		game->keys[CROUCH] = state;
+		game->state[CROUCH] = state;
 	if (key == XK_space)
-		game->keys[JUMP] = state;
+		game->state[JUMP] = state;
 }
 
 int	key_release(unsigned int key, t_game *game)
@@ -754,11 +759,14 @@ int	key_press(unsigned int key, t_game *game)
 	if (key == XK_e)
 		interact(game);
 	if (key == XK_m)
-		game->keys[MAP_DISABLE] = !game->keys[MAP_DISABLE];
+		game->state[MAP_DISABLE] = !game->state[MAP_DISABLE];
 	if (key == XK_1)
-		game->keys[MAP_BIG] = !game->keys[MAP_BIG];
+	{
+		game->state[MAP_DISABLE] = 0;
+		game->state[MAP_BIG] = !game->state[MAP_BIG];
+	}
 	if (key == XK_2)
-		game->keys[SHOW_ENEMY_PATH] = !game->keys[SHOW_ENEMY_PATH];
+		game->state[SHOW_ENEMY_PATH] = !game->state[SHOW_ENEMY_PATH];
 	change_target_fps(key, game);
 	return (0);
 }
@@ -807,22 +815,22 @@ void	handle_mouse(t_game *game)
 
 void	calculate_movement(t_game *game, float *move_x, float *move_y)
 {
-	if (game->keys[UP])
+	if (game->state[UP])
 	{
 		*move_x += game->player.dir.x;
 		*move_y += game->player.dir.y;
 	}
-	if (game->keys[DOWN])
+	if (game->state[DOWN])
 	{
 		*move_x -= game->player.dir.x;
 		*move_y -= game->player.dir.y;
 	}
-	if (game->keys[LEFT])
+	if (game->state[LEFT])
 	{
 		*move_x += game->player.dir.y;
 		*move_y -= game->player.dir.x;
 	}
-	if (game->keys[RIGHT])
+	if (game->state[RIGHT])
 	{
 		*move_x -= game->player.dir.y;
 		*move_y += game->player.dir.x;
@@ -877,8 +885,8 @@ void	handle_movement_xy(t_game *game, float speed)
 	t_fpoint	move;
 	t_fpoint	new_pos;
 
-	if (!game->keys[UP] && !game->keys[DOWN]
-		&& !game->keys[LEFT] && !game->keys[RIGHT])
+	if (!game->state[UP] && !game->state[DOWN]
+		&& !game->state[LEFT] && !game->state[RIGHT])
 		return ;
 	move.x = 0;
 	move.y = 0;
@@ -891,13 +899,13 @@ void	handle_movement_xy(t_game *game, float speed)
 
 void	handle_movement_z(t_game *game)
 {
-	if (game->keys[CROUCH])
+	if (game->state[CROUCH])
 	{
 		game->player.z -= 0.05;
 		if (game->player.z < P_MIN_HEIGHT)
 			game->player.z = P_MIN_HEIGHT;
 	}
-	if (game->keys[JUMP])
+	if (game->state[JUMP])
 	{
 		game->player.z += 0.05;
 		if (game->player.z > P_MAX_HEIGHT)
@@ -910,11 +918,11 @@ void	handle_yaw(t_game *game, float speed)
 	float			old_dir_x;
 	float			old_plane_x;
 
-	if (game->keys[ROT_L] && game->keys[ROT_R])
+	if (game->state[ROT_L] && game->state[ROT_R])
 		return ;
 	old_dir_x = game->player.dir.x;
 	old_plane_x = game->player.plane.x;
-	if (game->keys[ROT_L])
+	if (game->state[ROT_L])
 	{
 		game->player.dir.x = game->player.dir.x * cos(-speed)
 			- game->player.dir.y * sin(-speed);
@@ -925,7 +933,7 @@ void	handle_yaw(t_game *game, float speed)
 		game->player.plane.y = old_plane_x * sin(-speed)
 			+ game->player.plane.y * cos(-speed);
 	}
-	else if (game->keys[ROT_R])
+	else if (game->state[ROT_R])
 	{
 		game->player.dir.x = game->player.dir.x * cos(speed)
 			- game->player.dir.y * sin(speed);
@@ -942,11 +950,11 @@ void	handle_pitch(t_game *game)
 {
 	const int	limit = RES_Y * 0.5;
 
-	if (game->keys[ROT_U] && game->keys[ROT_D])
+	if (game->state[ROT_U] && game->state[ROT_D])
 		return ;
-	if (game->keys[ROT_U])
+	if (game->state[ROT_U])
 		game->player.pitch -= game->frame.time;
-	else if (game->keys[ROT_D])
+	else if (game->state[ROT_D])
 		game->player.pitch += game->frame.time;
 	if (game->player.pitch < -limit)
 		game->player.pitch = -limit;
@@ -954,35 +962,34 @@ void	handle_pitch(t_game *game)
 		game->player.pitch = limit;
 }
 
-int	handle_movement(t_game *game)
+void	handle_movement(t_game *game)
 {
 	int	run_speed;
 
+	if (game->state[GAME_OVER])
+		return ;
 	run_speed = 1;
-	if (game->keys[RUN] == 1)
+	if (game->state[RUN] == 1)
 	{
-		game->keys[MAP_BIG] = 1;
+		game->state[MAP_BIG] = 0;
 		run_speed = RUN_SPD;
 	}
 	handle_movement_xy(game, PLAYER_SPD * game->frame.time * run_speed);
 	handle_movement_z(game);
 	handle_pitch(game);
 	handle_yaw(game, ROT_SPD * game->frame.time);
-	return (0);
 }
 
-void	init_keystate(t_game *game)
+void	init_states(t_game *game)
 {
 	int	i;
 
 	i = 0;
-	while (i < (int)(sizeof(game->keys) / sizeof(*game->keys)))
+	while (i < (int)(sizeof(game->state) / sizeof(*game->state)))
 	{
-		game->keys[i] = 0;
+		game->state[i] = 0;
 		i++;
 	}
-	game->keys[MAP_BIG] = 1;
-	game->keys[MOUSE] = 1;
 }
 
 int	delay_ms(unsigned int ms, t_timer id)
@@ -1044,7 +1051,7 @@ void	draw_map_enemy(t_game *game)
 	end.y = (int)(game->enemy.last_seen.y * MAP_CELL_SIZE);
 	if (delay_ms(200, TIMER_ENEMY_PATH))
 		draw_circle(&game->img[T_MAP_ENEMY_PATH], start, 1, WHITE);
-	if (game->keys[SHOW_ENEMY_PATH])
+	if (game->state[SHOW_ENEMY_PATH])
 		put_img((t_point){0, 0},
 			&game->img[T_MAP_ENEMY_PATH], &game->img[T_MAP]);
 	if (game->enemy.last_seen.x && game->enemy.last_seen.y)
@@ -1053,7 +1060,7 @@ void	draw_map_enemy(t_game *game)
 		draw_circle(&game->img[T_MAP], end, MAP_CELL_SIZE * 0.15, RED);
 		draw_circle_outline(&game->img[T_MAP], end, MAP_CELL_SIZE * 0.25, RED);
 	}
-	if (game->map.enemy_toggle)
+	if (game->state[ENEMY_MAP_TOGGLE])
 	{
 		draw_circle(&game->img[T_MAP], start,
 			MAP_CELL_SIZE * 0.5, MAP_COLOR);
@@ -1078,7 +1085,7 @@ void	draw_minimap(t_game *game)
 	put_img((t_point){0, 0,}, &game->img[T_MAP_BG], &game->img[T_MAP_MASK]);
 	put_img((t_point){-player_pos.x + center, -player_pos.y + center},
 		&game->img[T_MAP], &game->img[T_MAP_MASK]);
-	if (game->keys[MAP_BIG] == 1)
+	if (!game->state[MAP_BIG])
 		put_img(game->map.offset, &game->img[T_MAP_MASK], &game->img[T_WIN]);
 	else
 		put_img((t_point){RES_X * 0.5 - game->img[T_MAP].size.x * 0.5,
@@ -1406,8 +1413,12 @@ void	chase(t_game *game, float dist_sq, float speed)
 	game->enemy.memory.y = game->enemy.pos.y + game->enemy.last_dist.y * speed;
 	if (dist_sq < 1.42)
 	{
-		game->keys[MAP_DISABLE] = 1;
+		game->state[MAP_DISABLE] = 1;
 		set_player_look_at(&game->player, game->enemy.pos);
+		if (game->player.zoom < 1.8)
+			game->player.zoom += 0.1;
+		game->player.pitch = -300;
+		game->state[GAME_OVER] = 1;
 		return ;
 	}
 	enemy_open_door(game);
@@ -1527,7 +1538,10 @@ void	render_enemy_sprite(t_game *game)
 	t_ray	r;
 
 	if (delay_ms(100, MS100))
+	{
+		game->state[ENEMY_MAP_TOGGLE] = !game->state[ENEMY_MAP_TOGGLE];
 		update_enemy_sprite(game);
+	}
 	init_ray_to_target(game, &r, game->enemy.pos);
 	if (dda_to_target(game, &r, game->enemy.pos) != 1)
 	{
@@ -1547,7 +1561,7 @@ void	render_item_sprite(t_game *game, t_item item)
 
 	item.dist.x = game->player.pos.x - item.pos.x;
 	item.dist.y = game->player.pos.y - item.pos.y;
-	view.x = dot_product(game->player.dir, item.dist) * 0.9;
+	view.x = dot_product(game->player.dir, item.dist) * 0.88;
 	if (view.x >= 0)
 		return ;
 	dist_sqrt = sqrtf(item.dist.x * item.dist.x + item.dist.y * item.dist.y);
@@ -1555,7 +1569,7 @@ void	render_item_sprite(t_game *game, t_item item)
 	screen.x = (RES_X * (view.y * 2.0) / (2 * view.x)) * game->player.zoom;
 	screen.y = ((RES_Y * game->player.z) / dist_sqrt - game->player.pitch);
 	scaling = fmaxf((game->img[T_ITEM].size.x / dist_sqrt)
-			* game->player.zoom * 0.05, 0.05);
+			* game->player.zoom * 0.04, 0.04);
 	scale.x = scaling;
 	scale.y = scaling;
 	if (view.x < 0)
@@ -1571,23 +1585,59 @@ void	render_item(t_game *game)
 	i = 0;
 	while (i < game->item_count)
 	{
+		if (game->item[i].collected == 1)
+		{
+			i++;
+			continue ;
+		}
 		init_ray_to_target(game, &r, game->item[i].pos);
 		if (dda_to_target(game, &r, game->item[i].pos) != 1)
-			break ;
-		if (game->item[i].seen == 0)
-			game->item[i].seen = 1;
+		{
+			i++;
+			continue ;
+		}
 		render_item_sprite(game, game->item[i]);
 		i++;
 	}
 }
 
+int	same_position(t_fpoint p1, t_fpoint p2)
+{
+	if ((int)p1.x == (int)p2.x && (int)p1.y == (int)p2.y)
+		return (1);
+	return (0);
+}
+
+void	pickup_item(t_game *game)
+{
+	int				i;
+
+	i = 0;
+	if (g_map[(int)game->player.pos.y][(int)game->player.pos.x] == -3)
+	{
+		while (i < game->item_count)
+		{
+			if (same_position(game->player.pos, game->item[i].pos))
+			{
+				game->item_collected++;
+				printf("collected %i/%i\n", game->item_collected, game->item_count);
+				game->item[i].collected = 1;
+				g_map[(int)game->player.pos.y][(int)game->player.pos.x] = 0;
+				game->map.update = 1;
+				return ;
+			}
+			i++;
+		}
+	}
+}
+
 int	game_loop(t_game *game)
 {
-	if (game->keys[MOUSE] && !game->keys[PAUSE])
+	if (game->state[MOUSE] && !game->state[PAUSE] && !game->state[GAME_OVER])
 		handle_mouse(game);
 	if (should_render_frame(game))
 	{
-		if (game->keys[PAUSE])
+		if (game->state[PAUSE])
 		{
 			put_img((t_point){0, 0}, &game->img[T_PAUSE], &game->img[T_WIN]);
 			mlx_put_image_to_window(game->mlx, game->win, game->img[T_WIN].img,
@@ -1600,16 +1650,22 @@ int	game_loop(t_game *game)
 			draw_bg(game);
 			render_viewport(game);
 			render_enemy_sprite(game);
+			pickup_item(game);
 			render_item(game);
-			if (!game->keys[MAP_DISABLE])
+			if (!game->state[MAP_DISABLE])
 				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
 				game->img[T_WIN].img, 0, 0);
 		}
-		if (game->keys[MOUSE] == 0)
-			mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
-				"MOUSE DISABLED");
 		display_fps_counter(game);
+		if (game->state[GAME_OVER])
+			return (0);
+		if (game->state[MOUSE] == 0)
+			mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
+				"MOUSE DISABLED, [CLICK ANYWHERE] TO ENABLE");
+		else
+			mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
+				"MOUSE ENABLED, [P] TO DISABLE");
 	}
 	return (0);
 }
@@ -1699,6 +1755,7 @@ void	init_items(t_game *game)
 	int	y;
 	int	i;
 
+	game->item_collected = 0;
 	game->item_count = count_tile(game, -3);
 	game->item = malloc(game->item_count * sizeof(t_item));
 	i = 0;
@@ -1714,7 +1771,6 @@ void	init_items(t_game *game)
 				game->item[i].pos.y = (float)y + 0.5;
 				game->item[i].dist.x = 0;
 				game->item[i].dist.y = 0;
-				game->item[i].seen = 0;
 				game->item[i].collected = 0;
 				i++;
 				if (i == game->item_count)
@@ -1724,7 +1780,6 @@ void	init_items(t_game *game)
 		}
 		y++;
 	}
-	(void)game;
 }
 
 int	init_game(t_game *game)
@@ -1747,7 +1802,7 @@ int	init_game(t_game *game)
 		return (-1);
 	load_xpms(game);
 	init_framedata(&game->frame);
-	init_keystate(game);
+	init_states(game);
 	init_player(&game->player);
 	init_enemy(game);
 	init_items(game);
@@ -1758,14 +1813,12 @@ int	init_game(t_game *game)
 	return (0);
 }
 
-int	mwheel(unsigned int key, int x, int y, t_game *game)
+int	mwheel(unsigned int key, t_game *game)
 {
 	const float	step = 0.1;
 	const int	limit = RES_Y * 0.5;
 
-	(void)x;
-	(void)y;
-	if (key == 4 && game->player.zoom < 2)
+	if (key == 4 && game->player.zoom < 1.8)
 	{
 		game->player.zoom += step;
 		if (game->player.pitch != limit && game->player.pitch != -limit)
@@ -1786,6 +1839,23 @@ int	mwheel(unsigned int key, int x, int y, t_game *game)
 	return (0);
 }
 
+int	mouse_event(unsigned int key, int x, int y, t_game *game)
+{
+	(void)x;
+	(void)y;
+	if (game->state[GAME_OVER])
+		return (0);
+	if (key == 1)
+	{
+		if (game->state[MOUSE] == 0)
+		{
+			mlx_mouse_move(game->mlx, game->win, RES_X * 0.5, RES_Y * 0.5);
+			game->state[MOUSE] = 1;
+		}
+	}
+	return (mwheel(key, game));
+}
+
 int	main(int ac, char **av)
 {
 	t_game	game;
@@ -1796,7 +1866,7 @@ int	main(int ac, char **av)
 	mlx_do_key_autorepeatoff(game.mlx);
 	mlx_hook(game.win, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win, KeyRelease, KeyReleaseMask, &key_release, &game);
-	mlx_hook(game.win, ButtonPress, ButtonPressMask, &mwheel, &game);
+	mlx_hook(game.win, ButtonPress, ButtonPressMask, &mouse_event, &game);
 	mlx_hook(game.win, DestroyNotify, StructureNotifyMask, &exit_game, &game);
 	mlx_loop_hook(game.mlx, &game_loop, &game);
 	mlx_loop(game.mlx);

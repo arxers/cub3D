@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/01 19:59:57 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/01 22:55:23 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
 # define PLAYER_SPD 0.002
-# define ENEMY_SPD 0.003
+# define ENEMY_SPD 0.0025
 # define PLAYER_RADIUS 0.20
 # define ENEMY_RADIUS 0.00
 
@@ -85,7 +85,7 @@ typedef enum e_texture
 	T_ITEM
 }					t_texture;
 
-typedef enum e_keystate
+typedef enum e_state
 {
 	UP,
 	DOWN,
@@ -102,8 +102,10 @@ typedef enum e_keystate
 	CROUCH,
 	JUMP,
 	PAUSE,
-	SHOW_ENEMY_PATH
-}					t_keystate;
+	ENEMY_MAP_TOGGLE,
+	SHOW_ENEMY_PATH,
+	GAME_OVER
+}					t_state;
 
 typedef enum e_direction
 {
@@ -148,7 +150,6 @@ typedef struct s_item
 {
 	t_fpoint		pos;
 	t_fpoint		dist;
-	int				seen;
 	int				collected;
 }					t_item;
 
@@ -171,9 +172,9 @@ typedef struct s_enemy
 	t_fpoint		last_seen;
 	t_img			img;
 	int				frame;
-	int				eyes;
 	int				move_seed;
 	int				move_inc;
+	char			eyes;
 }					t_enemy;
 
 typedef struct s_frame_data
@@ -192,8 +193,7 @@ typedef struct s_map
 	int				**grid;
 	t_point			size;
 	t_point			offset;
-	int				enemy_toggle;
-	int				update;
+	char			update;
 }					t_map;
 
 typedef struct s_light
@@ -213,9 +213,9 @@ typedef struct s_ray
 	t_point			pix;
 	t_point			step;
 	float			wall_dist;
-	int				side;
 	int				draw_start;
 	int				draw_end;
+	char			side;
 }					t_ray;
 
 typedef struct s_texture_map
@@ -228,7 +228,7 @@ typedef struct s_texture_map
 
 typedef struct s_game
 {
-	char			keys[32];
+	char			state[32];
 	t_img			img[32];
 	void			*mlx;
 	void			*win;
@@ -239,6 +239,9 @@ typedef struct s_game
 	t_map			map;
 	t_item			*item;
 	int				item_count;
+	int				item_collected;
+	char			item_flash;
+
 }					t_game;
 
 #endif
