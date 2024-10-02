@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/02 18:51:31 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 01:50:18 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,53 @@ void	put_img_scale_mid(t_point ofs, t_img *src, t_img *dst, t_fpoint scale)
 	}
 }
 
-void	put_img_scale_mid_bot(t_point ofs, t_img *src, t_img *dst, t_fpoint scale)
+unsigned int	darken(unsigned int color, float factor)
+{
+	unsigned int	r;
+	unsigned int	g;
+	unsigned int	b;
+
+	if ((color >> 24) & 0xFF)
+		return (color);
+	r = (color >> 16) & 0xFF;
+	g = (color >> 8) & 0xFF;
+	b = (color >> 0) & 0xFF;
+	r *= factor;
+	g *= factor;
+	b *= factor;
+	return ((r << 16) | (g << 8) | b);
+}
+
+void	put_img_scale_pwl(t_point ofs, t_img *src, t_img *dst, t_fpoint scale)
+{
+	t_fpoint	sp;
+	t_point		dp;
+	t_point		s_mid;
+
+	scale.x = 1.0 / scale.x;
+	scale.y = 1.0 / scale.y;
+	s_mid.x = src->size.x * 0.5;
+	s_mid.y = src->size.y * 0.5;
+	dp.y = 0;
+	while (dp.y < dst->size.y)
+	{
+		dp.x = 0;
+		while (dp.x < dst->size.x)
+		{
+			sp.x = (dp.x - ofs.x - dst->size.x * 0.5) * scale.x + s_mid.x;
+			sp.y = (dp.y - ofs.y - dst->size.y * 0.5) * scale.y + s_mid.y;
+			if (sp.x >= 0 && sp.x < src->size.x
+				&& sp.y >= 0 && sp.y < src->size.y)
+				set_pixel_alpha(dst, dp.x, dp.y,
+					darken(get_pixel(src, sp.x, sp.y), src->intensity));
+			dp.x++;
+		}
+		dp.y++;
+	}
+}
+
+void	put_img_scale_mid_bot(t_point ofs, t_img *src, t_img *dst,
+	t_fpoint scale)
 {
 	t_fpoint	sp;
 	t_point		dp;
@@ -423,8 +469,6 @@ void	validate_input(int ac, char **av)
 		ft_putstr_fd("cub3D: usage: cub3D [*.cub]\n", 2);
 		exit(1);
 	}
-	// if (open(av[1]) == -1) //check if able to open
-	// 	;remove (void)av when this check is done
 	(void)av;
 }
 
@@ -719,16 +763,16 @@ void	unstuck_player(t_game *game, t_ray r)
 	pos.y = (int)game->player.pos.y - (int)r.map.y;
 	if (pos.x == -1)
 		set_entity_pos(&game->player.pos,
-		game->player.pos.x - PLAYER_RADIUS, game->player.pos.y);
+			game->player.pos.x - PLAYER_RADIUS, game->player.pos.y);
 	if (pos.x == 1)
 		set_entity_pos(&game->player.pos,
-		game->player.pos.x + PLAYER_RADIUS, game->player.pos.y);
+			game->player.pos.x + PLAYER_RADIUS, game->player.pos.y);
 	if (pos.y == -1)
 		set_entity_pos(&game->player.pos,
-		game->player.pos.x, game->player.pos.y - PLAYER_RADIUS);
+			game->player.pos.x, game->player.pos.y - PLAYER_RADIUS);
 	if (pos.y == 1)
 		set_entity_pos(&game->player.pos,
-		game->player.pos.x, game->player.pos.y + PLAYER_RADIUS);
+			game->player.pos.x, game->player.pos.y + PLAYER_RADIUS);
 }
 
 void	interact(t_game *game)
@@ -748,7 +792,8 @@ void	interact(t_game *game)
 			r.wall_dist = r.side_dist.y - r.delta_dist.y;
 		if (r.wall_dist <= 2.0)
 		{
-			g_map[(int)r.map.y][(int)r.map.x] = -g_map[(int)r.map.y][(int)r.map.x];
+			g_map[(int)r.map.y][(int)r.map.x]
+				= -g_map[(int)r.map.y][(int)r.map.x];
 			if (r.wall_dist <= PLAYER_RADIUS)
 				unstuck_player(game, r);
 			game->map.update = 1;
@@ -1036,10 +1081,6 @@ int	should_render_frame(t_game *game)
 		game->frame.last = game->frame.current;
 		if (delay_ms(1000, MS1000))
 		{
-			// if (game->light.ambient == 1)
-			// 	game->light.ambient = 0.15;
-			// else if (game->light.ambient == 0.15)
-				// game->light.ambient = 1;
 			ft_free(&game->frame.fps_str);
 			game->frame.fps_str = ft_itoa(game->frame.fps);
 			game->frame.fps = 0;
@@ -1081,7 +1122,6 @@ void	draw_map_enemy(t_game *game)
 void	draw_minimap(t_game *game)
 {
 	t_fpoint	player_pos;
-
 	const int	center = game->img[T_MAP_MASK].size.x * 0.5;
 
 	player_pos.x = (int)((game->player.pos.x * MAP_CELL_SIZE));
@@ -1102,42 +1142,26 @@ void	draw_minimap(t_game *game)
 			&game->img[T_MAP], &game->img[T_WIN]);
 }
 
-unsigned int	darken(unsigned int color, float factor)
+float	set_intensity(t_light light, float dist)
 {
-	unsigned int	r;
-	unsigned int	g;
-	unsigned int	b;
-
-	if ((color >> 24) & 0xFF)
-		return (color);
-	r = (color >> 16) & 0xFF;
-	g = (color >> 8) & 0xFF;
-	b = (color >> 0) & 0xFF;
-	r *= factor;
-	g *= factor;
-	b *= factor;
-	return ((r << 16) | (g << 8) | b);
-}
-
-float	set_intensity(t_light *light, float dist)
-{
-	const float	inverse_range = 1.0 / (light->max - light->min);
+	const float	inverse_range = 1.0 / (light.max - light.min);
 	float		intensity;
 
-	intensity = (light->max - dist) * inverse_range;
+	intensity = (light.max - dist) * inverse_range;
 	if (intensity < 0)
 		intensity = 0;
 	if (intensity > 1)
 		intensity = 1;
-	intensity = intensity * (1 - light->ambient) + light->ambient;
+	intensity = intensity * (1 - light.ambient) + light.ambient;
 	return (intensity);
 }
 
 void	assign_wall_texture(t_game *game, t_ray *r, t_texture_map *tex)
 {
 	tex->wall_tex = NULL;
-	if (g_map[(int)r->map.y][(int)r->map.x] < 1 || g_map[(int)r->map.y][(int)r->map.x] == TILE_PWL)
-		return  ;
+	if (g_map[(int)r->map.y][(int)r->map.x] < 1
+		|| g_map[(int)r->map.y][(int)r->map.x] == TILE_PWL)
+		return ;
 	if (g_map[(int)r->map.y][(int)r->map.x] == 2)
 	{
 		if ((r->side == VERTICAL && r->dir.x <= 0)
@@ -1193,7 +1217,7 @@ int	dda(t_ray *r)
 void	draw_wall_slices(t_game *game, t_ray *r, t_texture_map *tex)
 {
 	tex->wall_tex->intensity
-		= set_intensity(&game->light, r->wall_dist * game->player.zoom);
+		= set_intensity(game->light, r->wall_dist * game->player.zoom);
 	tex->tex_step = 1.0 * WALL / r->line_height;
 	r->pix.y = r->draw_start;
 	tex->hit.y = (r->draw_start + game->player.pitch
@@ -1436,7 +1460,7 @@ void	chase(t_game *game, float dist_sq, float speed)
 		return (game_over(game));
 	enemy_open_door(game);
 	if (((int)game->enemy.pos.x == (int)game->enemy.last_seen.x
-		&& (int)game->enemy.pos.y == (int)game->enemy.last_seen.y)
+			&& (int)game->enemy.pos.y == (int)game->enemy.last_seen.y)
 		|| check_collision(&game->enemy.pos, game->enemy.memory, ENEMY_RADIUS))
 	{
 		game->enemy.last_seen.x = 0;
@@ -1497,9 +1521,8 @@ int	dda_to_target(t_game *game, t_ray *r, t_fpoint target_pos)
 			r->map.y += r->step.y;
 			r->side = HORIZONTAL;
 		}
-		if (out_of_bounds(r->map))
-			return (-1);
-		if (g_map[(int)r->map.y][(int)r->map.x] == TILE_WALL)
+		if (out_of_bounds(r->map) || (g_map[(int)r->map.y][(int)r->map.x] > 0
+			&& g_map[(int)r->map.y][(int)r->map.x] != TILE_PWL))
 			return (0);
 		if ((int)r->map.x == (int)target_pos.x
 			&& (int)r->map.y == (int)target_pos.y)
@@ -1623,7 +1646,7 @@ int	same_position(t_fpoint p1, t_fpoint p2)
 
 void	pickup_item(t_game *game)
 {
-	int				i;
+	int	i;
 
 	i = 0;
 	if (g_map[(int)game->player.pos.y][(int)game->player.pos.x] == -3)
@@ -1633,7 +1656,6 @@ void	pickup_item(t_game *game)
 			if (same_position(game->player.pos, game->item[i].pos))
 			{
 				game->item_collected++;
-				printf("collected %i/%i\n", game->item_collected, game->item_count);
 				game->item[i].collected = 1;
 				g_map[(int)game->player.pos.y][(int)game->player.pos.x] = 0;
 				game->map.update = 1;
@@ -1644,20 +1666,32 @@ void	pickup_item(t_game *game)
 	}
 }
 
-
-void	set_pwl_view(t_game *game, t_item *pwl)
+void	set_pwl_view(t_game *game, t_item *pwl, t_ray r)
 {
-	if (game->player.dir.x < 0 && game->player.dir.x <)
-	pwl->img = &game->img[T_PWL0];
-	pwl->img = &game->img[T_PWL1];
+	if (r.dir.x > 0.5 && r.dir.y < -0.5)
+		pwl->img = &game->img[T_PWL0];
+	else if (r.dir.x > 0.5 && r.dir.y > 0.5)
+		pwl->img = &game->img[T_PWL2];
+	else if (r.dir.x < -0.5 && r.dir.y > 0.5)
+		pwl->img = &game->img[T_PWL4];
+	else if (r.dir.x < -0.5 && r.dir.y < -0.5)
+		pwl->img = &game->img[T_PWL6];
+	else if (r.dir.x > 0.5)
+		pwl->img = &game->img[T_PWL1];
+	else if (r.dir.y > 0.5)
+		pwl->img = &game->img[T_PWL3];
+	else if (r.dir.x < -0.5)
+		pwl->img = &game->img[T_PWL5];
+	else if (r.dir.y < -0.5)
+		pwl->img = &game->img[T_PWL7];
 }
 
-void	render_pwl_sprite(t_game *game, t_item pwl)
+void	render_pwl_sprite(t_game *game, t_item pwl, t_ray r)
 {
 	t_fpoint	view;
 	t_fpoint	screen;
 	t_fpoint	scale;
-	float		dist_sqrt;
+	float		dist_sq;
 	float		scaling;
 
 	pwl.dist.x = game->player.pos.x - pwl.pos.x;
@@ -1665,16 +1699,17 @@ void	render_pwl_sprite(t_game *game, t_item pwl)
 	view.x = dot_product(game->player.dir, pwl.dist) * 0.88;
 	if (view.x >= 0)
 		return ;
-	dist_sqrt = sqrtf(pwl.dist.x * pwl.dist.x + pwl.dist.y * pwl.dist.y);
+	dist_sq = sqrtf(pwl.dist.x * pwl.dist.x + pwl.dist.y * pwl.dist.y);
 	view.y = dot_product(game->player.plane, pwl.dist);
 	screen.x = (RES_X * (view.y * 2.0) / (2 * view.x)) * game->player.zoom;
-	screen.y = ((RES_Y * game->player.z) / dist_sqrt - game->player.pitch);
-	scaling = fmaxf((game->img[T_ITEM].size.x / dist_sqrt)
+	screen.y = ((RES_Y * game->player.z) / dist_sq - game->player.pitch);
+	scaling = fmaxf((game->img[T_ITEM].size.x / dist_sq)
 			* game->player.zoom * 0.1, 0.1);
 	scale.x = scaling;
 	scale.y = scaling;
-	set_pwl_view(game, &pwl);
-	put_img_scale_mid((t_point){screen.x, screen.y},
+	set_pwl_view(game, &pwl, r);
+	pwl.img->intensity = set_intensity(game->light, dist_sq);
+	put_img_scale_pwl((t_point){screen.x, screen.y},
 		pwl.img, &game->img[T_WIN], scale);
 }
 
@@ -1686,13 +1721,8 @@ void	render_pwl(t_game *game)
 		return ;
 	init_ray_to_target(game, &r, game->power_loader.pos);
 	if (dda_to_target(game, &r, game->power_loader.pos) != 1)
-	{
-		printf("ray: %f, %f\n", r.map.x, r.map.y);
-		printf("target: %f, %f\n", game->power_loader.pos.x, game->power_loader.pos.y);
 		return ;
-	}
-	printf("hit\n");
-	render_pwl_sprite(game, game->power_loader);
+	render_pwl_sprite(game, game->power_loader, r);
 }
 
 int	game_loop(t_game *game)
