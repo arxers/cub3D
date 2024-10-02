@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/02 14:15:57 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/02 18:14:44 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,16 @@ typedef enum e_state
 	GAME_OVER
 }					t_state;
 
+typedef enum e_tiles
+{
+	TILE_ITEM = -3,
+	TILE_DOOR_OPEN,
+	TILE_FLOOR = 0,
+	TILE_WALL,
+	TILE_DOOR,
+	TILE_PWL
+}					t_tiles;
+
 typedef enum e_direction
 {
 	UP_LEFT,
@@ -148,6 +158,7 @@ typedef struct s_img
 	void			*img;
 	char			*addr;
 	t_point			size;
+	float			intensity;
 	int				bits_per_pixel;
 	int				line_len;
 	int				endian;
@@ -157,6 +168,7 @@ typedef struct s_item
 {
 	t_fpoint		pos;
 	t_fpoint		dist;
+	t_img			*img;
 	int				collected;
 }					t_item;
 
@@ -245,6 +257,7 @@ typedef struct s_game
 	t_light			light;
 	t_map			map;
 	t_item			*item;
+	t_item			power_loader;
 	int				item_count;
 	int				item_collected;
 	char			item_flash;

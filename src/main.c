@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/02 14:14:54 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/02 18:51:31 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	g_map[28][40] = {
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,-4,0,1,1,-3,1,-3,2,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,3,0,1,1,-3,1,-3,2,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,2,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,-3,1},
@@ -647,8 +647,10 @@ int	dda_door(t_ray *r)
 		}
 		if (out_of_bounds(r->map))
 			return (-1);
-		if (g_map[(int)r->map.y][(int)r->map.x] == 2
-			|| g_map[(int)r->map.y][(int)r->map.x] == -2)
+		if (g_map[(int)r->map.y][(int)r->map.x] == TILE_WALL)
+			return (0);
+		if (g_map[(int)r->map.y][(int)r->map.x] == TILE_DOOR
+			|| g_map[(int)r->map.y][(int)r->map.x] == TILE_DOOR_OPEN)
 			return (1);
 		i++;
 	}
@@ -1133,9 +1135,9 @@ float	set_intensity(t_light *light, float dist)
 
 void	assign_wall_texture(t_game *game, t_ray *r, t_texture_map *tex)
 {
-	if (g_map[(int)r->map.y][(int)r->map.x] < 1)
-		return ;
 	tex->wall_tex = NULL;
+	if (g_map[(int)r->map.y][(int)r->map.x] < 1 || g_map[(int)r->map.y][(int)r->map.x] == TILE_PWL)
+		return  ;
 	if (g_map[(int)r->map.y][(int)r->map.x] == 2)
 	{
 		if ((r->side == VERTICAL && r->dir.x <= 0)
@@ -1182,16 +1184,16 @@ int	dda(t_ray *r)
 		}
 		if (out_of_bounds(r->map))
 			return (-1);
-		if (g_map[(int)r->map.y][(int)r->map.x] > 0)
+		if (g_map[(int)r->map.y][(int)r->map.x] > 0
+			&& g_map[(int)r->map.y][(int)r->map.x] != TILE_PWL)
 			return (0);
 	}
 }
 
 void	draw_wall_slices(t_game *game, t_ray *r, t_texture_map *tex)
 {
-	float			intensity;
-
-	intensity = set_intensity(&game->light, r->wall_dist * game->player.zoom);
+	tex->wall_tex->intensity
+		= set_intensity(&game->light, r->wall_dist * game->player.zoom);
 	tex->tex_step = 1.0 * WALL / r->line_height;
 	r->pix.y = r->draw_start;
 	tex->hit.y = (r->draw_start + game->player.pitch
@@ -1203,7 +1205,7 @@ void	draw_wall_slices(t_game *game, t_ray *r, t_texture_map *tex)
 		tex->hit.y += tex->tex_step;
 		set_pixel_alpha(&game->img[T_WIN], r->pix.x, r->pix.y,
 			darken(get_pixel(tex->wall_tex, tex->coords.x, tex->coords.y),
-				intensity));
+				tex->wall_tex->intensity));
 		r->pix.y++;
 	}
 }
@@ -1497,7 +1499,7 @@ int	dda_to_target(t_game *game, t_ray *r, t_fpoint target_pos)
 		}
 		if (out_of_bounds(r->map))
 			return (-1);
-		if (g_map[(int)r->map.y][(int)r->map.x] > 0)
+		if (g_map[(int)r->map.y][(int)r->map.x] == TILE_WALL)
 			return (0);
 		if ((int)r->map.x == (int)target_pos.x
 			&& (int)r->map.y == (int)target_pos.y)
@@ -1642,10 +1644,56 @@ void	pickup_item(t_game *game)
 	}
 }
 
-// void	render_pwl(t_game *game)
-// {
 
-// }
+void	set_pwl_view(t_game *game, t_item *pwl)
+{
+	if (game->player.dir.x < 0 && game->player.dir.x <)
+	pwl->img = &game->img[T_PWL0];
+	pwl->img = &game->img[T_PWL1];
+}
+
+void	render_pwl_sprite(t_game *game, t_item pwl)
+{
+	t_fpoint	view;
+	t_fpoint	screen;
+	t_fpoint	scale;
+	float		dist_sqrt;
+	float		scaling;
+
+	pwl.dist.x = game->player.pos.x - pwl.pos.x;
+	pwl.dist.y = game->player.pos.y - pwl.pos.y;
+	view.x = dot_product(game->player.dir, pwl.dist) * 0.88;
+	if (view.x >= 0)
+		return ;
+	dist_sqrt = sqrtf(pwl.dist.x * pwl.dist.x + pwl.dist.y * pwl.dist.y);
+	view.y = dot_product(game->player.plane, pwl.dist);
+	screen.x = (RES_X * (view.y * 2.0) / (2 * view.x)) * game->player.zoom;
+	screen.y = ((RES_Y * game->player.z) / dist_sqrt - game->player.pitch);
+	scaling = fmaxf((game->img[T_ITEM].size.x / dist_sqrt)
+			* game->player.zoom * 0.1, 0.1);
+	scale.x = scaling;
+	scale.y = scaling;
+	set_pwl_view(game, &pwl);
+	put_img_scale_mid((t_point){screen.x, screen.y},
+		pwl.img, &game->img[T_WIN], scale);
+}
+
+void	render_pwl(t_game *game)
+{
+	t_ray	r;
+
+	if (game->power_loader.collected == 1)
+		return ;
+	init_ray_to_target(game, &r, game->power_loader.pos);
+	if (dda_to_target(game, &r, game->power_loader.pos) != 1)
+	{
+		printf("ray: %f, %f\n", r.map.x, r.map.y);
+		printf("target: %f, %f\n", game->power_loader.pos.x, game->power_loader.pos.y);
+		return ;
+	}
+	printf("hit\n");
+	render_pwl_sprite(game, game->power_loader);
+}
 
 int	game_loop(t_game *game)
 {
@@ -1668,7 +1716,7 @@ int	game_loop(t_game *game)
 			render_enemy_sprite(game);
 			pickup_item(game);
 			render_item(game);
-			// render_pwl();
+			render_pwl(game);
 			if (!game->state[MAP_DISABLE])
 				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
@@ -1799,9 +1847,9 @@ void	init_items(t_game *game)
 	}
 }
 
-t_point	get_unique_char_pos(t_game *game, int n)
+t_fpoint	get_unique_char_pos(t_game *game, int n)
 {
-	t_point	pos;
+	t_fpoint	pos;
 
 	pos.y = 0;
 	while (pos.y < g_map_y - 1)
@@ -1809,18 +1857,26 @@ t_point	get_unique_char_pos(t_game *game, int n)
 		pos.x = 0;
 		while (pos.x < g_map_x - 1)
 		{
-			if (g_map[pos.y][pos.x] == n)
+			if (g_map[(int)pos.y][(int)pos.x] == n)
+			{
+				pos.x += 0.5;
+				pos.y += 0.5;
 				return (pos);
+			}
+			pos.x++;
 		}
 		pos.y++;
 	}
 	(void)game;
-	return ((t_point){0, 0});
+	return ((t_fpoint){0, 0});
 }
 
-void	init_pwl()
+void	init_pwl(t_game *game)
 {
-
+	game->power_loader.pos = get_unique_char_pos(game, TILE_PWL);
+	game->power_loader.dist.x = 0;
+	game->power_loader.dist.y = 0;
+	game->power_loader.collected = 0;
 }
 
 int	init_game(t_game *game)
