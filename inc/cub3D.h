@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/01 22:55:23 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/02 14:15:57 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,6 @@ typedef enum e_texture
 	T_SOUTH,
 	T_EAST,
 	T_WEST,
-	T_DOOR_OPEN,
 	T_DOOR_CLOSE,
 	T_PAUSE,
 	T_DITHER,
@@ -82,6 +81,14 @@ typedef enum e_texture
 	T_XENO6,
 	T_XENO7,
 	T_XENO_END,
+	T_PWL0,
+	T_PWL1,
+	T_PWL2,
+	T_PWL3,
+	T_PWL4,
+	T_PWL5,
+	T_PWL6,
+	T_PWL7,
 	T_ITEM
 }					t_texture;
 
@@ -229,7 +236,7 @@ typedef struct s_texture_map
 typedef struct s_game
 {
 	char			state[32];
-	t_img			img[32];
+	t_img			img[33];
 	void			*mlx;
 	void			*win;
 	t_frame_data	frame;

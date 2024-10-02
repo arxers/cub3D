@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/02 06:01:10 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/02 14:14:54 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	g_map[28][40] = {
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,-3,1,-3,2,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,-4,0,1,1,-3,1,-3,2,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,2,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,-3,1},
@@ -256,6 +256,14 @@ int	load_xpms(t_game *game)
 	load_xpm(game->mlx, "textures/xeno5.xpm", &game->img[T_XENO5]);
 	load_xpm(game->mlx, "textures/xeno6.xpm", &game->img[T_XENO6]);
 	load_xpm(game->mlx, "textures/xeno7.xpm", &game->img[T_XENO7]);
+	load_xpm(game->mlx, "textures/pwl0.xpm", &game->img[T_PWL0]);
+	load_xpm(game->mlx, "textures/pwl1.xpm", &game->img[T_PWL1]);
+	load_xpm(game->mlx, "textures/pwl2.xpm", &game->img[T_PWL2]);
+	load_xpm(game->mlx, "textures/pwl3.xpm", &game->img[T_PWL3]);
+	load_xpm(game->mlx, "textures/pwl4.xpm", &game->img[T_PWL4]);
+	load_xpm(game->mlx, "textures/pwl5.xpm", &game->img[T_PWL5]);
+	load_xpm(game->mlx, "textures/pwl6.xpm", &game->img[T_PWL6]);
+	load_xpm(game->mlx, "textures/pwl7.xpm", &game->img[T_PWL7]);
 	load_xpm(game->mlx, "textures/item.xpm", &game->img[T_ITEM]);
 	return (0);
 }
@@ -1125,11 +1133,13 @@ float	set_intensity(t_light *light, float dist)
 
 void	assign_wall_texture(t_game *game, t_ray *r, t_texture_map *tex)
 {
+	if (g_map[(int)r->map.y][(int)r->map.x] < 1)
+		return ;
 	tex->wall_tex = NULL;
 	if (g_map[(int)r->map.y][(int)r->map.x] == 2)
 	{
 		if ((r->side == VERTICAL && r->dir.x <= 0)
-			||( r->side == HORIZONTAL && r->dir.y >= 0))
+			|| (r->side == HORIZONTAL && r->dir.y >= 0))
 			tex->coords.x = WALL - tex->coords.x - 1;
 		tex->wall_tex = &game->img[T_DOOR_CLOSE];
 		return ;
@@ -1632,6 +1642,11 @@ void	pickup_item(t_game *game)
 	}
 }
 
+// void	render_pwl(t_game *game)
+// {
+
+// }
+
 int	game_loop(t_game *game)
 {
 	if (game->state[MOUSE] && !game->state[PAUSE] && !game->state[GAME_OVER])
@@ -1653,6 +1668,7 @@ int	game_loop(t_game *game)
 			render_enemy_sprite(game);
 			pickup_item(game);
 			render_item(game);
+			// render_pwl();
 			if (!game->state[MAP_DISABLE])
 				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
@@ -1783,6 +1799,30 @@ void	init_items(t_game *game)
 	}
 }
 
+t_point	get_unique_char_pos(t_game *game, int n)
+{
+	t_point	pos;
+
+	pos.y = 0;
+	while (pos.y < g_map_y - 1)
+	{
+		pos.x = 0;
+		while (pos.x < g_map_x - 1)
+		{
+			if (g_map[pos.y][pos.x] == n)
+				return (pos);
+		}
+		pos.y++;
+	}
+	(void)game;
+	return ((t_point){0, 0});
+}
+
+void	init_pwl()
+{
+
+}
+
 int	init_game(t_game *game)
 {
 	// game->map.size.x = (n rows);
@@ -1807,6 +1847,7 @@ int	init_game(t_game *game)
 	init_player(&game->player);
 	init_enemy(game);
 	init_items(game);
+	init_pwl(game);
 	game->light.min = 0.25;
 	game->light.max = 2.5;
 	game->light.ambient = 0.15;
