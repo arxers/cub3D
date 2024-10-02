@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/02 18:14:44 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 03:23:21 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ typedef enum e_state
 	ROT_D,
 	ROT_L,
 	ROT_R,
+	INTERACT,
 	MAP_DISABLE,
 	MAP_BIG,
 	MOUSE,

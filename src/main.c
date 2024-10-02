@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 01:50:18 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 03:24:58 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -655,6 +655,8 @@ void	handle_keystate(unsigned int key, int state, t_game *game)
 		game->state[CROUCH] = state;
 	if (key == XK_space)
 		game->state[JUMP] = state;
+	if (key == XK_e)
+		game->state[INTERACT] = state;
 }
 
 int	key_release(unsigned int key, t_game *game)
@@ -792,10 +794,21 @@ void	interact(t_game *game)
 			r.wall_dist = r.side_dist.y - r.delta_dist.y;
 		if (r.wall_dist <= 2.0)
 		{
-			g_map[(int)r.map.y][(int)r.map.x]
-				= -g_map[(int)r.map.y][(int)r.map.x];
-			if (r.wall_dist <= PLAYER_RADIUS)
-				unstuck_player(game, r);
+			if (!game->state[MAP_BIG])
+			{
+				draw_circle_outline(&game->img[T_WIN], (t_point){RES_X * 0.5, RES_Y * 0.5}, 30, WHITE);
+				draw_rectangle(&game->img[T_WIN], (t_point){RES_X * 0.5 + 34, RES_Y * 0.5 - 15}, (t_point){68, 35}, BLACK);
+				mlx_string_put(game->mlx, game->win, RES_X * 0.5 + 38, RES_Y * 0.5, WHITE, "[E]");
+				mlx_string_put(game->mlx, game->win, RES_X * 0.5 + 38, RES_Y * 0.5 + 15, WHITE, "OPEN/CLOSE");
+			}
+			if (game->state[INTERACT] == 1)
+			{
+				g_map[(int)r.map.y][(int)r.map.x]
+					= -g_map[(int)r.map.y][(int)r.map.x];
+				if (r.wall_dist <= PLAYER_RADIUS)
+					unstuck_player(game, r);
+				game->state[INTERACT] = 0;
+			}
 			game->map.update = 1;
 		}
 	}
@@ -810,8 +823,6 @@ int	key_press(unsigned int key, t_game *game)
 		exit_game(game);
 	if (key == XK_p)
 		toggle_mouse(game);
-	if (key == XK_e)
-		interact(game);
 	if (key == XK_m)
 		game->state[MAP_DISABLE] = !game->state[MAP_DISABLE];
 	if (key == XK_1)
@@ -1751,6 +1762,7 @@ int	game_loop(t_game *game)
 				draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
 				game->img[T_WIN].img, 0, 0);
+			interact(game);
 		}
 		display_fps_counter(game);
 		if (game->state[GAME_OVER])
