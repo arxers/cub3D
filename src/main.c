@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/01 23:27:05 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/02 06:01:10 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,14 @@ int	g_map[28][40] = {
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,-3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,-3,1,-3,2,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,2,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,-3,1},
 {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1},
 {1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-{1,0,0,1,0,0,0,2,-3,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+{1,0,0,1,0,0,0,2,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 {1,0,0,1,0,0,0,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 {1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
 {1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,-3,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1},
@@ -245,7 +245,6 @@ int	load_xpms(t_game *game)
 	load_xpm(game->mlx, "textures/wall/wall2.xpm", &game->img[T_SOUTH]);
 	load_xpm(game->mlx, "textures/wall/wall3.xpm", &game->img[T_EAST]);
 	load_xpm(game->mlx, "textures/wall/wall4.xpm", &game->img[T_WEST]);
-	load_xpm(game->mlx, "textures/door_open.xpm", &game->img[T_DOOR_OPEN]);
 	load_xpm(game->mlx, "textures/door.xpm", &game->img[T_DOOR_CLOSE]);
 	load_xpm(game->mlx, "textures/shift_tab.xpm", &game->img[T_PAUSE]);
 	load_xpm(game->mlx, "textures/bg_dither.xpm", &game->img[T_DITHER]);
@@ -1400,6 +1399,16 @@ void	hunt(t_game *game)
 		enemy_open_door(game);
 }
 
+void	game_over(t_game *game)
+{
+	game->state[MAP_DISABLE] = 1;
+	set_player_look_at(&game->player, game->enemy.pos);
+	if (game->player.zoom < 1.8)
+		game->player.zoom += 0.1;
+	game->player.pitch = -300;
+	game->state[GAME_OVER] = 1;
+}
+
 void	chase(t_game *game, float dist_sq, float speed)
 {
 	if (game->enemy.eyes == 1)
@@ -1412,15 +1421,7 @@ void	chase(t_game *game, float dist_sq, float speed)
 	game->enemy.memory.x = game->enemy.pos.x + game->enemy.last_dist.x * speed;
 	game->enemy.memory.y = game->enemy.pos.y + game->enemy.last_dist.y * speed;
 	if (dist_sq < 1.42)
-	{
-		game->state[MAP_DISABLE] = 1;
-		set_player_look_at(&game->player, game->enemy.pos);
-		if (game->player.zoom < 1.8)
-			game->player.zoom += 0.1;
-		game->player.pitch = -300;
-		game->state[GAME_OVER] = 1;
-		return ;
-	}
+		return (game_over(game));
 	enemy_open_door(game);
 	if (((int)game->enemy.pos.x == (int)game->enemy.last_seen.x
 		&& (int)game->enemy.pos.y == (int)game->enemy.last_seen.y)
