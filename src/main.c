@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 16:31:04 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 18:43:31 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -672,32 +672,40 @@ int	out_of_bounds(t_fpoint map)
 	return (0);
 }
 
+void	set_dda_step_side(t_ray *r)
+{
+	if (r->side_dist.x < r->side_dist.y)
+	{
+		r->side_dist.x += r->delta_dist.x;
+		r->map.x += r->step.x;
+		r->side = VERTICAL;
+	}
+	else
+	{
+		r->side_dist.y += r->delta_dist.y;
+		r->map.y += r->step.y;
+		r->side = HORIZONTAL;
+	}
+}
+
 int	dda_interact(t_ray *r)
 {
 	int	i;
+	int	tile_hit;
 
 	i = 0;
 	while (i < 3)
 	{
-		if (r->side_dist.x < r->side_dist.y)
-		{
-			r->side_dist.x += r->delta_dist.x;
-			r->map.x += r->step.x;
-			r->side = VERTICAL;
-		}
-		else
-		{
-			r->side_dist.y += r->delta_dist.y;
-			r->map.y += r->step.y;
-			r->side = HORIZONTAL;
-		}
+		set_dda_step_side(r);
 		if (out_of_bounds(r->map))
-			return (-1);
-		if (g_map[(int)r->map.y][(int)r->map.x] == TILE_WALL)
 			return (0);
-		if (g_map[(int)r->map.y][(int)r->map.x] == TILE_DOOR
-			|| g_map[(int)r->map.y][(int)r->map.x] == TILE_DOOR_OPEN)
-			return (1);
+		tile_hit = g_map[(int)r->map.y][(int)r->map.x];
+		if (tile_hit == TILE_WALL)
+			return (0);
+		if (!out_of_bounds(r->map)
+			&& (tile_hit == TILE_PWL || tile_hit == TILE_DOOR
+				|| tile_hit == TILE_DOOR_OPEN))
+			return (g_map[(int)r->map.y][(int)r->map.x]);
 		i++;
 	}
 	return (0);
@@ -777,8 +785,30 @@ void	unstuck_player(t_game *game, t_ray r)
 			game->player.pos.x, game->player.pos.y + PLAYER_RADIUS);
 }
 
+void	display_door_ui(t_game *game)
+{
+	draw_circle_outline(&game->img[T_WIN],
+		(t_point){RES_X2, RES_Y2}, 25, WHITE);
+	draw_rectangle(&game->img[T_WIN],
+		(t_point){RES_X2 + 30, RES_Y2 - 15},
+		(t_point){68, 35}, BLACK);
+	mlx_string_put(game->mlx, game->win, RES_X2 + 34,
+		RES_Y2, WHITE, "[E]");
+	mlx_string_put(game->mlx, game->win, RES_X2 + 34,
+		RES_Y2 + 15, WHITE, "OPEN/CLOSE");
+}
+
+void	use_door(t_game *game, t_ray r)
+{
+	g_map[(int)r.map.y][(int)r.map.x] = -g_map[(int)r.map.y][(int)r.map.x];
+	if (r.wall_dist <= PLAYER_RADIUS)
+		unstuck_player(game, r);
+	game->state[INTERACT] = 0;
+}
+
 void	interact(t_game *game)
 {
+	int				tile_hit;
 	t_ray			r;
 	const float		camera_x_factor = 2.0 / RES_X;
 
@@ -786,7 +816,8 @@ void	interact(t_game *game)
 	r.map.y = (int)game->player.pos.y;
 	set_ray_direction(game, &r, RES_X2 * camera_x_factor - 1, 0);
 	set_ray_step_direction(game, &r);
-	if (dda_interact(&r) == 1)
+	tile_hit = dda_interact(&r);
+	if (tile_hit != 0)
 	{
 		if (r.side == VERTICAL)
 			r.wall_dist = r.side_dist.x - r.delta_dist.x;
@@ -795,24 +826,11 @@ void	interact(t_game *game)
 		if (r.wall_dist <= 2.0)
 		{
 			if (!game->state[MAP_BIG])
-			{
-				draw_circle_outline(&game->img[T_WIN],
-					(t_point){RES_X2, RES_Y2}, 25, WHITE);
-				draw_rectangle(&game->img[T_WIN],
-					(t_point){RES_X2 + 30, RES_Y2 - 15},
-					(t_point){68, 35}, BLACK);
-				mlx_string_put(game->mlx, game->win, 512 + 34,
-					RES_Y2, WHITE, "[E]");
-				mlx_string_put(game->mlx, game->win, 512 + 34,
-					RES_Y2 + 15, WHITE, "OPEN/CLOSE");
-			}
+				display_door_ui(game);
 			if (game->state[INTERACT] == 1)
 			{
-				g_map[(int)r.map.y][(int)r.map.x]
-					= -g_map[(int)r.map.y][(int)r.map.x];
-				if (r.wall_dist <= PLAYER_RADIUS)
-					unstuck_player(game, r);
-				game->state[INTERACT] = 0;
+				if (tile_hit == TILE_DOOR || tile_hit == TILE_DOOR_OPEN)
+					use_door(game, r);
 			}
 			game->map.update = 1;
 		}
@@ -1210,18 +1228,7 @@ int	dda(t_ray *r)
 {
 	while (1)
 	{
-		if (r->side_dist.x < r->side_dist.y)
-		{
-			r->side_dist.x += r->delta_dist.x;
-			r->map.x += r->step.x;
-			r->side = VERTICAL;
-		}
-		else
-		{
-			r->side_dist.y += r->delta_dist.y;
-			r->map.y += r->step.y;
-			r->side = HORIZONTAL;
-		}
+		set_dda_step_side(r);
 		if (out_of_bounds(r->map))
 			return (-1);
 		if (g_map[(int)r->map.y][(int)r->map.x] > 0
@@ -1525,18 +1532,7 @@ int	dda_to_target(t_game *game, t_ray *r, t_fpoint target_pos)
 		return (1);
 	while (1)
 	{
-		if (r->side_dist.x < r->side_dist.y)
-		{
-			r->side_dist.x += r->delta_dist.x;
-			r->map.x += r->step.x;
-			r->side = VERTICAL;
-		}
-		else
-		{
-			r->side_dist.y += r->delta_dist.y;
-			r->map.y += r->step.y;
-			r->side = HORIZONTAL;
-		}
+		set_dda_step_side(r);
 		if (out_of_bounds(r->map) || (g_map[(int)r->map.y][(int)r->map.x] > 0
 			&& g_map[(int)r->map.y][(int)r->map.x] != TILE_PWL))
 			return (0);

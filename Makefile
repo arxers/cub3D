@@ -14,12 +14,12 @@ LIBRARY_FLAGS = $(LIBFT_FLAGS) $(MLX_FLAGS) -lm
 
 all: $(NAME)
 
-$(MLXDIR)/Makefile:
+$(MLXDIR):
 	@if [ ! -d $(MLXDIR) ]; then \
 		git clone $(MLX_URL) $(MLXDIR); \
 	fi
 
-$(MLX): $(MLXDIR)/Makefile
+$(MLX): $(MLXDIR)
 	make -C $(MLXDIR)
 
 $(NAME): $(MLX) $(LIBFT) $(OBJ)
@@ -42,6 +42,9 @@ fclean: clean
 	rm -rf $(MLXDIR)
 
 re: fclean all
+
+fsanitize: CFLAGS += -fsanitize=address
+fsanitize: re
 
 debug: CFLAGS += -g
 debug: LIBFLAG += debug
