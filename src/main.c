@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 16:16:30 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 16:31:04 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -572,7 +572,7 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 		|| init_img(game->mlx, &game->img[T_MAP_BG], mask.x, mask.y) == -1)
 		return (-1);
 	fill_img(&game->img[T_MAP_ENEMY_PATH], MAGENTA);
-	game->map.offset.x = RES_X * 0.5 - game->img[T_MAP_MASK].size.x * 0.5;
+	game->map.offset.x = RES_X2 - game->img[T_MAP_MASK].size.x * 0.5;
 	game->map.offset.y = RES_Y - game->img[T_MAP_MASK].size.x - MAP_CELL_SIZE;
 	draw_rectangle(&game->img[T_MAP_BG], (t_point){0, 0},
 		game->img[T_MAP_MASK].size, BLACK);
@@ -592,8 +592,8 @@ void	toggle_mouse(t_game *game)
 {
 	t_point	center;
 
-	center.x = RES_X * 0.5;
-	center.y = RES_Y * 0.5;
+	center.x = RES_X2;
+	center.y = RES_Y2;
 	if (game->state[MOUSE] == 0)
 		mlx_mouse_move(game->mlx, game->win, center.x, center.y);
 	game->state[MOUSE] = !game->state[MOUSE];
@@ -603,8 +603,8 @@ void	pause_game(t_game *game)
 {
 	t_point	center;
 
-	center.x = RES_X * 0.5;
-	center.y = RES_Y * 0.5;
+	center.x = RES_X2;
+	center.y = RES_Y2;
 	if (game->state[RUN])
 		game->state[PAUSE] = !game->state[PAUSE];
 	if (!game->state[PAUSE] && game->state[MOUSE])
@@ -672,7 +672,7 @@ int	out_of_bounds(t_fpoint map)
 	return (0);
 }
 
-int	dda_door(t_ray *r)
+int	dda_interact(t_ray *r)
 {
 	int	i;
 
@@ -784,9 +784,9 @@ void	interact(t_game *game)
 
 	r.map.x = (int)game->player.pos.x;
 	r.map.y = (int)game->player.pos.y;
-	set_ray_direction(game, &r, RES_X * 0.5 * camera_x_factor - 1, 0);
+	set_ray_direction(game, &r, RES_X2 * camera_x_factor - 1, 0);
 	set_ray_step_direction(game, &r);
-	if (dda_door(&r) == 1)
+	if (dda_interact(&r) == 1)
 	{
 		if (r.side == VERTICAL)
 			r.wall_dist = r.side_dist.x - r.delta_dist.x;
@@ -796,10 +796,15 @@ void	interact(t_game *game)
 		{
 			if (!game->state[MAP_BIG])
 			{
-				draw_circle_outline(&game->img[T_WIN], (t_point){RES_X * 0.5, RES_Y * 0.5}, 30, WHITE);
-				draw_rectangle(&game->img[T_WIN], (t_point){RES_X * 0.5 + 34, RES_Y * 0.5 - 15}, (t_point){68, 35}, BLACK);
-				mlx_string_put(game->mlx, game->win, RES_X * 0.5 + 38, RES_Y * 0.5, WHITE, "[E]");
-				mlx_string_put(game->mlx, game->win, RES_X * 0.5 + 38, RES_Y * 0.5 + 15, WHITE, "OPEN/CLOSE");
+				draw_circle_outline(&game->img[T_WIN],
+					(t_point){RES_X2, RES_Y2}, 25, WHITE);
+				draw_rectangle(&game->img[T_WIN],
+					(t_point){RES_X2 + 30, RES_Y2 - 15},
+					(t_point){68, 35}, BLACK);
+				mlx_string_put(game->mlx, game->win, 512 + 34,
+					RES_Y2, WHITE, "[E]");
+				mlx_string_put(game->mlx, game->win, 512 + 34,
+					RES_Y2 + 15, WHITE, "OPEN/CLOSE");
 			}
 			if (game->state[INTERACT] == 1)
 			{
@@ -838,7 +843,7 @@ int	key_press(unsigned int key, t_game *game)
 
 void	vertical_look(t_game *game, float delta)
 {
-	const int	limit = RES_Y * 0.5;
+	const int	limit = RES_Y2;
 	int			new;
 
 	new = game->player.pitch + delta;
@@ -852,7 +857,7 @@ void	vertical_look(t_game *game, float delta)
 
 void	handle_mouse(t_game *game)
 {
-	const t_point	center = {RES_X * 0.5, RES_Y * 0.5};
+	const t_point	center = {RES_X2, RES_Y2};
 	t_point			mouse;
 	float			old_dir_x;
 	float			old_plane_x;
@@ -1013,7 +1018,7 @@ void	handle_yaw(t_game *game, float speed)
 
 void	handle_pitch(t_game *game)
 {
-	const int	limit = RES_Y * 0.5;
+	const int	limit = RES_Y2;
 
 	if (game->state[ROT_U] && game->state[ROT_D])
 		return ;
@@ -1148,7 +1153,7 @@ void	draw_minimap(t_game *game)
 	if (!game->state[MAP_BIG])
 		put_img(game->map.offset, &game->img[T_MAP_MASK], &game->img[T_WIN]);
 	else
-		put_img((t_point){RES_X * 0.5 - game->img[T_MAP].size.x * 0.5,
+		put_img((t_point){RES_X2 - game->img[T_MAP].size.x * 0.5,
 			RES_Y * 0.5 - game->img[T_MAP].size.y * 0.5},
 			&game->img[T_MAP], &game->img[T_WIN]);
 }
@@ -1309,9 +1314,9 @@ void	display_fps_counter(t_game *game)
 void	draw_bg(t_game *game)
 {
 	put_img((t_point){0, 0}, &game->img[T_CEILING], &game->img[T_WIN]);
-	put_img((t_point){0, RES_Y * 0.5 - game->player.pitch},
+	put_img((t_point){0, RES_Y2 - game->player.pitch},
 		&game->img[T_FLOOR], &game->img[T_WIN]);
-	put_img_scale((t_point){0, RES_Y * 0.5 - game->player.pitch},
+	put_img_scale((t_point){0, RES_Y2 - game->player.pitch},
 		&game->img[T_DITHER], &game->img[T_WIN],
 		(t_fpoint){1, (1 - (P_MAX_HEIGHT - game->player.z)
 			/ (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
@@ -1545,7 +1550,7 @@ void	update_enemy_sprite(t_game *game)
 {
 	game->enemy.img = game->img[game->enemy.frame];
 	game->enemy.frame++;
-	if (game->enemy.frame == T_XENO_END)
+	if (game->enemy.frame == T_XENO7 + 1)
 		game->enemy.frame = T_XENO0;
 }
 
@@ -1777,7 +1782,6 @@ int	game_loop(t_game *game)
 	return (0);
 }
 
-//x: left to right, y: top to bottom, starts from top left
 void	init_player(t_player *player)
 {
 	t_fpoint	pos;
@@ -1923,9 +1927,6 @@ void	init_pwl(t_game *game)
 
 int	init_game(t_game *game)
 {
-	// game->map.size.x = (n rows);
-	// game->map.size.y = (n columns);
-	// game->map.grid = malloc(game->map.size.y * sizeof(int *));
 	init_game_struct(game);
 	game->mlx = mlx_init();
 	if (game->mlx == NULL)
@@ -1949,14 +1950,14 @@ int	init_game(t_game *game)
 	game->light.min = 0.25;
 	game->light.max = 2.5;
 	game->light.ambient = 0.15;
-	mlx_mouse_move(game->mlx, game->win, RES_X * 0.5, RES_Y * 0.5);
+	mlx_mouse_move(game->mlx, game->win, RES_X2, RES_Y2);
 	return (0);
 }
 
 int	mwheel(unsigned int key, t_game *game)
 {
 	const float	step = 0.1;
-	const int	limit = RES_Y * 0.5;
+	const int	limit = RES_Y2;
 
 	if (key == 4 && game->player.zoom < 1.8)
 	{
@@ -1989,7 +1990,7 @@ int	mouse_event(unsigned int key, int x, int y, t_game *game)
 	{
 		if (game->state[MOUSE] == 0)
 		{
-			mlx_mouse_move(game->mlx, game->win, RES_X * 0.5, RES_Y * 0.5);
+			mlx_mouse_move(game->mlx, game->win, RES_X2, RES_Y2);
 			game->state[MOUSE] = 1;
 		}
 	}

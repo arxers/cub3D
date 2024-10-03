@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 03:23:21 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 16:31:55 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@
 // resolution
 # define RES_X 1024
 # define RES_Y 768
+# define RES_X2 512
+# define RES_Y2 384
 # define WALL 64
 
 // map
@@ -80,7 +82,6 @@ typedef enum e_texture
 	T_XENO5,
 	T_XENO6,
 	T_XENO7,
-	T_XENO_END,
 	T_PWL0,
 	T_PWL1,
 	T_PWL2,
@@ -249,7 +250,7 @@ typedef struct s_texture_map
 typedef struct s_game
 {
 	char			state[32];
-	t_img			img[33];
+	t_img			img[32];
 	void			*mlx;
 	void			*win;
 	t_frame_data	frame;
