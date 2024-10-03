@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 03:24:58 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 16:16:30 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1467,7 +1467,7 @@ void	chase(t_game *game, float dist_sq, float speed)
 	}
 	game->enemy.memory.x = game->enemy.pos.x + game->enemy.last_dist.x * speed;
 	game->enemy.memory.y = game->enemy.pos.y + game->enemy.last_dist.y * speed;
-	if (dist_sq < 1.42)
+	if (dist_sq < 1.415)
 		return (game_over(game));
 	enemy_open_door(game);
 	if (((int)game->enemy.pos.x == (int)game->enemy.last_seen.x
@@ -1584,7 +1584,7 @@ void	render_enemy_sprite(t_game *game)
 {
 	t_ray	r;
 
-	if (delay_ms(100, MS100))
+	if (delay_ms(75, MS100))
 	{
 		game->state[ENEMY_MAP_TOGGLE] = !game->state[ENEMY_MAP_TOGGLE];
 		update_enemy_sprite(game);
