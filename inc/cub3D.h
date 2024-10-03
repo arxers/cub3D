@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 16:31:55 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 19:16:41 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,27 @@
 # include <stdio.h>
 # include <sys/time.h>
 
-// raycasting
+// UI
+# define PWL_MSG_TRUE "ENTER P-5000 POWERED WORK LOADER"
+# define PWL_MSG_FALSE "NOT ENOUGH FUEL CELLS"
+
+// Gameplay
+# define REQUIRED_ITEMS 0
+
+// Movement Constants
+# define MOUSE_SEN 0.0025
+# define ROT_SPD 0.0025
+# define RUN_SPD 2
+# define PLAYER_SPD 0.002
+# define ENEMY_SPD 0.0025
+# define PLAYER_RADIUS 0.20
+# define ENEMY_RADIUS 0
+
+// Raycasting
 # define VERTICAL 0
 # define HORIZONTAL 1
 
-// resolution
+// Resolution
 # define RES_X 1024
 # define RES_Y 768
 # define RES_X2 512
@@ -36,16 +52,7 @@
 # define MAP_CELL_SIZE 24
 # define MAP_COLOR 0x0ADAF3
 
-// movement multipliers
-# define MOUSE_SEN 0.0025
-# define ROT_SPD 0.0025
-# define RUN_SPD 2
-# define PLAYER_SPD 0.002
-# define ENEMY_SPD 0.0025
-# define PLAYER_RADIUS 0.20
-# define ENEMY_RADIUS 0.00
-
-// colors
+// Colors
 # define RED 0xFF0000
 # define GREEN 0x00FF00
 # define BLUE 0x0000FF
@@ -53,7 +60,7 @@
 # define WHITE 0xFFFFFF
 # define MAGENTA 0xFF00FF
 
-// bounds
+// Bounds
 # define P_MAX_HEIGHT 0.4
 # define P_MIN_HEIGHT -0.2
 

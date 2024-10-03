@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 18:43:31 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 19:12:29 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -785,25 +785,49 @@ void	unstuck_player(t_game *game, t_ray r)
 			game->player.pos.x, game->player.pos.y + PLAYER_RADIUS);
 }
 
-void	display_door_ui(t_game *game)
+void	display_ui_door(t_game *game)
 {
 	draw_circle_outline(&game->img[T_WIN],
 		(t_point){RES_X2, RES_Y2}, 25, WHITE);
-	draw_rectangle(&game->img[T_WIN],
-		(t_point){RES_X2 + 30, RES_Y2 - 15},
-		(t_point){68, 35}, BLACK);
+	// draw_rectangle(&game->img[T_WIN],
+	// 	(t_point){RES_X2 + 30, RES_Y2 - 15},
+	// 	(t_point){68, 35}, BLACK);
 	mlx_string_put(game->mlx, game->win, RES_X2 + 34,
 		RES_Y2, WHITE, "[E]");
 	mlx_string_put(game->mlx, game->win, RES_X2 + 34,
 		RES_Y2 + 15, WHITE, "OPEN/CLOSE");
 }
 
-void	use_door(t_game *game, t_ray r)
+void	display_ui_pwl(t_game *game)
+{
+	draw_circle_outline(&game->img[T_WIN],
+		(t_point){RES_X2, RES_Y2}, 25, WHITE);
+	// draw_rectangle(&game->img[T_WIN],
+	// 	(t_point){RES_X2 + 30, RES_Y2 - 15},
+	// 	(t_point){68, 35}, BLACK);
+	mlx_string_put(game->mlx, game->win, RES_X2 + 34,
+		RES_Y2, WHITE, "[E]");
+	if (game->item_collected == REQUIRED_ITEMS)
+		mlx_string_put(game->mlx, game->win, RES_X2 + 34,
+			RES_Y2 + 15, WHITE, PWL_MSG_TRUE);
+	else
+		mlx_string_put(game->mlx, game->win, RES_X2 + 34,
+			RES_Y2 + 15, WHITE, PWL_MSG_FALSE);
+}
+
+void	interact_door(t_game *game, t_ray r)
 {
 	g_map[(int)r.map.y][(int)r.map.x] = -g_map[(int)r.map.y][(int)r.map.x];
 	if (r.wall_dist <= PLAYER_RADIUS)
 		unstuck_player(game, r);
 	game->state[INTERACT] = 0;
+	game->map.update = 1;
+}
+
+void	interact_pwl(t_game *game)
+{
+	if (game->item_count != 0)
+		return ;
 }
 
 void	interact(t_game *game)
@@ -826,13 +850,19 @@ void	interact(t_game *game)
 		if (r.wall_dist <= 2.0)
 		{
 			if (!game->state[MAP_BIG])
-				display_door_ui(game);
+			{
+				if (tile_hit == TILE_DOOR || tile_hit == TILE_DOOR_OPEN)
+					display_ui_door(game);
+				if (tile_hit == TILE_PWL)
+					display_ui_pwl(game);
+			}
 			if (game->state[INTERACT] == 1)
 			{
 				if (tile_hit == TILE_DOOR || tile_hit == TILE_DOOR_OPEN)
-					use_door(game, r);
+					return (interact_door(game, r));
+				if (tile_hit == TILE_PWL)
+					interact_pwl(game);
 			}
-			game->map.update = 1;
 		}
 	}
 }
