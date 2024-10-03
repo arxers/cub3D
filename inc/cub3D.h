@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 19:16:41 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 22:14:21 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 
 // UI
 # define PWL_MSG_TRUE "ENTER P-5000 POWERED WORK LOADER"
-# define PWL_MSG_FALSE "NOT ENOUGH FUEL CELLS"
+# define PWL_MSG_FALSE "NOT ENOUGH FUEL CELLS!"
 
 // Gameplay
 # define REQUIRED_ITEMS 0

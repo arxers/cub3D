@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 19:12:29 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 22:12:44 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -805,14 +805,15 @@ void	display_ui_pwl(t_game *game)
 	// draw_rectangle(&game->img[T_WIN],
 	// 	(t_point){RES_X2 + 30, RES_Y2 - 15},
 	// 	(t_point){68, 35}, BLACK);
-	mlx_string_put(game->mlx, game->win, RES_X2 + 34,
-		RES_Y2, WHITE, "[E]");
 	if (game->item_collected == REQUIRED_ITEMS)
-		mlx_string_put(game->mlx, game->win, RES_X2 + 34,
-			RES_Y2 + 15, WHITE, PWL_MSG_TRUE);
+	{
+		mlx_string_put(game->mlx, game->win, RES_X2 + 34, RES_Y2, WHITE, "[E]");
+		mlx_string_put(game->mlx, game->win, RES_X2 + 34, RES_Y2 + 15, WHITE,
+			PWL_MSG_TRUE);
+	}
 	else
 		mlx_string_put(game->mlx, game->win, RES_X2 + 34,
-			RES_Y2 + 15, WHITE, PWL_MSG_FALSE);
+			RES_Y2, WHITE, PWL_MSG_FALSE);
 }
 
 void	interact_door(t_game *game, t_ray r)
