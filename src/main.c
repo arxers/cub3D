@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 22:12:44 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 23:21:49 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 
 	mlx_do_key_autorepeaton(game->mlx);
 	i = 0;
-	while (i < (int)(sizeof(game->img) / sizeof(*game->img)))
+	while (i < TEXTURE_MAX)
 	{
 		ft_destroy_image(game->mlx, &game->img[i]);
 		i++;
@@ -170,7 +170,7 @@ unsigned int	darken(unsigned int color, float factor)
 	return ((r << 16) | (g << 8) | b);
 }
 
-void	put_img_scale_pwl(t_point ofs, t_img *src, t_img *dst, t_fpoint scale)
+void	put_img_scale_darken(t_point ofs, t_img *src, t_img *dst, t_fpoint scale)
 {
 	t_fpoint	sp;
 	t_point		dp;
@@ -802,9 +802,6 @@ void	display_ui_pwl(t_game *game)
 {
 	draw_circle_outline(&game->img[T_WIN],
 		(t_point){RES_X2, RES_Y2}, 25, WHITE);
-	// draw_rectangle(&game->img[T_WIN],
-	// 	(t_point){RES_X2 + 30, RES_Y2 - 15},
-	// 	(t_point){68, 35}, BLACK);
 	if (game->item_collected == REQUIRED_ITEMS)
 	{
 		mlx_string_put(game->mlx, game->win, RES_X2 + 34, RES_Y2, WHITE, "[E]");
@@ -827,8 +824,16 @@ void	interact_door(t_game *game, t_ray r)
 
 void	interact_pwl(t_game *game)
 {
-	if (game->item_count != 0)
+	if (game->item_collected != REQUIRED_ITEMS)
 		return ;
+	g_map[(int)game->power_loader.pos.y][(int)game->power_loader.pos.x] = 0;
+	game->player.pos = game->power_loader.pos;
+	game->player.dir.x = -0.7071;
+	game->player.dir.y = 0.7071;
+	game->player.plane.x = -game->player.dir.y * 0.66;
+	game->player.plane.y = game->player.dir.x * 0.66;
+	game->power_loader.collected = 1;
+	game->map.update = 1;
 }
 
 void	interact(t_game *game)
@@ -1752,7 +1757,7 @@ void	render_pwl_sprite(t_game *game, t_item pwl, t_ray r)
 	scale.y = scaling;
 	set_pwl_view(game, &pwl, r);
 	pwl.img->intensity = set_intensity(game->light, dist_sq);
-	put_img_scale_pwl((t_point){screen.x, screen.y},
+	put_img_scale_darken((t_point){screen.x, screen.y},
 		pwl.img, &game->img[T_WIN], scale);
 }
 

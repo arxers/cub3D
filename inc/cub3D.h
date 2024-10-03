@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 22:14:21 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/03 23:27:40 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,8 @@ typedef enum e_texture
 	T_PWL5,
 	T_PWL6,
 	T_PWL7,
-	T_ITEM
+	T_ITEM,
+	TEXTURE_MAX
 }					t_texture;
 
 typedef enum e_state
@@ -120,7 +121,8 @@ typedef enum e_state
 	PAUSE,
 	ENEMY_MAP_TOGGLE,
 	SHOW_ENEMY_PATH,
-	GAME_OVER
+	GAME_OVER,
+	STATE_MAX,
 }					t_state;
 
 typedef enum e_tiles
@@ -148,6 +150,7 @@ typedef enum e_timer
 	TIMER_ENEMY,
 	TIMER_ENEMY_MAP,
 	TIMER_ENEMY_PATH,
+	TIMER_MAX,
 }					t_timer;
 
 typedef struct s_fpoint
@@ -256,8 +259,9 @@ typedef struct s_texture_map
 
 typedef struct s_game
 {
-	char			state[32];
-	t_img			img[32];
+	char			state[STATE_MAX];
+	t_img			img[TEXTURE_MAX];
+	struct timeval	start_time[TIMER_MAX];
 	void			*mlx;
 	void			*win;
 	t_frame_data	frame;
