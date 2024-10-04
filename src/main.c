@@ -785,32 +785,20 @@ void	unstuck_player(t_game *game, t_ray r)
 			game->player.pos.x, game->player.pos.y + PLAYER_RADIUS);
 }
 
-void	display_ui_door(t_game *game)
+void	display_ui_msg(t_game *game, char *key, char *msg)
 {
-	draw_circle_outline(&game->img[T_WIN],
-		(t_point){RES_X2, RES_Y2}, 25, WHITE);
-	// draw_rectangle(&game->img[T_WIN],
-	// 	(t_point){RES_X2 + 30, RES_Y2 - 15},
-	// 	(t_point){68, 35}, BLACK);
-	mlx_string_put(game->mlx, game->win, RES_X2 + 34,
-		RES_Y2, WHITE, "[E]");
-	mlx_string_put(game->mlx, game->win, RES_X2 + 34,
-		RES_Y2 + 15, WHITE, "OPEN/CLOSE");
-}
+	int	msg_y;
 
-void	display_ui_pwl(t_game *game)
-{
+	msg_y = 0;
+	if (key)
+		msg_y = 15;
 	draw_circle_outline(&game->img[T_WIN],
 		(t_point){RES_X2, RES_Y2}, 25, WHITE);
-	if (game->item_collected == REQUIRED_ITEMS)
-	{
-		mlx_string_put(game->mlx, game->win, RES_X2 + 34, RES_Y2, WHITE, "[E]");
-		mlx_string_put(game->mlx, game->win, RES_X2 + 34, RES_Y2 + 15, WHITE,
-			PWL_MSG_TRUE);
-	}
-	else
+	if (key)
 		mlx_string_put(game->mlx, game->win, RES_X2 + 34,
-			RES_Y2, WHITE, PWL_MSG_FALSE);
+			RES_Y2, WHITE, key);
+	mlx_string_put(game->mlx, game->win, RES_X2 + 34,
+		RES_Y2 + msg_y, WHITE, msg);
 }
 
 void	interact_door(t_game *game, t_ray r)
@@ -832,7 +820,10 @@ void	interact_pwl(t_game *game)
 	game->player.dir.y = 0.7071;
 	game->player.plane.x = -game->player.dir.y * 0.66;
 	game->player.plane.y = game->player.dir.x * 0.66;
+	game->player.z = 0.3;
+	game->player.pitch = 100;
 	game->power_loader.collected = 1;
+	game->state[HIDE_ENEMY_TRACE] = 1;
 	game->map.update = 1;
 }
 
@@ -840,36 +831,38 @@ void	interact(t_game *game)
 {
 	int				tile_hit;
 	t_ray			r;
-	const float		camera_x_factor = 2.0 / RES_X;
 
 	r.map.x = (int)game->player.pos.x;
 	r.map.y = (int)game->player.pos.y;
-	set_ray_direction(game, &r, RES_X2 * camera_x_factor - 1, 0);
+	set_ray_direction(game, &r, 0, 0);
 	set_ray_step_direction(game, &r);
 	tile_hit = dda_interact(&r);
-	if (tile_hit != 0)
+	if (tile_hit == 0)
+		return ;
+	if (r.side == VERTICAL)
+		r.wall_dist = r.side_dist.x - r.delta_dist.x;
+	else
+		r.wall_dist = r.side_dist.y - r.delta_dist.y;
+	if (r.wall_dist > 2.0)
+		return ;
+	if (!game->state[MAP_BIG])
 	{
-		if (r.side == VERTICAL)
-			r.wall_dist = r.side_dist.x - r.delta_dist.x;
-		else
-			r.wall_dist = r.side_dist.y - r.delta_dist.y;
-		if (r.wall_dist <= 2.0)
+		if (tile_hit == TILE_DOOR || tile_hit == TILE_DOOR_OPEN)
+			display_ui_msg(game, "[E]", UI_DOOR);
+		if (tile_hit == TILE_PWL)
 		{
-			if (!game->state[MAP_BIG])
-			{
-				if (tile_hit == TILE_DOOR || tile_hit == TILE_DOOR_OPEN)
-					display_ui_door(game);
-				if (tile_hit == TILE_PWL)
-					display_ui_pwl(game);
-			}
-			if (game->state[INTERACT] == 1)
-			{
-				if (tile_hit == TILE_DOOR || tile_hit == TILE_DOOR_OPEN)
-					return (interact_door(game, r));
-				if (tile_hit == TILE_PWL)
-					interact_pwl(game);
-			}
+			if (game->item_collected == REQUIRED_ITEMS)
+				display_ui_msg(game, "[E]", UI_PWL_TRUE);
+			else
+				display_ui_msg(game, NULL, UI_PWL_FALSE);
 		}
+	}
+	if (game->state[INTERACT] == 1)
+	{
+		if (tile_hit == TILE_DOOR || tile_hit == TILE_DOOR_OPEN)
+			return (interact_door(game, r));
+		if (tile_hit == TILE_PWL)
+			interact_pwl(game);
 	}
 }
 
@@ -1099,7 +1092,7 @@ void	handle_movement(t_game *game)
 		run_speed = RUN_SPD;
 	}
 	handle_movement_xy(game, PLAYER_SPD * game->frame.time * run_speed);
-	handle_movement_z(game);
+	// handle_movement_z(game);
 	handle_pitch(game);
 	handle_yaw(game, ROT_SPD * game->frame.time);
 }
@@ -1174,7 +1167,7 @@ void	draw_map_enemy(t_game *game)
 	if (game->state[SHOW_ENEMY_PATH])
 		put_img((t_point){0, 0},
 			&game->img[T_MAP_ENEMY_PATH], &game->img[T_MAP]);
-	if (game->enemy.last_seen.x && game->enemy.last_seen.y)
+	if (!game->state[HIDE_ENEMY_TRACE] && game->enemy.last_seen.x && game->enemy.last_seen.y)
 	{
 		draw_line(&game->img[T_MAP], start, end, RED);
 		draw_circle(&game->img[T_MAP], end, MAP_CELL_SIZE * 0.15, RED);
@@ -1496,6 +1489,8 @@ void	hunt(t_game *game)
 
 void	game_over(t_game *game)
 {
+	if (game->power_loader.collected)
+		return ;
 	game->state[MAP_DISABLE] = 1;
 	set_player_look_at(&game->player, game->enemy.pos);
 	if (game->player.zoom < 1.8)
@@ -1542,6 +1537,8 @@ void	update_enemy_pos(t_game *game)
 	dist_sq = game->enemy.dist.x * game->enemy.dist.x
 		+ game->enemy.dist.y * game->enemy.dist.y;
 	normalized_speed = (ENEMY_SPD * game->frame.time) / sqrtf(dist_sq);
+	if (game->power_loader.collected)
+		normalized_speed = -normalized_speed;
 	chase(game, dist_sq, normalized_speed);
 }
 
@@ -1696,9 +1693,9 @@ void	pickup_item(t_game *game)
 {
 	int	i;
 
-	i = 0;
-	if (g_map[(int)game->player.pos.y][(int)game->player.pos.x] == -3)
+	if (g_map[(int)game->player.pos.y][(int)game->player.pos.x] == TILE_ITEM)
 	{
+		i = 0;
 		while (i < game->item_count)
 		{
 			if (same_position(game->player.pos, game->item[i].pos))

@@ -22,11 +22,12 @@
 # include <sys/time.h>
 
 // UI
-# define PWL_MSG_TRUE "ENTER P-5000 POWERED WORK LOADER"
-# define PWL_MSG_FALSE "NOT ENOUGH FUEL CELLS!"
+# define UI_PWL_TRUE "ENTER P-5000 POWERED WORK LOADER"
+# define UI_PWL_FALSE "NOT ENOUGH FUEL CELLS!"
+# define UI_DOOR "OPEN/CLOSE"
 
 // Gameplay
-# define REQUIRED_ITEMS 0
+# define REQUIRED_ITEMS 1
 
 // Movement Constants
 # define MOUSE_SEN 0.0025
@@ -121,6 +122,7 @@ typedef enum e_state
 	PAUSE,
 	ENEMY_MAP_TOGGLE,
 	SHOW_ENEMY_PATH,
+	HIDE_ENEMY_TRACE,
 	GAME_OVER,
 	STATE_MAX,
 }					t_state;
