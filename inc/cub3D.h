@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 23:27:40 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/07 06:19:16 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,13 @@ typedef enum e_texture
 	T_PWL5,
 	T_PWL6,
 	T_PWL7,
+	T_PWL_ARM0,
+	T_PWL_ARM1,
+	T_PWL_ARM2,
+	T_PWL_ARM3,
+	T_PWL_ARM4,
+	T_PWL_ARM5,
+	T_PWL_ARM6,
 	T_ITEM,
 	TEXTURE_MAX
 }					t_texture;

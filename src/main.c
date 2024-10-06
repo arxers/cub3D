@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/03 23:21:49 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/07 06:22:05 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -310,6 +310,13 @@ int	load_xpms(t_game *game)
 	load_xpm(game->mlx, "textures/pwl5.xpm", &game->img[T_PWL5]);
 	load_xpm(game->mlx, "textures/pwl6.xpm", &game->img[T_PWL6]);
 	load_xpm(game->mlx, "textures/pwl7.xpm", &game->img[T_PWL7]);
+	load_xpm(game->mlx, "textures/pwl_arm0.xpm", &game->img[T_PWL_ARM0]);
+	load_xpm(game->mlx, "textures/pwl_arm1.xpm", &game->img[T_PWL_ARM1]);
+	load_xpm(game->mlx, "textures/pwl_arm2.xpm", &game->img[T_PWL_ARM2]);
+	load_xpm(game->mlx, "textures/pwl_arm3.xpm", &game->img[T_PWL_ARM3]);
+	load_xpm(game->mlx, "textures/pwl_arm4.xpm", &game->img[T_PWL_ARM4]);
+	load_xpm(game->mlx, "textures/pwl_arm5.xpm", &game->img[T_PWL_ARM5]);
+	load_xpm(game->mlx, "textures/pwl_arm6.xpm", &game->img[T_PWL_ARM6]);
 	load_xpm(game->mlx, "textures/item.xpm", &game->img[T_ITEM]);
 	return (0);
 }
@@ -812,7 +819,7 @@ void	interact_door(t_game *game, t_ray r)
 
 void	interact_pwl(t_game *game)
 {
-	if (game->item_collected != REQUIRED_ITEMS)
+	if (game->item_collected < REQUIRED_ITEMS)
 		return ;
 	g_map[(int)game->power_loader.pos.y][(int)game->power_loader.pos.x] = 0;
 	game->player.pos = game->power_loader.pos;
@@ -866,6 +873,11 @@ void	interact(t_game *game)
 	}
 }
 
+// void	pwl_punch(game)
+// {
+// 	if (dda_to_target())
+// }
+
 int	key_press(unsigned int key, t_game *game)
 {
 	handle_keystate(key, 1, game);
@@ -884,6 +896,8 @@ int	key_press(unsigned int key, t_game *game)
 	}
 	if (key == XK_2)
 		game->state[SHOW_ENEMY_PATH] = !game->state[SHOW_ENEMY_PATH];
+	// if (game->power_loader.collected == 1 && key == XK_space)
+	// 	pwl_punch();
 	change_target_fps(key, game);
 	return (0);
 }
