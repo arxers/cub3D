@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/07 06:22:05 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/07 06:31:10 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1201,6 +1201,8 @@ void	draw_minimap(t_game *game)
 	t_fpoint	player_pos;
 	const int	center = game->img[T_MAP_MASK].size.x * 0.5;
 
+	if (game->state[MAP_DISABLE])
+		return ;
 	player_pos.x = (int)((game->player.pos.x * MAP_CELL_SIZE));
 	player_pos.y = (int)((game->player.pos.y * MAP_CELL_SIZE));
 	if (game->map.update)
@@ -1784,6 +1786,13 @@ void	render_pwl(t_game *game)
 	render_pwl_sprite(game, game->power_loader, r);
 }
 
+void	render_pwl_overlay(t_game *game)
+{
+	if (game->power_loader.collected != 1)
+		return ;
+	put_img((t_point){0, 136}, &game->img[T_PWL_ARM0], &game->img[T_WIN]);
+}
+
 int	game_loop(t_game *game)
 {
 	if (game->state[MOUSE] && !game->state[PAUSE] && !game->state[GAME_OVER])
@@ -1806,8 +1815,8 @@ int	game_loop(t_game *game)
 			pickup_item(game);
 			render_item(game);
 			render_pwl(game);
-			if (!game->state[MAP_DISABLE])
-				draw_minimap(game);
+			render_pwl_overlay(game);
+			draw_minimap(game);
 			mlx_put_image_to_window(game->mlx, game->win,
 				game->img[T_WIN].img, 0, 0);
 			interact(game);
