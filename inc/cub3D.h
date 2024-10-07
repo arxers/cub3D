@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/07 14:43:01 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/07 14:54:18 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 # define UI_DOOR "OPEN/CLOSE"
 
 // Gameplay
-# define REQUIRED_ITEMS 2
+# define REQUIRED_ITEMS 3
 
 // Movement Constants
 # define MOUSE_SEN 0.0025
