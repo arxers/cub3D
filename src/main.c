@@ -58,7 +58,7 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 
 	mlx_do_key_autorepeaton(game->mlx);
 	i = 0;
-	while (i < TEXTURE_MAX)
+	while (i < IMG_MAX)
 	{
 		ft_destroy_image(game->mlx, &game->img[i]);
 		i++;
@@ -69,7 +69,7 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 	if (game->mlx)
 		mlx_destroy_display(game->mlx);
 	ft_free_void(&game->mlx);
-	ft_free_void((void **)&game->item);
+	ft_free_void((void **)&game->item.array);
 	ft_free(&game->frame.fps_str);
 	if (msg)
 		ft_putstr_fd(msg, 2);
@@ -280,16 +280,15 @@ int	load_xpm(void *mlx, char *path, t_img *img)
 {
 	img->img = mlx_xpm_file_to_image(mlx, path, &img->size.x, &img->size.y);
 	if (!img->img)
-		return (0);
+		return (1);
 	img->addr = mlx_get_data_addr(img->img, &img->bits_per_pixel,
 			&img->line_len, &img->endian);
-	return (1);
+	return (0);
 }
 
 int	load_pwl_xpms(t_game *game)
 {
 	if (load_xpm(game->mlx, "textures/pwl0.xpm", &game->img[T_PWL0])
-		|| load_xpm(game->mlx, "textures/pwl0.xpm", &game->img[T_PWL0])
 		|| load_xpm(game->mlx, "textures/pwl1.xpm", &game->img[T_PWL1])
 		|| load_xpm(game->mlx, "textures/pwl2.xpm", &game->img[T_PWL2])
 		|| load_xpm(game->mlx, "textures/pwl3.xpm", &game->img[T_PWL3])
@@ -304,27 +303,29 @@ int	load_pwl_xpms(t_game *game)
 		|| load_xpm(game->mlx, "textures/pwl_arm4.xpm", &game->img[T_PWL_ARM4])
 		|| load_xpm(game->mlx, "textures/pwl_arm5.xpm", &game->img[T_PWL_ARM5])
 		|| load_xpm(game->mlx, "textures/pwl_arm6.xpm", &game->img[T_PWL_ARM6]))
-	return (1);
+		return (1);
+	return (0);
 }
 
 int	load_xpms(t_game *game)
 {
 	if (load_xpm(game->mlx, "textures/wall/wall1.xpm", &game->img[T_NORTH])
-	|| load_xpm(game->mlx, "textures/wall/wall2.xpm", &game->img[T_SOUTH]);
-	load_xpm(game->mlx, "textures/wall/wall3.xpm", &game->img[T_EAST]);
-	load_xpm(game->mlx, "textures/wall/wall4.xpm", &game->img[T_WEST]);
-	load_xpm(game->mlx, "textures/door.xpm", &game->img[T_DOOR_CLOSE]);
-	load_xpm(game->mlx, "textures/shift_tab.xpm", &game->img[T_PAUSE]);
-	load_xpm(game->mlx, "textures/bg_dither.xpm", &game->img[T_DITHER]);
-	load_xpm(game->mlx, "textures/xeno0.xpm", &game->img[T_XENO0]);
-	load_xpm(game->mlx, "textures/xeno1.xpm", &game->img[T_XENO1]);
-	load_xpm(game->mlx, "textures/xeno2.xpm", &game->img[T_XENO2]);
-	load_xpm(game->mlx, "textures/xeno3.xpm", &game->img[T_XENO3]);
-	load_xpm(game->mlx, "textures/xeno4.xpm", &game->img[T_XENO4]);
-	load_xpm(game->mlx, "textures/xeno5.xpm", &game->img[T_XENO5]);
-	load_xpm(game->mlx, "textures/xeno6.xpm", &game->img[T_XENO6]);
-	load_xpm(game->mlx, "textures/xeno7.xpm", &game->img[T_XENO7]);
-	load_xpm(game->mlx, "textures/item.xpm", &game->img[T_ITEM]);
+		|| load_xpm(game->mlx, "textures/wall/wall2.xpm", &game->img[T_SOUTH])
+		|| load_xpm(game->mlx, "textures/wall/wall3.xpm", &game->img[T_EAST])
+		|| load_xpm(game->mlx, "textures/wall/wall4.xpm", &game->img[T_WEST])
+		|| load_xpm(game->mlx, "textures/door.xpm", &game->img[T_DOOR_CLOSE])
+		|| load_xpm(game->mlx, "textures/shift_tab.xpm", &game->img[T_PAUSE])
+		|| load_xpm(game->mlx, "textures/bg_dither.xpm", &game->img[T_DITHER])
+		|| load_xpm(game->mlx, "textures/xeno0.xpm", &game->img[T_XENO0])
+		|| load_xpm(game->mlx, "textures/xeno1.xpm", &game->img[T_XENO1])
+		|| load_xpm(game->mlx, "textures/xeno2.xpm", &game->img[T_XENO2])
+		|| load_xpm(game->mlx, "textures/xeno3.xpm", &game->img[T_XENO3])
+		|| load_xpm(game->mlx, "textures/xeno4.xpm", &game->img[T_XENO4])
+		|| load_xpm(game->mlx, "textures/xeno5.xpm", &game->img[T_XENO5])
+		|| load_xpm(game->mlx, "textures/xeno6.xpm", &game->img[T_XENO6])
+		|| load_xpm(game->mlx, "textures/xeno7.xpm", &game->img[T_XENO7])
+		|| load_xpm(game->mlx, "textures/item.xpm", &game->img[T_ITEM]))
+		return (-1);
 	if (load_pwl_xpms(game))
 		return (-1);
 	return (0);
@@ -828,7 +829,7 @@ void	interact_door(t_game *game, t_ray r)
 
 void	interact_pwl(t_game *game)
 {
-	if (game->item_collected < REQUIRED_ITEMS)
+	if (game->item.collected < REQUIRED_ITEMS)
 		return ;
 	g_map[(int)game->pwl.item.pos.y][(int)game->pwl.item.pos.x] = 0;
 	game->player.pos = game->pwl.item.pos;
@@ -859,7 +860,7 @@ void	check_interact(t_game *game, int *tile_hit, t_ray *r)
 			display_ui_msg(game, "[E]", UI_DOOR);
 		if (*tile_hit == TILE_PWL)
 		{
-			if (game->item_collected < REQUIRED_ITEMS)
+			if (game->item.collected < REQUIRED_ITEMS)
 				display_ui_msg(game, NULL, UI_PWL_FALSE);
 			else
 				display_ui_msg(game, "[E]", UI_PWL_TRUE);
@@ -1000,8 +1001,6 @@ int	check_collision(t_fpoint *pos, t_fpoint new_pos, float radius)
 		side.y = -radius;
 	else
 		side.y = radius;
-	if (out_of_bounds(new_pos))
-		return (1);
 	if (g_map[(int)(pos->y)][(int)(new_pos.x - radius)] < 1
 		&& g_map[(int)(pos->y - radius)][(int)(new_pos.x + side.x)] < 1
 		&& g_map[(int)(pos->y + radius)][(int)(new_pos.x + side.x)] < 1)
@@ -1034,15 +1033,11 @@ void	handle_movement_xy(t_game *game, float speed)
 	check_collision(&game->player.pos, new_pos, PLAYER_RADIUS);
 }
 
-void	handle_yaw(t_game *game, float speed)
+void	handle_yaw(t_game *game, float speed, float old_dir_x,
+	float old_plane_x)
 {
-	float			old_dir_x;
-	float			old_plane_x;
-
 	if (game->state[S_ROT_L] && game->state[S_ROT_R])
 		return ;
-	old_dir_x = game->player.dir.x;
-	old_plane_x = game->player.plane.x;
 	if (game->state[S_ROT_L])
 	{
 		game->player.dir.x = game->player.dir.x * cos(-speed)
@@ -1096,21 +1091,9 @@ void	handle_movement(t_game *game)
 		run_speed = RUN_SPD;
 	}
 	handle_movement_xy(game, PLAYER_SPD * game->frame.time * run_speed);
-	// handle_movement_z(game);
 	handle_pitch(game);
-	handle_yaw(game, ROT_SPD * game->frame.time);
-}
-
-void	init_states(t_game *game)
-{
-	int	i;
-
-	i = 0;
-	while (i < (int)(sizeof(game->state) / sizeof(*game->state)))
-	{
-		game->state[i] = 0;
-		i++;
-	}
+	handle_yaw(game, ROT_SPD * game->frame.time,
+		game->player.dir.x, game->player.plane.x);
 }
 
 int	delay_ms(unsigned int ms, struct timeval *timer)
@@ -1225,20 +1208,8 @@ float	set_intensity(t_light light, float dist)
 	return (intensity);
 }
 
-void	assign_wall_texture(t_game *game, t_ray *r, t_texture_map *tex)
+void	assign_wall_textures(t_game *game, t_ray *r, t_texture_map *tex)
 {
-	tex->wall_tex = NULL;
-	if (g_map[(int)r->map.y][(int)r->map.x] < 1
-		|| g_map[(int)r->map.y][(int)r->map.x] == TILE_PWL)
-		return ;
-	if (g_map[(int)r->map.y][(int)r->map.x] == 2)
-	{
-		if ((r->side == VERTICAL && r->dir.x <= 0)
-			|| (r->side == HORIZONTAL && r->dir.y >= 0))
-			tex->coords.x = WALL - tex->coords.x - 1;
-		tex->wall_tex = &game->img[T_DOOR_CLOSE];
-		return ;
-	}
 	if (r->side == VERTICAL)
 	{
 		tex->wall_tex = &game->img[T_EAST];
@@ -1257,6 +1228,23 @@ void	assign_wall_texture(t_game *game, t_ray *r, t_texture_map *tex)
 			tex->coords.x = WALL - tex->coords.x - 1;
 		}
 	}
+}
+
+void	assign_tile_textures(t_game *game, t_ray *r, t_texture_map *tex)
+{
+	tex->wall_tex = NULL;
+	if (g_map[(int)r->map.y][(int)r->map.x] < 1
+		|| g_map[(int)r->map.y][(int)r->map.x] == TILE_PWL)
+		return ;
+	if (g_map[(int)r->map.y][(int)r->map.x] == 2)
+	{
+		if ((r->side == VERTICAL && r->dir.x <= 0)
+			|| (r->side == HORIZONTAL && r->dir.y >= 0))
+			tex->coords.x = WALL - tex->coords.x - 1;
+		tex->wall_tex = &game->img[T_DOOR_CLOSE];
+		return ;
+	}
+	assign_wall_textures(game, r, tex);
 }
 
 int	dda(t_ray *r)
@@ -1331,7 +1319,7 @@ void	render_viewport(t_game *game)
 		if (dda(&r) == -1)
 			return ;
 		calculate_wall_projection(game, &r, &tex);
-		assign_wall_texture(game, &r, &tex);
+		assign_tile_textures(game, &r, &tex);
 		draw_wall_slices(game, &r, &tex);
 		r.pix.x++;
 	}
@@ -1405,9 +1393,8 @@ void	enemy_open_door(t_game *game)
 	game->map.update = 1;
 }
 
-void	move_enemy_cardinal(t_game *game, int direction)
+void	move_enemy_cardinal(t_game *game, int direction, t_fpoint *new_pos)
 {
-	t_fpoint	new_pos;
 	t_point		step_dir;
 
 	step_dir.x = 0;
@@ -1420,18 +1407,12 @@ void	move_enemy_cardinal(t_game *game, int direction)
 		step_dir.x = -1;
 	else if (direction == S_RIGHT)
 		step_dir.x = 1;
-	new_pos.x = game->enemy.pos.x + step_dir.x * ENEMY_SPD * game->frame.time;
-	new_pos.y = game->enemy.pos.y + step_dir.y * ENEMY_SPD * game->frame.time;
-	if (check_collision(&game->enemy.pos, new_pos, ENEMY_RADIUS))
-	{
-		game->enemy.move_seed = 0;
-		game->enemy.move_inc = 0;
-	}
+	new_pos->x = game->enemy.pos.x + step_dir.x * ENEMY_SPD * game->frame.time;
+	new_pos->y = game->enemy.pos.y + step_dir.y * ENEMY_SPD * game->frame.time;
 }
 
-void	move_enemy_diagonal(t_game *game, int direction)
+void	move_enemy_diagonal(t_game *game, int direction, t_fpoint *new_pos)
 {
-	t_fpoint	new_pos;
 	t_point		step_dir;
 
 	step_dir.x = 0;
@@ -1450,17 +1431,34 @@ void	move_enemy_diagonal(t_game *game, int direction)
 		if (direction == DOWN_RIGHT)
 			step_dir.x = 1;
 	}
-	new_pos.x = game->enemy.pos.x + step_dir.x * ENEMY_SPD * game->frame.time;
-	new_pos.y = game->enemy.pos.y + step_dir.y * ENEMY_SPD * game->frame.time;
-	if (check_collision(&game->enemy.pos, new_pos, ENEMY_RADIUS))
-	{
-		game->enemy.move_seed = 0;
-		game->enemy.move_inc = 0;
-	}
+	new_pos->x = game->enemy.pos.x + step_dir.x * ENEMY_SPD * game->frame.time;
+	new_pos->y = game->enemy.pos.y + step_dir.y * ENEMY_SPD * game->frame.time;
+}
+
+void	move_enemy(t_game *game, t_fpoint *new_pos)
+{
+	if (game->enemy.move_seed >= 0 && game->enemy.move_seed <= 12)
+		move_enemy_cardinal(game, S_UP, new_pos);
+	else if (game->enemy.move_seed >= 13 && game->enemy.move_seed <= 25)
+		move_enemy_cardinal(game, S_DOWN, new_pos);
+	else if (game->enemy.move_seed >= 26 && game->enemy.move_seed <= 38)
+		move_enemy_cardinal(game, S_LEFT, new_pos);
+	else if (game->enemy.move_seed >= 39 && game->enemy.move_seed <= 51)
+		move_enemy_cardinal(game, S_RIGHT, new_pos);
+	else if (game->enemy.move_seed >= 52 && game->enemy.move_seed <= 63)
+		move_enemy_diagonal(game, UP_LEFT, new_pos);
+	else if (game->enemy.move_seed >= 64 && game->enemy.move_seed <= 75)
+		move_enemy_diagonal(game, UP_RIGHT, new_pos);
+	else if (game->enemy.move_seed >= 76 && game->enemy.move_seed <= 87)
+		move_enemy_diagonal(game, DOWN_LEFT, new_pos);
+	else
+		move_enemy_diagonal(game, DOWN_RIGHT, new_pos);
 }
 
 void	hunt(t_game *game)
 {
+	t_fpoint	new_pos;
+
 	if (game->enemy.move_seed == 0)
 		game->enemy.move_seed = d100();
 	else
@@ -1471,22 +1469,12 @@ void	hunt(t_game *game)
 			game->enemy.move_seed = d100();
 		}
 	}
-	if (game->enemy.move_seed >= 0 && game->enemy.move_seed <= 12)
-		move_enemy_cardinal(game, S_UP);
-	else if (game->enemy.move_seed >= 13 && game->enemy.move_seed <= 25)
-		move_enemy_cardinal(game, S_DOWN);
-	else if (game->enemy.move_seed >= 26 && game->enemy.move_seed <= 38)
-		move_enemy_cardinal(game, S_LEFT);
-	else if (game->enemy.move_seed >= 39 && game->enemy.move_seed <= 51)
-		move_enemy_cardinal(game, S_RIGHT);
-	else if (game->enemy.move_seed >= 52 && game->enemy.move_seed <= 63)
-		move_enemy_diagonal(game, UP_LEFT);
-	else if (game->enemy.move_seed >= 64 && game->enemy.move_seed <= 75)
-		move_enemy_diagonal(game, UP_RIGHT);
-	else if (game->enemy.move_seed >= 76 && game->enemy.move_seed <= 87)
-		move_enemy_diagonal(game, DOWN_LEFT);
-	else
-		move_enemy_diagonal(game, DOWN_RIGHT);
+	move_enemy(game, &new_pos);
+	if (check_collision(&game->enemy.pos, new_pos, ENEMY_RADIUS))
+	{
+		game->enemy.move_seed = 0;
+		game->enemy.move_inc = 0;
+	}
 	if (d100() == 1)
 		enemy_open_door(game);
 }
@@ -1647,7 +1635,7 @@ void	render_enemy_sprite(t_game *game)
 	render_enemy(game);
 }
 
-void	render_item_sprite(t_game *game, t_item item)
+void	render_item_sprite(t_game *game, t_coin item)
 {
 	t_fpoint	view;
 	t_fpoint	screen;
@@ -1679,20 +1667,20 @@ void	render_item(t_game *game)
 	int		i;
 
 	i = 0;
-	while (i < game->item_count)
+	while (i < game->item.count)
 	{
-		if (game->item[i].collected == 1)
+		if (game->item.array[i].collected == 1)
 		{
 			i++;
 			continue ;
 		}
-		init_ray_to_target(game, &r, game->item[i].pos);
-		if (dda_to_target(game, &r, game->item[i].pos) != 1)
+		init_ray_to_target(game, &r, game->item.array[i].pos);
+		if (dda_to_target(game, &r, game->item.array[i].pos) != 1)
 		{
 			i++;
 			continue ;
 		}
-		render_item_sprite(game, game->item[i]);
+		render_item_sprite(game, game->item.array[i]);
 		i++;
 	}
 }
@@ -1711,12 +1699,12 @@ void	pickup_item(t_game *game)
 	if (g_map[(int)game->player.pos.y][(int)game->player.pos.x] == TILE_ITEM)
 	{
 		i = 0;
-		while (i < game->item_count)
+		while (i < game->item.count)
 		{
-			if (same_position(game->player.pos, game->item[i].pos))
+			if (same_position(game->player.pos, game->item.array[i].pos))
 			{
-				game->item_collected++;
-				game->item[i].collected = 1;
+				game->item.collected++;
+				game->item.array[i].collected = 1;
 				g_map[(int)game->player.pos.y][(int)game->player.pos.x] = 0;
 				game->map.update = 1;
 				return ;
@@ -1827,12 +1815,13 @@ void	display_msg(t_game *game)
 	if (game->state[S_ENEMY_DEAD])
 	{
 		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
-			"CONGRATULATIONS, YOU BEAT THE GAME");
+			"CONGRATULATIONS! [ESC] to quit");
 		return ;
 	}
 	if (game->state[S_CAUGHT])
 	{
-		mlx_string_put(game->mlx, game->win, 4, 26, WHITE, "YOU DIED");
+		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
+			"YOU DIED! [ESC] to quit");
 		return ;
 	}
 	if (game->state[S_MOUSE] == 0)
@@ -1857,23 +1846,21 @@ int	game_loop(t_game *game)
 			put_img((t_point){0, 0}, &game->img[T_PAUSE], &game->img[T_WIN]);
 			mlx_put_image_to_window(game->mlx, game->win, game->img[T_WIN].img,
 				0, 0);
+			return (0);
 		}
-		else
-		{
-			update_enemy_pos(game);
-			handle_movement(game);
-			draw_bg(game);
-			render_viewport(game);
-			render_enemy_sprite(game);
-			pickup_item(game);
-			render_item(game);
-			render_pwl(game);
-			render_pwl_overlay(game);
-			draw_minimap(game);
-			mlx_put_image_to_window(game->mlx, game->win,
-				game->img[T_WIN].img, 0, 0);
-			interact(game);
-		}
+		update_enemy_pos(game);
+		handle_movement(game);
+		draw_bg(game);
+		render_viewport(game);
+		render_enemy_sprite(game);
+		pickup_item(game);
+		render_item(game);
+		render_pwl(game);
+		render_pwl_overlay(game);
+		draw_minimap(game);
+		mlx_put_image_to_window(game->mlx, game->win,
+			game->img[T_WIN].img, 0, 0);
+		interact(game);
 		display_fps_counter(game);
 		display_msg(game);
 	}
@@ -1886,7 +1873,6 @@ void	init_player(t_player *player)
 
 	pos.x = 6;
 	pos.y = 12;
-	player->pitch = 0;
 	player->pos.x = pos.x + 0.5;
 	player->pos.y = pos.y + 0.5;
 	player->dir.x = 0;
@@ -1894,30 +1880,13 @@ void	init_player(t_player *player)
 	player->plane.x = -player->dir.y * 0.66;
 	player->plane.y = player->dir.x * 0.66;
 	player->zoom = 1.0;
-	player->z = 0.0;
 }
 
 void	init_framedata(t_frame_data *frame)
 {
-	frame->fps = 0;
 	frame->fps_target = 30;
 	frame->time = 1000.0 / frame->fps_target;
 	gettimeofday(&frame->last, NULL);
-}
-
-void	init_game_struct(t_game *game)
-{
-	int	i;
-
-	i = 0;
-	while (i < (int)(sizeof(game->img) / sizeof(*game->img)))
-	{
-		game->img[i].img = NULL;
-		i++;
-	}
-	game->mlx = NULL;
-	game->win = NULL;
-	game->frame.fps_str = NULL;
 }
 
 void	init_enemy(t_game *game)
@@ -1926,12 +1895,6 @@ void	init_enemy(t_game *game)
 	game->enemy.pos.y = 12.5;
 	game->enemy.frame = T_XENO0;
 	game->enemy.img = game->img[T_XENO0];
-	game->enemy.move_seed = 0;
-	game->enemy.move_inc = 0;
-	game->enemy.memory.x = 0;
-	game->enemy.memory.y = 0;
-	game->enemy.last_seen.x = 0;
-	game->enemy.last_seen.y = 0;
 }
 
 int	count_tile(t_game *game, int n)
@@ -1963,9 +1926,8 @@ void	init_items(t_game *game)
 	int	y;
 	int	i;
 
-	game->item_collected = 0;
-	game->item_count = count_tile(game, -3);
-	game->item = malloc(game->item_count * sizeof(t_item));
+	game->item.count = count_tile(game, -3);
+	game->item.array = malloc(game->item.count * sizeof(t_coin));
 	i = 0;
 	y = 0;
 	while (y < g_map_y - 1)
@@ -1975,13 +1937,10 @@ void	init_items(t_game *game)
 		{
 			if (g_map[y][x] == -3)
 			{
-				game->item[i].pos.x = (float)x + 0.5;
-				game->item[i].pos.y = (float)y + 0.5;
-				game->item[i].dist.x = 0;
-				game->item[i].dist.y = 0;
-				game->item[i].collected = 0;
+				game->item.array[i].pos.x = (float)x + 0.5;
+				game->item.array[i].pos.y = (float)y + 0.5;
 				i++;
-				if (i == game->item_count)
+				if (i == game->item.count)
 					return ;
 			}
 			x++;
@@ -2017,49 +1976,32 @@ t_fpoint	get_unique_char_pos(t_game *game, int n)
 void	init_pwl(t_game *game)
 {
 	game->pwl.item.pos = get_unique_char_pos(game, TILE_PWL);
-	game->pwl.item.dist.x = 0;
-	game->pwl.item.dist.y = 0;
-	game->pwl.item.collected = 0;
 	game->pwl.img = game->img[T_PWL_ARM0];
 	game->pwl.frame = T_PWL_ARM0;
 }
 
-void	init_timer(t_game *game)
-{
-	int	i;
-
-	i = 0;
-	while (i < TIMER_MAX)
-	{
-		game->timer[i].tv_sec = 0;
-		game->timer[i].tv_usec = 0;
-		i++;
-	}
-}
-
 int	init_game(t_game *game)
 {
-	init_game_struct(game);
+	ft_memset(game, 0, sizeof(t_game));
 	game->mlx = mlx_init();
 	if (game->mlx == NULL)
-		return (-1);
-	load_xpms(game);
+		return (1);
 	mlx_do_key_autorepeatoff(game->mlx);
 	game->win = mlx_new_window(game->mlx, RES_X, RES_Y, "cub3D");
 	if (game->win == NULL)
-		return (-1);
+		return (1);
 	if (init_img(game->mlx, &game->img[T_WIN], RES_X, RES_Y) == -1)
-		return (-1);
+		return (2);
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
 		|| init_bg(game, BLACK, 0x2C2E33) == -1)
-		return (-1);
+		return (2);
+	if (load_xpms(game))
+		return (3);
 	init_framedata(&game->frame);
-	init_states(game);
 	init_player(&game->player);
 	init_enemy(game);
 	init_items(game);
 	init_pwl(game);
-	init_timer(game);
 	game->light.min = 0.25;
 	game->light.max = 2.5;
 	game->light.ambient = 0.15;
@@ -2112,13 +2054,25 @@ int	mouse_event(unsigned int key, int x, int y, t_game *game)
 	return (mwheel(key, game));
 }
 
+void	error_handler(t_game *game, int status)
+{
+	if (status == 1)
+		cleanup(game, 1, "cub3D: Error: Failed to initialize game\n");
+	else if (status == 2)
+		cleanup(game, 1, "cub3D: Error: Failed to create image\n");
+	else if (status == 3)
+		cleanup(game, 1, "cub3D: Error: Missing texture file/files\n");
+}
+
 int	main(int ac, char **av)
 {
+	int		status;
 	t_game	game;
 
 	validate_input(ac, av);
-	if (init_game(&game) == -1)
-		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
+	status = init_game(&game);
+	if (status)
+		error_handler(&game, status);
 	mlx_do_key_autorepeatoff(game.mlx);
 	mlx_hook(game.win, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win, KeyRelease, KeyReleaseMask, &key_release, &game);

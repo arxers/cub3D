@@ -106,7 +106,7 @@ typedef enum e_texture
 	T_PWL_ARM5,
 	T_PWL_ARM6,
 	T_ITEM,
-	TEXTURE_MAX
+	IMG_MAX
 }					t_texture;
 
 typedef enum e_state
@@ -187,13 +187,13 @@ typedef struct s_img
 	int				endian;
 }					t_img;
 
-typedef struct s_item
+typedef struct s_coin
 {
 	t_fpoint		pos;
 	t_fpoint		dist;
 	t_img			*img;
 	int				collected;
-}					t_item;
+}					t_coin;
 
 typedef struct s_player
 {
@@ -269,15 +269,22 @@ typedef struct s_texture_map
 
 typedef struct s_pwl
 {
-	t_item			item;
+	t_coin			item;
 	t_img			img;
 	int				frame;
 }					t_pwl;
 
+typedef struct s_item
+{
+	t_coin			*array;
+	int				count;
+	int				collected;
+}					t_item;
+
 typedef struct s_game
 {
+	t_img			img[IMG_MAX];
 	char			state[STATE_MAX];
-	t_img			img[TEXTURE_MAX];
 	struct timeval	timer[TIMER_MAX];
 	void			*mlx;
 	void			*win;
@@ -287,11 +294,7 @@ typedef struct s_game
 	t_light			light;
 	t_map			map;
 	t_pwl			pwl;
-	t_item			*item;
-	int				item_count;
-	int				item_collected;
-	char			item_flash;
-
+	t_item			item;
 }					t_game;
 
 #endif
