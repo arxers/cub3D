@@ -281,14 +281,11 @@ void	draw_map_player(t_img *img, t_player p, t_point origin)
 	draw_circle(img, pointer_pos, dir_radius, WHITE);
 }
 
+// jsu: continue working here
 void	validate_input(int ac, char **av)
 {
-	if (ac != 2)
-	{
-		ft_putstr_fd("cub3D: Invalid number of arguments\n", 2);
-		ft_putstr_fd("cub3D: usage: cub3D [*.cub]\n", 2);
-		exit(1);
-	}
+	check_n_cmdline_args(ac);
+	
 	// if (open(av[1]) == -1) //check if able to open
 	// 	;remove (void)av when this check is done
 	(void)av;
@@ -1031,7 +1028,7 @@ int	main(int ac, char **av)
 {
 	t_game	game;
 
-	validate_input(ac, av);
+	validate_input(ac, av); // use this wrapper to call suite of checks
 	if (init_game(&game) == -1)
 		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
