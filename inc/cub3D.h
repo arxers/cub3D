@@ -20,6 +20,7 @@
 # include <math.h>
 # include <stdio.h>
 # include <sys/time.h>
+# include <fcntl.h>
 
 # include "./validate_input.h"
 
