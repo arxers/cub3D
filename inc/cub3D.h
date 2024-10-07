@@ -21,7 +21,7 @@
 # include <stdio.h>
 # include <sys/time.h>
 
-# include validate_input.h
+# include "./validate_input.h"
 
 // raycasting
 # define VERTICAL 0
