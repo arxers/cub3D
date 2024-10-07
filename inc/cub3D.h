@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/07 06:19:16 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/07 11:03:49 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,10 @@ typedef enum e_state
 	ENEMY_MAP_TOGGLE,
 	SHOW_ENEMY_PATH,
 	HIDE_ENEMY_TRACE,
+	ENEMY_VISION,
+	ENEMY_DEAD,
 	GAME_OVER,
+	PUNCHING,
 	STATE_MAX,
 }					t_state;
 
@@ -156,6 +159,7 @@ typedef enum e_timer
 {
 	MS100,
 	MS1000,
+	TIMER_PWL,
 	TIMER_ENEMY,
 	TIMER_ENEMY_MAP,
 	TIMER_ENEMY_PATH,
@@ -214,7 +218,6 @@ typedef struct s_enemy
 	int				frame;
 	int				move_seed;
 	int				move_inc;
-	char			eyes;
 }					t_enemy;
 
 typedef struct s_frame_data
@@ -266,11 +269,18 @@ typedef struct s_texture_map
 	float			tex_step;
 }					t_texture_map;
 
+typedef struct s_pwl
+{
+	t_item			item;
+	t_img			img;
+	int				frame;
+}					t_pwl;
+
 typedef struct s_game
 {
 	char			state[STATE_MAX];
 	t_img			img[TEXTURE_MAX];
-	struct timeval	start_time[TIMER_MAX];
+	struct timeval	timer[TIMER_MAX];
 	void			*mlx;
 	void			*win;
 	t_frame_data	frame;
@@ -278,8 +288,8 @@ typedef struct s_game
 	t_enemy			enemy;
 	t_light			light;
 	t_map			map;
+	t_pwl			pwl;
 	t_item			*item;
-	t_item			power_loader;
 	int				item_count;
 	int				item_collected;
 	char			item_flash;

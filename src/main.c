@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/07 06:31:10 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/07 11:52:04 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int	g_map[28][40] = {
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,3,0,1,1,-3,1,-3,2,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,2,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,-3,1},
+{1,1,1,1,1,1,1,1,1,1,1,1,0,-3,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,-3,1},
 {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1},
 {1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
@@ -722,6 +722,8 @@ void	set_ray_direction(t_game *game, t_ray *r, float camera_x, int incl_zoom)
 {
 	float	zoom;
 
+	r->map.x = (int)game->player.pos.x;
+	r->map.y = (int)game->player.pos.y;
 	zoom = game->player.zoom;
 	if (!incl_zoom)
 		zoom = 1;
@@ -821,15 +823,15 @@ void	interact_pwl(t_game *game)
 {
 	if (game->item_collected < REQUIRED_ITEMS)
 		return ;
-	g_map[(int)game->power_loader.pos.y][(int)game->power_loader.pos.x] = 0;
-	game->player.pos = game->power_loader.pos;
+	g_map[(int)game->pwl.item.pos.y][(int)game->pwl.item.pos.x] = 0;
+	game->player.pos = game->pwl.item.pos;
 	game->player.dir.x = -0.7071;
 	game->player.dir.y = 0.7071;
 	game->player.plane.x = -game->player.dir.y * 0.66;
 	game->player.plane.y = game->player.dir.x * 0.66;
 	game->player.z = 0.3;
 	game->player.pitch = 100;
-	game->power_loader.collected = 1;
+	game->pwl.item.collected = 1;
 	game->state[HIDE_ENEMY_TRACE] = 1;
 	game->map.update = 1;
 }
@@ -839,12 +841,10 @@ void	interact(t_game *game)
 	int				tile_hit;
 	t_ray			r;
 
-	r.map.x = (int)game->player.pos.x;
-	r.map.y = (int)game->player.pos.y;
 	set_ray_direction(game, &r, 0, 0);
 	set_ray_step_direction(game, &r);
 	tile_hit = dda_interact(&r);
-	if (tile_hit == 0)
+	if (!game->pwl.item.collected && tile_hit == 0)
 		return ;
 	if (r.side == VERTICAL)
 		r.wall_dist = r.side_dist.x - r.delta_dist.x;
@@ -858,10 +858,10 @@ void	interact(t_game *game)
 			display_ui_msg(game, "[E]", UI_DOOR);
 		if (tile_hit == TILE_PWL)
 		{
-			if (game->item_collected == REQUIRED_ITEMS)
-				display_ui_msg(game, "[E]", UI_PWL_TRUE);
-			else
+			if (game->item_collected < REQUIRED_ITEMS)
 				display_ui_msg(game, NULL, UI_PWL_FALSE);
+			else
+				display_ui_msg(game, "[E]", UI_PWL_TRUE);
 		}
 	}
 	if (game->state[INTERACT] == 1)
@@ -872,11 +872,6 @@ void	interact(t_game *game)
 			interact_pwl(game);
 	}
 }
-
-// void	pwl_punch(game)
-// {
-// 	if (dda_to_target())
-// }
 
 int	key_press(unsigned int key, t_game *game)
 {
@@ -896,8 +891,8 @@ int	key_press(unsigned int key, t_game *game)
 	}
 	if (key == XK_2)
 		game->state[SHOW_ENEMY_PATH] = !game->state[SHOW_ENEMY_PATH];
-	// if (game->power_loader.collected == 1 && key == XK_space)
-	// 	pwl_punch();
+	if (game->pwl.item.collected == 1 && key == XK_space)
+		game->state[PUNCHING] = 1;
 	change_target_fps(key, game);
 	return (0);
 }
@@ -916,7 +911,7 @@ void	vertical_look(t_game *game, float delta)
 		game->player.pitch = limit;
 }
 
-void	handle_mouse(t_game *game)
+void	handle_mouselook(t_game *game)
 {
 	const t_point	center = {RES_X2, RES_Y2};
 	t_point			mouse;
@@ -996,6 +991,8 @@ int	check_collision(t_fpoint *pos, t_fpoint new_pos, float radius)
 		side.y = -radius;
 	else
 		side.y = radius;
+	if (out_of_bounds(new_pos))
+		return (1);
 	if (g_map[(int)(pos->y)][(int)(new_pos.x - radius)] < 1
 		&& g_map[(int)(pos->y - radius)][(int)(new_pos.x + side.x)] < 1
 		&& g_map[(int)(pos->y + radius)][(int)(new_pos.x + side.x)] < 1)
@@ -1123,23 +1120,22 @@ void	init_states(t_game *game)
 	}
 }
 
-int	delay_ms(unsigned int ms, t_timer id)
+int	delay_ms(unsigned int ms, struct timeval *timer)
 {
-	static struct timeval	start_time[5] = {0};
 	struct timeval			current_time;
 	long					ms_elapsed;
 
-	if (start_time[id].tv_sec == 0 && start_time[id].tv_usec == 0)
+	if (timer->tv_sec == 0 && timer->tv_usec == 0)
 	{
-		gettimeofday(&start_time[id], NULL);
+		gettimeofday(timer, NULL);
 		return (0);
 	}
 	gettimeofday(&current_time, NULL);
-	ms_elapsed = (current_time.tv_sec - start_time[id].tv_sec) * 1000;
-	ms_elapsed += (current_time.tv_usec - start_time[id].tv_usec) / 1000;
+	ms_elapsed = (current_time.tv_sec - timer->tv_sec) * 1000;
+	ms_elapsed += (current_time.tv_usec - timer->tv_usec) / 1000;
 	if (ms_elapsed >= ms)
 	{
-		start_time[id] = current_time;
+		*timer = current_time;
 		return (1);
 	}
 	return (0);
@@ -1156,7 +1152,7 @@ int	should_render_frame(t_game *game)
 	{
 		game->frame.fps++;
 		game->frame.last = game->frame.current;
-		if (delay_ms(1000, MS1000))
+		if (delay_ms(1000, &game->timer[MS1000]))
 		{
 			ft_free(&game->frame.fps_str);
 			game->frame.fps_str = ft_itoa(game->frame.fps);
@@ -1176,7 +1172,7 @@ void	draw_map_enemy(t_game *game)
 	start.y = (int)(game->enemy.pos.y * MAP_CELL_SIZE);
 	end.x = (int)(game->enemy.last_seen.x * MAP_CELL_SIZE);
 	end.y = (int)(game->enemy.last_seen.y * MAP_CELL_SIZE);
-	if (delay_ms(200, TIMER_ENEMY_PATH))
+	if (delay_ms(200, &game->timer[TIMER_ENEMY_PATH]))
 		draw_circle(&game->img[T_MAP_ENEMY_PATH], start, 1, WHITE);
 	if (game->state[SHOW_ENEMY_PATH])
 		put_img((t_point){0, 0},
@@ -1208,7 +1204,8 @@ void	draw_minimap(t_game *game)
 	if (game->map.update)
 		update_map_tiles(game);
 	put_img((t_point){0, 0}, &game->img[T_MAP_TILES], &game->img[T_MAP]);
-	draw_map_enemy(game);
+	if (!game->state[ENEMY_DEAD])
+		draw_map_enemy(game);
 	draw_map_player(&game->img[T_MAP], game->player);
 	put_img((t_point){0, 0,}, &game->img[T_MAP_BG], &game->img[T_MAP_MASK]);
 	put_img((t_point){-player_pos.x + center, -player_pos.y + center},
@@ -1336,8 +1333,6 @@ void	render_viewport(t_game *game)
 	r.pix.x = 0;
 	while (r.pix.x < RES_X)
 	{
-		r.map.x = (int)game->player.pos.x;
-		r.map.y = (int)game->player.pos.y;
 		set_ray_direction(game, &r, r.pix.x * camera_x_factor - 1, 1);
 		set_ray_step_direction(game, &r);
 		if (dda(&r) == -1)
@@ -1477,7 +1472,7 @@ void	hunt(t_game *game)
 		game->enemy.move_seed = d100();
 	else
 	{
-		if (delay_ms(game->enemy.move_inc, TIMER_ENEMY))
+		if (delay_ms(game->enemy.move_inc, &game->timer[TIMER_ENEMY]))
 		{
 			game->enemy.move_inc += 1000;
 			game->enemy.move_seed = d100();
@@ -1505,7 +1500,7 @@ void	hunt(t_game *game)
 
 void	game_over(t_game *game)
 {
-	if (game->power_loader.collected)
+	if (game->pwl.item.collected)
 		return ;
 	game->state[MAP_DISABLE] = 1;
 	set_player_look_at(&game->player, game->enemy.pos);
@@ -1517,7 +1512,7 @@ void	game_over(t_game *game)
 
 void	chase(t_game *game, float dist_sq, float speed)
 {
-	if (game->enemy.eyes == 1)
+	if (game->state[ENEMY_VISION] == 1)
 	{
 		game->enemy.last_seen.x = game->player.pos.x;
 		game->enemy.last_seen.y = game->player.pos.y;
@@ -1545,7 +1540,9 @@ void	update_enemy_pos(t_game *game)
 	float		dist_sq;
 	float		normalized_speed;
 
-	if (game->enemy.eyes == 0
+	if (game->state[ENEMY_DEAD])
+		return ;
+	if (game->state[ENEMY_VISION] == 0
 		&& (game->enemy.memory.x == 0 && game->enemy.memory.y == 0))
 		return (hunt(game));
 	game->enemy.dist.x = game->player.pos.x - game->enemy.pos.x;
@@ -1553,7 +1550,7 @@ void	update_enemy_pos(t_game *game)
 	dist_sq = game->enemy.dist.x * game->enemy.dist.x
 		+ game->enemy.dist.y * game->enemy.dist.y;
 	normalized_speed = (ENEMY_SPD * game->frame.time) / sqrtf(dist_sq);
-	if (game->power_loader.collected)
+	if (game->pwl.item.collected)
 		normalized_speed = -normalized_speed;
 	chase(game, dist_sq, normalized_speed);
 }
@@ -1594,9 +1591,16 @@ int	dda_to_target(t_game *game, t_ray *r, t_fpoint target_pos)
 void	update_enemy_sprite(t_game *game)
 {
 	game->enemy.img = game->img[game->enemy.frame];
-	game->enemy.frame++;
-	if (game->enemy.frame == T_XENO7 + 1)
-		game->enemy.frame = T_XENO0;
+	if (!game->pwl.item.collected)
+	{
+		game->enemy.frame++;
+		if (game->enemy.frame == T_XENO7 + 1)
+			game->enemy.frame = T_XENO0;
+		return ;
+	}
+	game->enemy.frame--;
+	if (game->enemy.frame == T_XENO0 -1)
+		game->enemy.frame = T_XENO7;
 }
 
 float	dot_product(t_fpoint a, t_fpoint b)
@@ -1612,7 +1616,7 @@ void	render_enemy(t_game *game)
 	float		dist_sqrt;
 	float		scaling;
 
-	game->enemy.eyes = 1;
+	game->state[ENEMY_VISION] = 1;
 	view.x = dot_product(game->player.dir, game->enemy.dist) * 0.9;
 	if (view.x >= 0)
 		return ;
@@ -1634,7 +1638,9 @@ void	render_enemy_sprite(t_game *game)
 {
 	t_ray	r;
 
-	if (delay_ms(75, MS100))
+	if (game->state[ENEMY_DEAD])
+		return ;
+	if (delay_ms(75, &game->timer[MS100]))
 	{
 		game->state[ENEMY_MAP_TOGGLE] = !game->state[ENEMY_MAP_TOGGLE];
 		update_enemy_sprite(game);
@@ -1642,7 +1648,7 @@ void	render_enemy_sprite(t_game *game)
 	init_ray_to_target(game, &r, game->enemy.pos);
 	if (dda_to_target(game, &r, game->enemy.pos) != 1)
 	{
-		game->enemy.eyes = 0;
+		game->state[ENEMY_VISION] = 0;
 		return ;
 	}
 	render_enemy(game);
@@ -1727,27 +1733,27 @@ void	pickup_item(t_game *game)
 	}
 }
 
-void	set_pwl_view(t_game *game, t_item *pwl, t_ray r)
+void	set_pwl_view(t_game *game, t_ray r)
 {
 	if (r.dir.x > 0.5 && r.dir.y < -0.5)
-		pwl->img = &game->img[T_PWL0];
+		game->pwl.item.img = &game->img[T_PWL0];
 	else if (r.dir.x > 0.5 && r.dir.y > 0.5)
-		pwl->img = &game->img[T_PWL2];
+		game->pwl.item.img = &game->img[T_PWL2];
 	else if (r.dir.x < -0.5 && r.dir.y > 0.5)
-		pwl->img = &game->img[T_PWL4];
+		game->pwl.item.img = &game->img[T_PWL4];
 	else if (r.dir.x < -0.5 && r.dir.y < -0.5)
-		pwl->img = &game->img[T_PWL6];
+		game->pwl.item.img = &game->img[T_PWL6];
 	else if (r.dir.x > 0.5)
-		pwl->img = &game->img[T_PWL1];
+		game->pwl.item.img = &game->img[T_PWL1];
 	else if (r.dir.y > 0.5)
-		pwl->img = &game->img[T_PWL3];
+		game->pwl.item.img = &game->img[T_PWL3];
 	else if (r.dir.x < -0.5)
-		pwl->img = &game->img[T_PWL5];
+		game->pwl.item.img = &game->img[T_PWL5];
 	else if (r.dir.y < -0.5)
-		pwl->img = &game->img[T_PWL7];
+		game->pwl.item.img = &game->img[T_PWL7];
 }
 
-void	render_pwl_sprite(t_game *game, t_item pwl, t_ray r)
+void	render_pwl_sprite(t_game *game, t_ray r)
 {
 	t_fpoint	view;
 	t_fpoint	screen;
@@ -1755,48 +1761,93 @@ void	render_pwl_sprite(t_game *game, t_item pwl, t_ray r)
 	float		dist_sq;
 	float		scaling;
 
-	pwl.dist.x = game->player.pos.x - pwl.pos.x;
-	pwl.dist.y = game->player.pos.y - pwl.pos.y;
-	view.x = dot_product(game->player.dir, pwl.dist) * 0.88;
+	game->pwl.item.dist.x = game->player.pos.x - game->pwl.item.pos.x;
+	game->pwl.item.dist.y = game->player.pos.y - game->pwl.item.pos.y;
+	view.x = dot_product(game->player.dir, game->pwl.item.dist) * 0.88;
 	if (view.x >= 0)
 		return ;
-	dist_sq = sqrtf(pwl.dist.x * pwl.dist.x + pwl.dist.y * pwl.dist.y);
-	view.y = dot_product(game->player.plane, pwl.dist);
+	dist_sq = sqrtf(game->pwl.item.dist.x * game->pwl.item.dist.x + game->pwl.item.dist.y * game->pwl.item.dist.y);
+	view.y = dot_product(game->player.plane, game->pwl.item.dist);
 	screen.x = (RES_X * (view.y * 2.0) / (2 * view.x)) * game->player.zoom;
 	screen.y = ((RES_Y * game->player.z) / dist_sq - game->player.pitch);
 	scaling = fmaxf((game->img[T_ITEM].size.x / dist_sq)
 			* game->player.zoom * 0.1, 0.1);
 	scale.x = scaling;
 	scale.y = scaling;
-	set_pwl_view(game, &pwl, r);
-	pwl.img->intensity = set_intensity(game->light, dist_sq);
+	set_pwl_view(game, r);
+	game->pwl.item.img->intensity = set_intensity(game->light, dist_sq);
 	put_img_scale_darken((t_point){screen.x, screen.y},
-		pwl.img, &game->img[T_WIN], scale);
+		game->pwl.item.img, &game->img[T_WIN], scale);
 }
 
 void	render_pwl(t_game *game)
 {
 	t_ray	r;
 
-	if (game->power_loader.collected == 1)
+	if (game->pwl.item.collected == 1)
 		return ;
-	init_ray_to_target(game, &r, game->power_loader.pos);
-	if (dda_to_target(game, &r, game->power_loader.pos) != 1)
+	init_ray_to_target(game, &r, game->pwl.item.pos);
+	if (dda_to_target(game, &r, game->pwl.item.pos) != 1)
 		return ;
-	render_pwl_sprite(game, game->power_loader, r);
+	render_pwl_sprite(game, r);
+}
+
+void	enemy_hit_check(t_game *game)
+{
+	t_ray	r;
+	float	dist_sq;
+	
+	dist_sq = game->enemy.dist.x * game->enemy.dist.x
+		+ game->enemy.dist.y * game->enemy.dist.y;
+	set_ray_direction(game, &r, 0, 0);
+	set_ray_step_direction(game, &r);
+	if (dda_to_target(game, &r, game->enemy.pos) && dist_sq < 4)
+		game->state[ENEMY_DEAD] = 1;
 }
 
 void	render_pwl_overlay(t_game *game)
 {
-	if (game->power_loader.collected != 1)
+	if (game->pwl.item.collected != 1)
 		return ;
-	put_img((t_point){0, 136}, &game->img[T_PWL_ARM0], &game->img[T_WIN]);
+	if (game->state[PUNCHING] == 1)
+	{
+		if (delay_ms(100, &game->timer[TIMER_PWL]))
+		{
+			game->pwl.frame++;
+			game->pwl.img = game->img[game->pwl.frame];
+			if (game->pwl.frame == T_PWL_ARM6 + 1)
+			{
+				game->pwl.frame = T_PWL_ARM0;
+				game->pwl.img = game->img[T_PWL_ARM0];
+				game->state[PUNCHING] = 0;
+			}
+		}
+		if (game->pwl.frame == T_PWL_ARM4)
+			enemy_hit_check(game);
+	}
+	put_img((t_point){0, 136}, &game->pwl.img, &game->img[T_WIN]);
+}
+
+int	print_endgame(t_game *game)
+{
+	if (game->state[GAME_OVER])
+	{
+		mlx_string_put(game->mlx, game->win, 4, 26, WHITE, "YOU DIED");
+		return (1);
+	}
+	else if (game->state[ENEMY_DEAD])
+	{
+		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
+			"CONGRATULATIONS, YOU BEAT THE GAME");
+		return (1);
+	}
+	return (0);
 }
 
 int	game_loop(t_game *game)
 {
 	if (game->state[MOUSE] && !game->state[PAUSE] && !game->state[GAME_OVER])
-		handle_mouse(game);
+		handle_mouselook(game);
 	if (should_render_frame(game))
 	{
 		if (game->state[PAUSE])
@@ -1822,7 +1873,7 @@ int	game_loop(t_game *game)
 			interact(game);
 		}
 		display_fps_counter(game);
-		if (game->state[GAME_OVER])
+		if (print_endgame(game))
 			return (0);
 		if (game->state[MOUSE] == 0)
 			mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
@@ -1830,6 +1881,7 @@ int	game_loop(t_game *game)
 		else
 			mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
 				"MOUSE ENABLED, [P] TO DISABLE");
+			
 	}
 	return (0);
 }
@@ -1880,7 +1932,6 @@ void	init_enemy(t_game *game)
 	game->enemy.pos.y = 12.5;
 	game->enemy.frame = T_XENO0;
 	game->enemy.img = game->img[T_XENO0];
-	game->enemy.eyes = 0;
 	game->enemy.move_seed = 0;
 	game->enemy.move_inc = 0;
 	game->enemy.memory.x = 0;
@@ -1971,10 +2022,25 @@ t_fpoint	get_unique_char_pos(t_game *game, int n)
 
 void	init_pwl(t_game *game)
 {
-	game->power_loader.pos = get_unique_char_pos(game, TILE_PWL);
-	game->power_loader.dist.x = 0;
-	game->power_loader.dist.y = 0;
-	game->power_loader.collected = 0;
+	game->pwl.item.pos = get_unique_char_pos(game, TILE_PWL);
+	game->pwl.item.dist.x = 0;
+	game->pwl.item.dist.y = 0;
+	game->pwl.item.collected = 0;
+	game->pwl.img = game->img[T_PWL_ARM0];
+	game->pwl.frame = T_PWL_ARM0;
+}
+
+void	init_timer(t_game *game)
+{
+	int	i;
+
+	i = 0;
+	while (i < TIMER_MAX)
+	{
+		game->timer[i].tv_sec = 0;
+		game->timer[i].tv_usec = 0;
+		i++;
+	}
 }
 
 int	init_game(t_game *game)
@@ -1999,6 +2065,7 @@ int	init_game(t_game *game)
 	init_enemy(game);
 	init_items(game);
 	init_pwl(game);
+	init_timer(game);
 	game->light.min = 0.25;
 	game->light.max = 2.5;
 	game->light.ambient = 0.15;
@@ -2045,6 +2112,8 @@ int	mouse_event(unsigned int key, int x, int y, t_game *game)
 			mlx_mouse_move(game->mlx, game->win, RES_X2, RES_Y2);
 			game->state[MOUSE] = 1;
 		}
+		if (game->pwl.item.collected && game->state[MOUSE])
+			game->state[PUNCHING] = 1;
 	}
 	return (mwheel(key, game));
 }
