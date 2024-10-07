@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/07 11:52:04 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/07 12:24:38 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,7 +170,8 @@ unsigned int	darken(unsigned int color, float factor)
 	return ((r << 16) | (g << 8) | b);
 }
 
-void	put_img_scale_darken(t_point ofs, t_img *src, t_img *dst, t_fpoint scale)
+void	put_img_scale_darken(t_point ofs, t_img *src, t_img *dst,
+	t_fpoint scale)
 {
 	t_fpoint	sp;
 	t_point		dp;
@@ -285,10 +286,31 @@ int	load_xpm(void *mlx, char *path, t_img *img)
 	return (1);
 }
 
+int	load_pwl_xpms(t_game *game)
+{
+	if (load_xpm(game->mlx, "textures/pwl0.xpm", &game->img[T_PWL0])
+		|| load_xpm(game->mlx, "textures/pwl0.xpm", &game->img[T_PWL0])
+		|| load_xpm(game->mlx, "textures/pwl1.xpm", &game->img[T_PWL1])
+		|| load_xpm(game->mlx, "textures/pwl2.xpm", &game->img[T_PWL2])
+		|| load_xpm(game->mlx, "textures/pwl3.xpm", &game->img[T_PWL3])
+		|| load_xpm(game->mlx, "textures/pwl4.xpm", &game->img[T_PWL4])
+		|| load_xpm(game->mlx, "textures/pwl5.xpm", &game->img[T_PWL5])
+		|| load_xpm(game->mlx, "textures/pwl6.xpm", &game->img[T_PWL6])
+		|| load_xpm(game->mlx, "textures/pwl7.xpm", &game->img[T_PWL7])
+		|| load_xpm(game->mlx, "textures/pwl_arm0.xpm", &game->img[T_PWL_ARM0])
+		|| load_xpm(game->mlx, "textures/pwl_arm1.xpm", &game->img[T_PWL_ARM1])
+		|| load_xpm(game->mlx, "textures/pwl_arm2.xpm", &game->img[T_PWL_ARM2])
+		|| load_xpm(game->mlx, "textures/pwl_arm3.xpm", &game->img[T_PWL_ARM3])
+		|| load_xpm(game->mlx, "textures/pwl_arm4.xpm", &game->img[T_PWL_ARM4])
+		|| load_xpm(game->mlx, "textures/pwl_arm5.xpm", &game->img[T_PWL_ARM5])
+		|| load_xpm(game->mlx, "textures/pwl_arm6.xpm", &game->img[T_PWL_ARM6]))
+	return (1);
+}
+
 int	load_xpms(t_game *game)
 {
-	load_xpm(game->mlx, "textures/wall/wall1.xpm", &game->img[T_NORTH]);
-	load_xpm(game->mlx, "textures/wall/wall2.xpm", &game->img[T_SOUTH]);
+	if (load_xpm(game->mlx, "textures/wall/wall1.xpm", &game->img[T_NORTH])
+	|| load_xpm(game->mlx, "textures/wall/wall2.xpm", &game->img[T_SOUTH]);
 	load_xpm(game->mlx, "textures/wall/wall3.xpm", &game->img[T_EAST]);
 	load_xpm(game->mlx, "textures/wall/wall4.xpm", &game->img[T_WEST]);
 	load_xpm(game->mlx, "textures/door.xpm", &game->img[T_DOOR_CLOSE]);
@@ -302,22 +324,9 @@ int	load_xpms(t_game *game)
 	load_xpm(game->mlx, "textures/xeno5.xpm", &game->img[T_XENO5]);
 	load_xpm(game->mlx, "textures/xeno6.xpm", &game->img[T_XENO6]);
 	load_xpm(game->mlx, "textures/xeno7.xpm", &game->img[T_XENO7]);
-	load_xpm(game->mlx, "textures/pwl0.xpm", &game->img[T_PWL0]);
-	load_xpm(game->mlx, "textures/pwl1.xpm", &game->img[T_PWL1]);
-	load_xpm(game->mlx, "textures/pwl2.xpm", &game->img[T_PWL2]);
-	load_xpm(game->mlx, "textures/pwl3.xpm", &game->img[T_PWL3]);
-	load_xpm(game->mlx, "textures/pwl4.xpm", &game->img[T_PWL4]);
-	load_xpm(game->mlx, "textures/pwl5.xpm", &game->img[T_PWL5]);
-	load_xpm(game->mlx, "textures/pwl6.xpm", &game->img[T_PWL6]);
-	load_xpm(game->mlx, "textures/pwl7.xpm", &game->img[T_PWL7]);
-	load_xpm(game->mlx, "textures/pwl_arm0.xpm", &game->img[T_PWL_ARM0]);
-	load_xpm(game->mlx, "textures/pwl_arm1.xpm", &game->img[T_PWL_ARM1]);
-	load_xpm(game->mlx, "textures/pwl_arm2.xpm", &game->img[T_PWL_ARM2]);
-	load_xpm(game->mlx, "textures/pwl_arm3.xpm", &game->img[T_PWL_ARM3]);
-	load_xpm(game->mlx, "textures/pwl_arm4.xpm", &game->img[T_PWL_ARM4]);
-	load_xpm(game->mlx, "textures/pwl_arm5.xpm", &game->img[T_PWL_ARM5]);
-	load_xpm(game->mlx, "textures/pwl_arm6.xpm", &game->img[T_PWL_ARM6]);
 	load_xpm(game->mlx, "textures/item.xpm", &game->img[T_ITEM]);
+	if (load_pwl_xpms(game))
+		return (-1);
 	return (0);
 }
 
@@ -601,9 +610,9 @@ void	toggle_mouse(t_game *game)
 
 	center.x = RES_X2;
 	center.y = RES_Y2;
-	if (game->state[MOUSE] == 0)
+	if (game->state[S_MOUSE] == 0)
 		mlx_mouse_move(game->mlx, game->win, center.x, center.y);
-	game->state[MOUSE] = !game->state[MOUSE];
+	game->state[S_MOUSE] = !game->state[S_MOUSE];
 }
 
 void	pause_game(t_game *game)
@@ -612,9 +621,9 @@ void	pause_game(t_game *game)
 
 	center.x = RES_X2;
 	center.y = RES_Y2;
-	if (game->state[RUN])
-		game->state[PAUSE] = !game->state[PAUSE];
-	if (!game->state[PAUSE] && game->state[MOUSE])
+	if (game->state[S_RUN])
+		game->state[S_PAUSE] = !game->state[S_PAUSE];
+	if (!game->state[S_PAUSE] && game->state[S_MOUSE])
 		mlx_mouse_move(game->mlx, game->win, center.x, center.y);
 }
 
@@ -641,29 +650,27 @@ void	change_target_fps(unsigned int key, t_game *game)
 void	handle_keystate(unsigned int key, int state, t_game *game)
 {
 	if (key == XK_Up || key == XK_w)
-		game->state[UP] = state;
+		game->state[S_UP] = state;
 	if (key == XK_Down || key == XK_s)
-		game->state[DOWN] = state;
+		game->state[S_DOWN] = state;
 	if (key == XK_a)
-		game->state[LEFT] = state;
+		game->state[S_LEFT] = state;
 	if (key == XK_d)
-		game->state[RIGHT] = state;
+		game->state[S_RIGHT] = state;
 	if (key == XK_r)
-		game->state[ROT_U] = state;
+		game->state[S_ROT_U] = state;
 	if (key == XK_f)
-		game->state[ROT_D] = state;
+		game->state[S_ROT_D] = state;
 	if (key == XK_Left)
-		game->state[ROT_L] = state;
+		game->state[S_ROT_L] = state;
 	if (key == XK_Right)
-		game->state[ROT_R] = state;
+		game->state[S_ROT_R] = state;
 	if (key == XK_Shift_L)
-		game->state[RUN] = state;
+		game->state[S_RUN] = state;
 	if (key == XK_Control_L)
-		game->state[CROUCH] = state;
-	if (key == XK_space)
-		game->state[JUMP] = state;
+		game->state[S_SPACE] = state;
 	if (key == XK_e)
-		game->state[INTERACT] = state;
+		game->state[S_INTERACT] = state;
 }
 
 int	key_release(unsigned int key, t_game *game)
@@ -815,7 +822,7 @@ void	interact_door(t_game *game, t_ray r)
 	g_map[(int)r.map.y][(int)r.map.x] = -g_map[(int)r.map.y][(int)r.map.x];
 	if (r.wall_dist <= PLAYER_RADIUS)
 		unstuck_player(game, r);
-	game->state[INTERACT] = 0;
+	game->state[S_INTERACT] = 0;
 	game->map.update = 1;
 }
 
@@ -832,31 +839,25 @@ void	interact_pwl(t_game *game)
 	game->player.z = 0.3;
 	game->player.pitch = 100;
 	game->pwl.item.collected = 1;
-	game->state[HIDE_ENEMY_TRACE] = 1;
 	game->map.update = 1;
 }
 
-void	interact(t_game *game)
+void	check_interact(t_game *game, int *tile_hit, t_ray *r)
 {
-	int				tile_hit;
-	t_ray			r;
-
-	set_ray_direction(game, &r, 0, 0);
-	set_ray_step_direction(game, &r);
-	tile_hit = dda_interact(&r);
-	if (!game->pwl.item.collected && tile_hit == 0)
+	set_ray_direction(game, r, 0, 0);
+	set_ray_step_direction(game, r);
+	*tile_hit = dda_interact(r);
+	if (*tile_hit == 0)
 		return ;
-	if (r.side == VERTICAL)
-		r.wall_dist = r.side_dist.x - r.delta_dist.x;
+	if (r->side == VERTICAL)
+		r->wall_dist = r->side_dist.x - r->delta_dist.x;
 	else
-		r.wall_dist = r.side_dist.y - r.delta_dist.y;
-	if (r.wall_dist > 2.0)
-		return ;
-	if (!game->state[MAP_BIG])
+		r->wall_dist = r->side_dist.y - r->delta_dist.y;
+	if (r->wall_dist < 2.0 && !game->state[S_MAP_BIG])
 	{
-		if (tile_hit == TILE_DOOR || tile_hit == TILE_DOOR_OPEN)
+		if (*tile_hit == TILE_DOOR || *tile_hit == TILE_DOOR_OPEN)
 			display_ui_msg(game, "[E]", UI_DOOR);
-		if (tile_hit == TILE_PWL)
+		if (*tile_hit == TILE_PWL)
 		{
 			if (game->item_collected < REQUIRED_ITEMS)
 				display_ui_msg(game, NULL, UI_PWL_FALSE);
@@ -864,7 +865,15 @@ void	interact(t_game *game)
 				display_ui_msg(game, "[E]", UI_PWL_TRUE);
 		}
 	}
-	if (game->state[INTERACT] == 1)
+}
+
+void	interact(t_game *game)
+{
+	t_ray	r;
+	int		tile_hit;
+
+	check_interact(game, &tile_hit, &r);
+	if (game->state[S_INTERACT] == 1)
 	{
 		if (tile_hit == TILE_DOOR || tile_hit == TILE_DOOR_OPEN)
 			return (interact_door(game, r));
@@ -883,16 +892,16 @@ int	key_press(unsigned int key, t_game *game)
 	if (key == XK_p)
 		toggle_mouse(game);
 	if (key == XK_m)
-		game->state[MAP_DISABLE] = !game->state[MAP_DISABLE];
+		game->state[S_MAP_DISABLE] = !game->state[S_MAP_DISABLE];
 	if (key == XK_1)
 	{
-		game->state[MAP_DISABLE] = 0;
-		game->state[MAP_BIG] = !game->state[MAP_BIG];
+		game->state[S_MAP_DISABLE] = 0;
+		game->state[S_MAP_BIG] = !game->state[S_MAP_BIG];
 	}
 	if (key == XK_2)
-		game->state[SHOW_ENEMY_PATH] = !game->state[SHOW_ENEMY_PATH];
+		game->state[S_ENEMY_PATH] = !game->state[S_ENEMY_PATH];
 	if (game->pwl.item.collected == 1 && key == XK_space)
-		game->state[PUNCHING] = 1;
+		game->state[S_PUNCHING] = 1;
 	change_target_fps(key, game);
 	return (0);
 }
@@ -941,22 +950,22 @@ void	handle_mouselook(t_game *game)
 
 void	calculate_movement(t_game *game, float *move_x, float *move_y)
 {
-	if (game->state[UP])
+	if (game->state[S_UP])
 	{
 		*move_x += game->player.dir.x;
 		*move_y += game->player.dir.y;
 	}
-	if (game->state[DOWN])
+	if (game->state[S_DOWN])
 	{
 		*move_x -= game->player.dir.x;
 		*move_y -= game->player.dir.y;
 	}
-	if (game->state[LEFT])
+	if (game->state[S_LEFT])
 	{
 		*move_x += game->player.dir.y;
 		*move_y -= game->player.dir.x;
 	}
-	if (game->state[RIGHT])
+	if (game->state[S_RIGHT])
 	{
 		*move_x -= game->player.dir.y;
 		*move_y += game->player.dir.x;
@@ -1013,8 +1022,8 @@ void	handle_movement_xy(t_game *game, float speed)
 	t_fpoint	move;
 	t_fpoint	new_pos;
 
-	if (!game->state[UP] && !game->state[DOWN]
-		&& !game->state[LEFT] && !game->state[RIGHT])
+	if (!game->state[S_UP] && !game->state[S_DOWN]
+		&& !game->state[S_LEFT] && !game->state[S_RIGHT])
 		return ;
 	move.x = 0;
 	move.y = 0;
@@ -1025,32 +1034,16 @@ void	handle_movement_xy(t_game *game, float speed)
 	check_collision(&game->player.pos, new_pos, PLAYER_RADIUS);
 }
 
-void	handle_movement_z(t_game *game)
-{
-	if (game->state[CROUCH])
-	{
-		game->player.z -= 0.05;
-		if (game->player.z < P_MIN_HEIGHT)
-			game->player.z = P_MIN_HEIGHT;
-	}
-	if (game->state[JUMP])
-	{
-		game->player.z += 0.05;
-		if (game->player.z > P_MAX_HEIGHT)
-			game->player.z = P_MAX_HEIGHT;
-	}
-}
-
 void	handle_yaw(t_game *game, float speed)
 {
 	float			old_dir_x;
 	float			old_plane_x;
 
-	if (game->state[ROT_L] && game->state[ROT_R])
+	if (game->state[S_ROT_L] && game->state[S_ROT_R])
 		return ;
 	old_dir_x = game->player.dir.x;
 	old_plane_x = game->player.plane.x;
-	if (game->state[ROT_L])
+	if (game->state[S_ROT_L])
 	{
 		game->player.dir.x = game->player.dir.x * cos(-speed)
 			- game->player.dir.y * sin(-speed);
@@ -1061,7 +1054,7 @@ void	handle_yaw(t_game *game, float speed)
 		game->player.plane.y = old_plane_x * sin(-speed)
 			+ game->player.plane.y * cos(-speed);
 	}
-	else if (game->state[ROT_R])
+	else if (game->state[S_ROT_R])
 	{
 		game->player.dir.x = game->player.dir.x * cos(speed)
 			- game->player.dir.y * sin(speed);
@@ -1078,11 +1071,11 @@ void	handle_pitch(t_game *game)
 {
 	const int	limit = RES_Y2;
 
-	if (game->state[ROT_U] && game->state[ROT_D])
+	if (game->state[S_ROT_U] && game->state[S_ROT_D])
 		return ;
-	if (game->state[ROT_U])
+	if (game->state[S_ROT_U])
 		game->player.pitch -= game->frame.time;
-	else if (game->state[ROT_D])
+	else if (game->state[S_ROT_D])
 		game->player.pitch += game->frame.time;
 	if (game->player.pitch < -limit)
 		game->player.pitch = -limit;
@@ -1094,12 +1087,12 @@ void	handle_movement(t_game *game)
 {
 	int	run_speed;
 
-	if (game->state[GAME_OVER])
+	if (game->state[S_CAUGHT])
 		return ;
 	run_speed = 1;
-	if (game->state[RUN] == 1)
+	if (game->state[S_RUN] == 1)
 	{
-		game->state[MAP_BIG] = 0;
+		game->state[S_MAP_BIG] = 0;
 		run_speed = RUN_SPD;
 	}
 	handle_movement_xy(game, PLAYER_SPD * game->frame.time * run_speed);
@@ -1174,16 +1167,16 @@ void	draw_map_enemy(t_game *game)
 	end.y = (int)(game->enemy.last_seen.y * MAP_CELL_SIZE);
 	if (delay_ms(200, &game->timer[TIMER_ENEMY_PATH]))
 		draw_circle(&game->img[T_MAP_ENEMY_PATH], start, 1, WHITE);
-	if (game->state[SHOW_ENEMY_PATH])
+	if (game->state[S_ENEMY_PATH])
 		put_img((t_point){0, 0},
 			&game->img[T_MAP_ENEMY_PATH], &game->img[T_MAP]);
-	if (!game->state[HIDE_ENEMY_TRACE] && game->enemy.last_seen.x && game->enemy.last_seen.y)
+	if (game->enemy.last_seen.x && game->enemy.last_seen.y)
 	{
 		draw_line(&game->img[T_MAP], start, end, RED);
 		draw_circle(&game->img[T_MAP], end, MAP_CELL_SIZE * 0.15, RED);
 		draw_circle_outline(&game->img[T_MAP], end, MAP_CELL_SIZE * 0.25, RED);
 	}
-	if (game->state[ENEMY_MAP_TOGGLE])
+	if (game->state[S_ENEMY_ICON])
 	{
 		draw_circle(&game->img[T_MAP], start,
 			MAP_CELL_SIZE * 0.5, MAP_COLOR);
@@ -1197,20 +1190,20 @@ void	draw_minimap(t_game *game)
 	t_fpoint	player_pos;
 	const int	center = game->img[T_MAP_MASK].size.x * 0.5;
 
-	if (game->state[MAP_DISABLE])
+	if (game->state[S_MAP_DISABLE])
 		return ;
 	player_pos.x = (int)((game->player.pos.x * MAP_CELL_SIZE));
 	player_pos.y = (int)((game->player.pos.y * MAP_CELL_SIZE));
 	if (game->map.update)
 		update_map_tiles(game);
 	put_img((t_point){0, 0}, &game->img[T_MAP_TILES], &game->img[T_MAP]);
-	if (!game->state[ENEMY_DEAD])
+	if (!game->state[S_ENEMY_DEAD])
 		draw_map_enemy(game);
 	draw_map_player(&game->img[T_MAP], game->player);
 	put_img((t_point){0, 0,}, &game->img[T_MAP_BG], &game->img[T_MAP_MASK]);
 	put_img((t_point){-player_pos.x + center, -player_pos.y + center},
 		&game->img[T_MAP], &game->img[T_MAP_MASK]);
-	if (!game->state[MAP_BIG])
+	if (!game->state[S_MAP_BIG])
 		put_img(game->map.offset, &game->img[T_MAP_MASK], &game->img[T_WIN]);
 	else
 		put_img((t_point){RES_X2 - game->img[T_MAP].size.x * 0.5,
@@ -1419,13 +1412,13 @@ void	move_enemy_cardinal(t_game *game, int direction)
 
 	step_dir.x = 0;
 	step_dir.y = 0;
-	if (direction == UP)
+	if (direction == S_UP)
 		step_dir.y = -1;
-	else if (direction == DOWN)
+	else if (direction == S_DOWN)
 		step_dir.y = 1;
-	else if (direction == LEFT)
+	else if (direction == S_LEFT)
 		step_dir.x = -1;
-	else if (direction == RIGHT)
+	else if (direction == S_RIGHT)
 		step_dir.x = 1;
 	new_pos.x = game->enemy.pos.x + step_dir.x * ENEMY_SPD * game->frame.time;
 	new_pos.y = game->enemy.pos.y + step_dir.y * ENEMY_SPD * game->frame.time;
@@ -1479,13 +1472,13 @@ void	hunt(t_game *game)
 		}
 	}
 	if (game->enemy.move_seed >= 0 && game->enemy.move_seed <= 12)
-		move_enemy_cardinal(game, UP);
+		move_enemy_cardinal(game, S_UP);
 	else if (game->enemy.move_seed >= 13 && game->enemy.move_seed <= 25)
-		move_enemy_cardinal(game, DOWN);
+		move_enemy_cardinal(game, S_DOWN);
 	else if (game->enemy.move_seed >= 26 && game->enemy.move_seed <= 38)
-		move_enemy_cardinal(game, LEFT);
+		move_enemy_cardinal(game, S_LEFT);
 	else if (game->enemy.move_seed >= 39 && game->enemy.move_seed <= 51)
-		move_enemy_cardinal(game, RIGHT);
+		move_enemy_cardinal(game, S_RIGHT);
 	else if (game->enemy.move_seed >= 52 && game->enemy.move_seed <= 63)
 		move_enemy_diagonal(game, UP_LEFT);
 	else if (game->enemy.move_seed >= 64 && game->enemy.move_seed <= 75)
@@ -1502,17 +1495,17 @@ void	game_over(t_game *game)
 {
 	if (game->pwl.item.collected)
 		return ;
-	game->state[MAP_DISABLE] = 1;
+	game->state[S_MAP_DISABLE] = 1;
 	set_player_look_at(&game->player, game->enemy.pos);
 	if (game->player.zoom < 1.8)
 		game->player.zoom += 0.1;
 	game->player.pitch = -300;
-	game->state[GAME_OVER] = 1;
+	game->state[S_CAUGHT] = 1;
 }
 
 void	chase(t_game *game, float dist_sq, float speed)
 {
-	if (game->state[ENEMY_VISION] == 1)
+	if (game->state[S_ENEMY_VISION] == 1)
 	{
 		game->enemy.last_seen.x = game->player.pos.x;
 		game->enemy.last_seen.y = game->player.pos.y;
@@ -1540,9 +1533,9 @@ void	update_enemy_pos(t_game *game)
 	float		dist_sq;
 	float		normalized_speed;
 
-	if (game->state[ENEMY_DEAD])
+	if (game->state[S_ENEMY_DEAD])
 		return ;
-	if (game->state[ENEMY_VISION] == 0
+	if (game->state[S_ENEMY_VISION] == 0
 		&& (game->enemy.memory.x == 0 && game->enemy.memory.y == 0))
 		return (hunt(game));
 	game->enemy.dist.x = game->player.pos.x - game->enemy.pos.x;
@@ -1616,7 +1609,7 @@ void	render_enemy(t_game *game)
 	float		dist_sqrt;
 	float		scaling;
 
-	game->state[ENEMY_VISION] = 1;
+	game->state[S_ENEMY_VISION] = 1;
 	view.x = dot_product(game->player.dir, game->enemy.dist) * 0.9;
 	if (view.x >= 0)
 		return ;
@@ -1638,17 +1631,17 @@ void	render_enemy_sprite(t_game *game)
 {
 	t_ray	r;
 
-	if (game->state[ENEMY_DEAD])
+	if (game->state[S_ENEMY_DEAD])
 		return ;
 	if (delay_ms(75, &game->timer[MS100]))
 	{
-		game->state[ENEMY_MAP_TOGGLE] = !game->state[ENEMY_MAP_TOGGLE];
+		game->state[S_ENEMY_ICON] = !game->state[S_ENEMY_ICON];
 		update_enemy_sprite(game);
 	}
 	init_ray_to_target(game, &r, game->enemy.pos);
 	if (dda_to_target(game, &r, game->enemy.pos) != 1)
 	{
-		game->state[ENEMY_VISION] = 0;
+		game->state[S_ENEMY_VISION] = 0;
 		return ;
 	}
 	render_enemy(game);
@@ -1766,7 +1759,8 @@ void	render_pwl_sprite(t_game *game, t_ray r)
 	view.x = dot_product(game->player.dir, game->pwl.item.dist) * 0.88;
 	if (view.x >= 0)
 		return ;
-	dist_sq = sqrtf(game->pwl.item.dist.x * game->pwl.item.dist.x + game->pwl.item.dist.y * game->pwl.item.dist.y);
+	dist_sq = sqrtf(game->pwl.item.dist.x * game->pwl.item.dist.x
+			+ game->pwl.item.dist.y * game->pwl.item.dist.y);
 	view.y = dot_product(game->player.plane, game->pwl.item.dist);
 	screen.x = (RES_X * (view.y * 2.0) / (2 * view.x)) * game->player.zoom;
 	screen.y = ((RES_Y * game->player.z) / dist_sq - game->player.pitch);
@@ -1796,20 +1790,20 @@ void	enemy_hit_check(t_game *game)
 {
 	t_ray	r;
 	float	dist_sq;
-	
+
 	dist_sq = game->enemy.dist.x * game->enemy.dist.x
 		+ game->enemy.dist.y * game->enemy.dist.y;
 	set_ray_direction(game, &r, 0, 0);
 	set_ray_step_direction(game, &r);
 	if (dda_to_target(game, &r, game->enemy.pos) && dist_sq < 4)
-		game->state[ENEMY_DEAD] = 1;
+		game->state[S_ENEMY_DEAD] = 1;
 }
 
 void	render_pwl_overlay(t_game *game)
 {
 	if (game->pwl.item.collected != 1)
 		return ;
-	if (game->state[PUNCHING] == 1)
+	if (game->state[S_PUNCHING] == 1)
 	{
 		if (delay_ms(100, &game->timer[TIMER_PWL]))
 		{
@@ -1819,7 +1813,7 @@ void	render_pwl_overlay(t_game *game)
 			{
 				game->pwl.frame = T_PWL_ARM0;
 				game->pwl.img = game->img[T_PWL_ARM0];
-				game->state[PUNCHING] = 0;
+				game->state[S_PUNCHING] = 0;
 			}
 		}
 		if (game->pwl.frame == T_PWL_ARM4)
@@ -1828,29 +1822,37 @@ void	render_pwl_overlay(t_game *game)
 	put_img((t_point){0, 136}, &game->pwl.img, &game->img[T_WIN]);
 }
 
-int	print_endgame(t_game *game)
+void	display_msg(t_game *game)
 {
-	if (game->state[GAME_OVER])
-	{
-		mlx_string_put(game->mlx, game->win, 4, 26, WHITE, "YOU DIED");
-		return (1);
-	}
-	else if (game->state[ENEMY_DEAD])
+	if (game->state[S_ENEMY_DEAD])
 	{
 		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
 			"CONGRATULATIONS, YOU BEAT THE GAME");
-		return (1);
+		return ;
 	}
-	return (0);
+	if (game->state[S_CAUGHT])
+	{
+		mlx_string_put(game->mlx, game->win, 4, 26, WHITE, "YOU DIED");
+		return ;
+	}
+	if (game->state[S_MOUSE] == 0)
+		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
+			"MOUSE DISABLED, [CLICK ANYWHERE] TO ENABLE");
+	else
+		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
+			"MOUSE ENABLED, [P] TO DISABLE");
+	if (game->pwl.item.collected)
+		mlx_string_put(game->mlx, game->win, 4, 39, WHITE,
+			"[SPACE] or [CLICK] to punch");
 }
 
 int	game_loop(t_game *game)
 {
-	if (game->state[MOUSE] && !game->state[PAUSE] && !game->state[GAME_OVER])
+	if (game->state[S_MOUSE] && !game->state[S_PAUSE] && !game->state[S_CAUGHT])
 		handle_mouselook(game);
 	if (should_render_frame(game))
 	{
-		if (game->state[PAUSE])
+		if (game->state[S_PAUSE])
 		{
 			put_img((t_point){0, 0}, &game->img[T_PAUSE], &game->img[T_WIN]);
 			mlx_put_image_to_window(game->mlx, game->win, game->img[T_WIN].img,
@@ -1873,15 +1875,7 @@ int	game_loop(t_game *game)
 			interact(game);
 		}
 		display_fps_counter(game);
-		if (print_endgame(game))
-			return (0);
-		if (game->state[MOUSE] == 0)
-			mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
-				"MOUSE DISABLED, [CLICK ANYWHERE] TO ENABLE");
-		else
-			mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
-				"MOUSE ENABLED, [P] TO DISABLE");
-			
+		display_msg(game);
 	}
 	return (0);
 }
@@ -2049,6 +2043,7 @@ int	init_game(t_game *game)
 	game->mlx = mlx_init();
 	if (game->mlx == NULL)
 		return (-1);
+	load_xpms(game);
 	mlx_do_key_autorepeatoff(game->mlx);
 	game->win = mlx_new_window(game->mlx, RES_X, RES_Y, "cub3D");
 	if (game->win == NULL)
@@ -2058,7 +2053,6 @@ int	init_game(t_game *game)
 	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
 		|| init_bg(game, BLACK, 0x2C2E33) == -1)
 		return (-1);
-	load_xpms(game);
 	init_framedata(&game->frame);
 	init_states(game);
 	init_player(&game->player);
@@ -2103,17 +2097,17 @@ int	mouse_event(unsigned int key, int x, int y, t_game *game)
 {
 	(void)x;
 	(void)y;
-	if (game->state[GAME_OVER])
+	if (game->state[S_CAUGHT])
 		return (0);
 	if (key == 1)
 	{
-		if (game->state[MOUSE] == 0)
+		if (game->state[S_MOUSE] == 0)
 		{
 			mlx_mouse_move(game->mlx, game->win, RES_X2, RES_Y2);
-			game->state[MOUSE] = 1;
+			game->state[S_MOUSE] = 1;
 		}
-		if (game->pwl.item.collected && game->state[MOUSE])
-			game->state[PUNCHING] = 1;
+		if (game->pwl.item.collected && game->state[S_MOUSE])
+			game->state[S_PUNCHING] = 1;
 	}
 	return (mwheel(key, game));
 }

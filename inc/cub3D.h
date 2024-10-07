@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/07 11:03:49 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/07 12:17:48 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,29 +111,27 @@ typedef enum e_texture
 
 typedef enum e_state
 {
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT,
-	ROT_U,
-	ROT_D,
-	ROT_L,
-	ROT_R,
-	INTERACT,
-	MAP_DISABLE,
-	MAP_BIG,
-	MOUSE,
-	RUN,
-	CROUCH,
-	JUMP,
-	PAUSE,
-	ENEMY_MAP_TOGGLE,
-	SHOW_ENEMY_PATH,
-	HIDE_ENEMY_TRACE,
-	ENEMY_VISION,
-	ENEMY_DEAD,
-	GAME_OVER,
-	PUNCHING,
+	S_UP,
+	S_DOWN,
+	S_LEFT,
+	S_RIGHT,
+	S_ROT_U,
+	S_ROT_D,
+	S_ROT_L,
+	S_ROT_R,
+	S_INTERACT,
+	S_MAP_DISABLE,
+	S_MAP_BIG,
+	S_MOUSE,
+	S_RUN,
+	S_SPACE,
+	S_PAUSE,
+	S_ENEMY_ICON,
+	S_ENEMY_PATH,
+	S_ENEMY_VISION,
+	S_ENEMY_DEAD,
+	S_CAUGHT,
+	S_PUNCHING,
 	STATE_MAX,
 }					t_state;
 
