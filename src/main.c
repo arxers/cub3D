@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/07 12:24:38 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/07 14:53:54 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1928,7 +1928,7 @@ void	init_items(t_game *game)
 	int	i;
 
 	game->item.count = count_tile(game, -3);
-	game->item.array = malloc(game->item.count * sizeof(t_coin));
+	game->item.array = ft_calloc(game->item.count, sizeof(t_coin));
 	i = 0;
 	y = 0;
 	while (y < g_map_y - 1)
