@@ -1303,12 +1303,24 @@ void	calculate_wall_projection(t_game *game, t_ray *r, t_texture_map *tex)
 	tex->coords.x = (int)(tex->hit.x * WALL);
 }
 
+void	draw_bg(t_game *game)
+{
+	put_img((t_point){0, 0}, &game->img[T_CEILING], &game->img[T_WIN]);
+	put_img((t_point){0, RES_Y2 - game->player.pitch},
+		&game->img[T_FLOOR], &game->img[T_WIN]);
+	put_img_scale((t_point){0, RES_Y2 - game->player.pitch},
+		&game->img[T_DITHER], &game->img[T_WIN],
+		(t_fpoint){1, (1 - (P_MAX_HEIGHT - game->player.z)
+			/ (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
+}
+
 void	render_viewport(t_game *game)
 {
 	t_texture_map	tex;
 	t_ray			r;
 	const float		camera_x_factor = 2.0 / RES_X;
 
+	draw_bg(game);
 	if (out_of_bounds(game->player.pos))
 		return ;
 	r.pix.x = 0;
@@ -1337,17 +1349,6 @@ void	display_fps_counter(t_game *game)
 	else
 		mlx_string_put(game->mlx, game->win, 4, 13, WHITE,
 			"INITIALIZING FPS...");
-}
-
-void	draw_bg(t_game *game)
-{
-	put_img((t_point){0, 0}, &game->img[T_CEILING], &game->img[T_WIN]);
-	put_img((t_point){0, RES_Y2 - game->player.pitch},
-		&game->img[T_FLOOR], &game->img[T_WIN]);
-	put_img_scale((t_point){0, RES_Y2 - game->player.pitch},
-		&game->img[T_DITHER], &game->img[T_WIN],
-		(t_fpoint){1, (1 - (P_MAX_HEIGHT - game->player.z)
-			/ (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
 }
 
 int	d100(void)
@@ -1762,18 +1763,6 @@ void	render_pwl_sprite(t_game *game, t_ray r)
 		game->pwl.item.img, &game->img[T_WIN], scale);
 }
 
-void	render_pwl(t_game *game)
-{
-	t_ray	r;
-
-	if (game->pwl.item.collected == 1)
-		return ;
-	init_ray_to_target(game, &r, game->pwl.item.pos);
-	if (dda_to_target(game, &r, game->pwl.item.pos) != 1)
-		return ;
-	render_pwl_sprite(game, r);
-}
-
 void	enemy_hit_check(t_game *game)
 {
 	t_ray	r;
@@ -1789,8 +1778,6 @@ void	enemy_hit_check(t_game *game)
 
 void	render_pwl_overlay(t_game *game)
 {
-	if (game->pwl.item.collected != 1)
-		return ;
 	if (game->state[S_PUNCHING] == 1)
 	{
 		if (delay_ms(100, &game->timer[TIMER_PWL]))
@@ -1808,6 +1795,18 @@ void	render_pwl_overlay(t_game *game)
 			enemy_hit_check(game);
 	}
 	put_img((t_point){0, 136}, &game->pwl.img, &game->img[T_WIN]);
+}
+
+void	render_pwl(t_game *game)
+{
+	t_ray	r;
+
+	if (game->pwl.item.collected == 1)
+		return (render_pwl_overlay(game));
+	init_ray_to_target(game, &r, game->pwl.item.pos);
+	if (dda_to_target(game, &r, game->pwl.item.pos) != 1)
+		return ;
+	render_pwl_sprite(game, r);
 }
 
 void	display_msg(t_game *game)
@@ -1835,28 +1834,30 @@ void	display_msg(t_game *game)
 			"[SPACE] or [CLICK] to punch");
 }
 
+int	display_pause_screen(t_game *game)
+{
+	if (!game->state[S_PAUSE])
+		return (0);
+	put_img((t_point){0, 0}, &game->img[T_PAUSE], &game->img[T_WIN]);
+	mlx_put_image_to_window(game->mlx, game->win, game->img[T_WIN].img, 0, 0);
+	return (1);
+}
+
 int	game_loop(t_game *game)
 {
 	if (game->state[S_MOUSE] && !game->state[S_PAUSE] && !game->state[S_CAUGHT])
 		handle_mouselook(game);
 	if (should_render_frame(game))
 	{
-		if (game->state[S_PAUSE])
-		{
-			put_img((t_point){0, 0}, &game->img[T_PAUSE], &game->img[T_WIN]);
-			mlx_put_image_to_window(game->mlx, game->win, game->img[T_WIN].img,
-				0, 0);
+		if (display_pause_screen(game))
 			return (0);
-		}
 		update_enemy_pos(game);
 		handle_movement(game);
-		draw_bg(game);
 		render_viewport(game);
 		render_enemy_sprite(game);
 		pickup_item(game);
 		render_item(game);
 		render_pwl(game);
-		render_pwl_overlay(game);
 		draw_minimap(game);
 		mlx_put_image_to_window(game->mlx, game->win,
 			game->img[T_WIN].img, 0, 0);
