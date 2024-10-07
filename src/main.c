@@ -285,6 +285,7 @@ void	draw_map_player(t_img *img, t_player p, t_point origin)
 void	validate_input(int ac, char **av)
 {
 	check_n_cmdline_args(ac);
+	is_map_a_dot_cub_file(av[1]);
 	
 	// if (open(av[1]) == -1) //check if able to open
 	// 	;remove (void)av when this check is done
