@@ -34,18 +34,15 @@ void	is_map_a_dot_cub_file(char *s)
 	}
 }
 
-// check if .cub extension
-int	is_cub_ext(char *s)
+void	is_map_file_openable(char *mapfile)
 {
-	int	len;
+	int map_fd;
 	
-	len = ft_strlen(s);
-	if ((s[len - 1] == 'b') && \
-		(s[len - 2] == 'u') && \
-		(s[len - 3] == 'c') && \
-		(s[len - 4] == '.') \
-		)
-	return (0);
-	else
-		return (1);
-}	
+	map_fd = open(mapfile, O_RDONLY);
+	if (map_fd == -1)
+	{
+		ft_putstr_fd("cub3D: Map cannot be opened\n", 2);
+		exit(1);
+	}
+	return ;
+}
