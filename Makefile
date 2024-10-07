@@ -1,6 +1,6 @@
 NAME = cub3D
 CFLAGS = -Wall -Wextra -Werror
-SRC =   src/main.c
+SRC =   src/main.c src/validate_input.c
 OBJ = $(SRC:.c=.o)
 
 LIBFT = libft/libft.a
