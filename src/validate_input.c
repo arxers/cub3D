@@ -46,3 +46,18 @@ void	is_map_file_openable(char *mapfile)
 	}
 	return ;
 }
+
+t_scene	*alloc_scene(void)
+{
+	t_scene *tmp_ptr;
+	
+	tmp_ptr = ft_calloc(1, sizeof(t_scene));
+	if (!tmp_ptr)
+	{
+		ft_putstr_fd("cub3D: Cannot alloc memory for scene\n", 2);
+		exit(1);
+	}
+	else
+		return (tmp_ptr);
+
+}

@@ -284,13 +284,15 @@ void	draw_map_player(t_img *img, t_player p, t_point origin)
 // jsu: continue working here
 void	validate_input(int ac, char **av)
 {
+	t_scene	*scene;
+	
 	check_n_cmdline_args(ac);
 	is_map_a_dot_cub_file(av[1]);
 	is_map_file_openable(av[1]);
 	
-	// if (open(av[1]) == -1) //check if able to open
-	// 	;remove (void)av when this check is done
-	(void)av;
+	scene = alloc_scene();
+	//printf("scene mem: %p\n", scene);
+	
 }
 
 void	ft_destroy_image(void *mlx_ptr, void **img)
@@ -1029,6 +1031,7 @@ int mwheel(unsigned int key, int x, int y, t_game *game)
 int	main(int ac, char **av)
 {
 	t_game	game;
+	//t_scene	scene;
 
 	validate_input(ac, av); // use this wrapper to call suite of checks
 	if (init_game(&game) == -1)
