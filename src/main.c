@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/07 14:54:13 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/07 18:20:08 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,12 @@ int	g_map[28][40] = {
 {1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,-3,1},
 {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,1,0,0,1,1,1},
-{1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1},
-{1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-{1,0,0,1,0,0,0,2,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-{1,0,0,1,0,0,0,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-{1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-{1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,-3,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1},
+{1,1,1,1,0,-3,-3,0,0,0,0,0,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1},
+{1,0,0,2,-3,-3,-3,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
+{1,0,0,1,-3,-3,-3,2,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+{1,0,0,1,-3,-3,-3,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+{1,0,0,2,-3,-3,-3,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
+{1,1,1,1,-3,-3,-3,0,0,0,0,0,0,1,1,-3,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1},
 {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,0,0,2,0,1,0,2,0,0,0,0,0,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,1,2,1,1,1,0,1,1,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,1,0,1,1,1,2,1,1,1,0,0,0,1,0,0,2,0,1},
@@ -1718,21 +1718,21 @@ void	pickup_item(t_game *game)
 void	set_pwl_view(t_game *game, t_ray r)
 {
 	if (r.dir.x > 0.5 && r.dir.y < -0.5)
-		game->pwl.item.img = &game->img[T_PWL0];
+		game->pwl.item_img = game->img[T_PWL0];
 	else if (r.dir.x > 0.5 && r.dir.y > 0.5)
-		game->pwl.item.img = &game->img[T_PWL2];
+		game->pwl.item_img = game->img[T_PWL2];
 	else if (r.dir.x < -0.5 && r.dir.y > 0.5)
-		game->pwl.item.img = &game->img[T_PWL4];
+		game->pwl.item_img = game->img[T_PWL4];
 	else if (r.dir.x < -0.5 && r.dir.y < -0.5)
-		game->pwl.item.img = &game->img[T_PWL6];
+		game->pwl.item_img = game->img[T_PWL6];
 	else if (r.dir.x > 0.5)
-		game->pwl.item.img = &game->img[T_PWL1];
+		game->pwl.item_img = game->img[T_PWL1];
 	else if (r.dir.y > 0.5)
-		game->pwl.item.img = &game->img[T_PWL3];
+		game->pwl.item_img = game->img[T_PWL3];
 	else if (r.dir.x < -0.5)
-		game->pwl.item.img = &game->img[T_PWL5];
+		game->pwl.item_img = game->img[T_PWL5];
 	else if (r.dir.y < -0.5)
-		game->pwl.item.img = &game->img[T_PWL7];
+		game->pwl.item_img = game->img[T_PWL7];
 }
 
 void	render_pwl_sprite(t_game *game, t_ray r)
@@ -1758,9 +1758,9 @@ void	render_pwl_sprite(t_game *game, t_ray r)
 	scale.x = scaling;
 	scale.y = scaling;
 	set_pwl_view(game, r);
-	game->pwl.item.img->intensity = set_intensity(game->light, dist_sq);
+	game->pwl.item_img.intensity = set_intensity(game->light, dist_sq);
 	put_img_scale_darken((t_point){screen.x, screen.y},
-		game->pwl.item.img, &game->img[T_WIN], scale);
+		&game->pwl.item_img, &game->img[T_WIN], scale);
 }
 
 void	enemy_hit_check(t_game *game)
@@ -1783,18 +1783,18 @@ void	render_pwl_overlay(t_game *game)
 		if (delay_ms(100, &game->timer[TIMER_PWL]))
 		{
 			game->pwl.frame++;
-			game->pwl.img = game->img[game->pwl.frame];
+			game->pwl.overlay_img = game->img[game->pwl.frame];
 			if (game->pwl.frame == T_PWL_ARM6 + 1)
 			{
 				game->pwl.frame = T_PWL_ARM0;
-				game->pwl.img = game->img[T_PWL_ARM0];
+				game->pwl.overlay_img = game->img[T_PWL_ARM0];
 				game->state[S_PUNCHING] = 0;
 			}
 		}
 		if (game->pwl.frame == T_PWL_ARM4)
 			enemy_hit_check(game);
 	}
-	put_img((t_point){0, 136}, &game->pwl.img, &game->img[T_WIN]);
+	put_img((t_point){0, 136}, &game->pwl.overlay_img, &game->img[T_WIN]);
 }
 
 void	render_pwl(t_game *game)
@@ -1977,7 +1977,7 @@ t_fpoint	get_unique_char_pos(t_game *game, int n)
 void	init_pwl(t_game *game)
 {
 	game->pwl.item.pos = get_unique_char_pos(game, TILE_PWL);
-	game->pwl.img = game->img[T_PWL_ARM0];
+	game->pwl.overlay_img = game->img[T_PWL_ARM0];
 	game->pwl.frame = T_PWL_ARM0;
 }
 

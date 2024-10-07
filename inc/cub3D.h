@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/07 14:54:18 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/07 17:41:27 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 # define UI_DOOR "OPEN/CLOSE"
 
 // Gameplay
-# define REQUIRED_ITEMS 3
+# define REQUIRED_ITEMS 5
 
 // Movement Constants
 # define MOUSE_SEN 0.0025
@@ -191,7 +191,6 @@ typedef struct s_coin
 {
 	t_fpoint		pos;
 	t_fpoint		dist;
-	t_img			*img;
 	int				collected;
 }					t_coin;
 
@@ -262,20 +261,22 @@ typedef struct s_ray
 typedef struct s_texture_map
 {
 	t_img			*wall_tex;
-	t_point			coords;
 	t_fpoint		hit;
+	t_point			coords;
 	float			tex_step;
 }					t_texture_map;
 
 typedef struct s_pwl
 {
+	t_img			item_img;
+	t_img			overlay_img;
 	t_coin			item;
-	t_img			img;
 	int				frame;
 }					t_pwl;
 
 typedef struct s_item
 {
+	t_img			img;
 	t_coin			*array;
 	int				count;
 	int				collected;
