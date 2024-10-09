@@ -59,7 +59,6 @@ t_scene	*alloc_scene(void)
 	}
 	else
 		return (tmp_ptr);
-
 }
 
 //# DONE above
@@ -90,7 +89,7 @@ int	is_start_with_expected_identifier(char *s)
 	if (!ft_strncmp(s, "NO ", 3) 
 		|| !ft_strncmp(s, "SO ", 3)
 		|| !ft_strncmp(s, "EA ", 3)
-		|| !ft_strncmp(s, "NO ", 3)
+		|| !ft_strncmp(s, "WE ", 3)
 		|| !ft_strncmp(s, "F ", 2)
 		|| !ft_strncmp(s, "C ", 2)
 		)
@@ -111,13 +110,11 @@ if reach here, then return 0 (success)
 */
 int is_wall_texture(char *s)
 {
-	if (is_end_with_xpm(s))
+	printf("is_wall_texture()\n");
+	if ((is_start_with_expected_identifier(s) == 1))
 		return (1);
-	if (is_start_with_expected_identifier(s))
-		return (1);
-		
-	printf("is_wall_texture!\n");
-	return (0);
+	else
+		return (0);
 }
 
 
@@ -138,18 +135,26 @@ static int	is_scene_details_exceptmap_loaded(t_scene *scene)
 */
 
 /*
-read .cub file, line by line
-check if texture line, or color line, or something else
+read .cub file, line by line, using get_next_line()
+check if current line begins with any of the 5 expected identifiers:
+"NO "
+"SO "
+"EA "
+"WE "
+"F "
+"C "
 
 if something else, read, and free, ie. skip the map!
 
 after reading,
 check if 6 lines are present in t_scene struct
 
+NOTE. line returned from GNL, contains a terminating '\n'
+
 */
 void	load_scene_details(int map_fd, t_scene **scene)
 {
-	char *line;
+	char 	*line;
 	int		n;
 	int		n_total_lines;
 	int		n_texture_lines;
@@ -161,22 +166,30 @@ void	load_scene_details(int map_fd, t_scene **scene)
 	line = get_next_line(map_fd);
 	while (line)
 	{
+		n_total_lines++;
+		if (is_start_with_expected_identifier(line) == 0)
+		{
+			n_texture_lines += 1;
+			printf("%s", line);					
+		}
+		//printf("line contents: %s", line);
+		//is_wall_texture(line);
 		/* 
 		// if all scene details except map, are loaded, then stop loading
 		if (is_scene_details_except_map_loaded(*scene)) 
 			break ;
-		*/
+		
 		if (is_wall_texture(line)) // update scene struct with ONE wall texture line
 		{
 			// error handling
 			// finish reading and then flush gnl buffer, free_members_and_scene(), exit(1)
 			
 		}
-		n = is_wall_texture(line);
-		if (n == 0)
-			n_texture_lines += 1;
+		*/
 		
-		n_total_lines++;
+		
+		
+		
 		
 		/*
 		else if (is_floor_or_ceiling(line)) // update floor/ceiling with ONE line of color values
@@ -192,6 +205,7 @@ void	load_scene_details(int map_fd, t_scene **scene)
 		free(line);
 		line = get_next_line(map_fd);
 	}
+	printf("\n");
 	printf("n_texture_lines: %d\n", n_texture_lines);	// expect 6 for map.cub
 	printf("n_total_lines: %d\n", n_total_lines);		// expect 29 for map.cub
 	// if all scene details except map, are NOT loaded, then free the scene members + scene, and exit
