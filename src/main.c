@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/09 21:09:14 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/09 21:14:25 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -854,12 +854,6 @@ void	interact(t_game *game)
 	int		tile_hit;
 
 	check_interact(game, &tile_hit, &r);
-	if (g_map[(int)r.map.y][(int)r.map.x] == 2 && game->pwl.frame == T_PWL_ARM4)
-	{
-		g_map[(int)r.map.y][(int)r.map.x] = -2;
-		game->map.update = 1;
-		return ;
-	}
 	if (game->state[S_INTERACT] == 1)
 	{
 		if (tile_hit == TILE_DOOR || tile_hit == TILE_DOOR_OPEN)
