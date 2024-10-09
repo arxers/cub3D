@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/07 18:20:08 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/09 21:09:14 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,12 @@ int	g_map[28][40] = {
 {1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,-3,1},
 {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,1,0,0,1,1,1},
-{1,1,1,1,0,-3,-3,0,0,0,0,0,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1},
-{1,0,0,2,-3,-3,-3,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-{1,0,0,1,-3,-3,-3,2,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-{1,0,0,1,-3,-3,-3,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-{1,0,0,2,-3,-3,-3,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-{1,1,1,1,-3,-3,-3,0,0,0,0,0,0,1,1,-3,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1},
+{1,1,1,1,0,0,-3,0,0,0,0,0,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1},
+{1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
+{1,0,0,1,0,0,0,2,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+{1,0,0,1,0,0,0,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+{1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
+{1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,-3,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1},
 {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,0,0,2,0,1,0,2,0,0,0,0,0,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,1,2,1,1,1,0,1,1,0,0,0,0,1,0,0,1,1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,1,0,1,1,1,2,1,1,1,0,0,0,1,0,0,2,0,1},
@@ -69,7 +69,7 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 	if (game->mlx)
 		mlx_destroy_display(game->mlx);
 	ft_free_void(&game->mlx);
-	ft_free_void((void **)&game->item.array);
+	ft_free_void((void **)&game->item.arr);
 	ft_free(&game->frame.fps_str);
 	if (msg)
 		ft_putstr_fd(msg, 2);
@@ -628,26 +628,6 @@ void	pause_game(t_game *game)
 		mlx_mouse_move(game->mlx, game->win, center.x, center.y);
 }
 
-void	change_target_fps(unsigned int key, t_game *game)
-{
-	if (key == XK_bracketleft)
-	{
-		if (game->frame.fps_target > 30)
-		{
-			game->frame.fps_target -= 30;
-			game->frame.time = 1000.0 / game->frame.fps_target;
-		}
-	}
-	else if (key == XK_bracketright)
-	{
-		if (game->frame.fps_target < 60)
-		{
-			game->frame.fps_target += 30;
-			game->frame.time = 1000.0 / game->frame.fps_target;
-		}
-	}
-}
-
 void	handle_keystate(unsigned int key, int state, t_game *game)
 {
 	if (key == XK_Up || key == XK_w)
@@ -874,6 +854,12 @@ void	interact(t_game *game)
 	int		tile_hit;
 
 	check_interact(game, &tile_hit, &r);
+	if (g_map[(int)r.map.y][(int)r.map.x] == 2 && game->pwl.frame == T_PWL_ARM4)
+	{
+		g_map[(int)r.map.y][(int)r.map.x] = -2;
+		game->map.update = 1;
+		return ;
+	}
 	if (game->state[S_INTERACT] == 1)
 	{
 		if (tile_hit == TILE_DOOR || tile_hit == TILE_DOOR_OPEN)
@@ -903,7 +889,6 @@ int	key_press(unsigned int key, t_game *game)
 		game->state[S_ENEMY_PATH] = !game->state[S_ENEMY_PATH];
 	if (game->pwl.item.collected == 1 && key == XK_space)
 		game->state[S_PUNCHING] = 1;
-	change_target_fps(key, game);
 	return (0);
 }
 
@@ -1085,7 +1070,7 @@ void	handle_movement(t_game *game)
 	if (game->state[S_CAUGHT])
 		return ;
 	run_speed = 1;
-	if (game->state[S_RUN] == 1)
+	if (game->state[S_RUN] == 1 && !game->pwl.item.collected)
 	{
 		game->state[S_MAP_BIG] = 0;
 		run_speed = RUN_SPD;
@@ -1644,22 +1629,24 @@ void	render_item_sprite(t_game *game, t_coin item)
 	float		dist_sqrt;
 	float		scaling;
 
-	item.dist.x = game->player.pos.x - item.pos.x;
-	item.dist.y = game->player.pos.y - item.pos.y;
+	dist_sqrt = sqrtf(item.dist.x * item.dist.x + item.dist.y * item.dist.y);
+	if (dist_sqrt > 3)
+		return ;
 	view.x = dot_product(game->player.dir, item.dist) * 0.88;
 	if (view.x >= 0)
 		return ;
-	dist_sqrt = sqrtf(item.dist.x * item.dist.x + item.dist.y * item.dist.y);
 	view.y = dot_product(game->player.plane, item.dist);
 	screen.x = (RES_X * (view.y * 2.0) / (2 * view.x)) * game->player.zoom;
-	screen.y = ((RES_Y * game->player.z) / dist_sqrt - game->player.pitch);
+	screen.y = (float)-game->player.pitch;
 	scaling = fmaxf((game->img[T_ITEM].size.x / dist_sqrt)
 			* game->player.zoom * 0.04, 0.04);
 	scale.x = scaling;
 	scale.y = scaling;
-	if (view.x < 0)
-		put_img_scale_mid_bot((t_point){screen.x, screen.y},
-			&game->img[T_ITEM], &game->img[T_WIN], scale);
+	if (screen.x < -RES_X2 - 32 * scaling || screen.x > RES_X2 + 32 * scaling
+		|| (screen.y + game->img[T_ITEM].size.y * scaling) > 382)
+		return ;
+	put_img_scale_mid_bot((t_point){screen.x, screen.y},
+		&game->img[T_ITEM], &game->img[T_WIN], scale);
 }
 
 void	render_item(t_game *game)
@@ -1670,18 +1657,20 @@ void	render_item(t_game *game)
 	i = 0;
 	while (i < game->item.count)
 	{
-		if (game->item.array[i].collected == 1)
+		if (game->item.arr[i].collected == 1)
 		{
 			i++;
 			continue ;
 		}
-		init_ray_to_target(game, &r, game->item.array[i].pos);
-		if (dda_to_target(game, &r, game->item.array[i].pos) != 1)
+		init_ray_to_target(game, &r, game->item.arr[i].pos);
+		if (dda_to_target(game, &r, game->item.arr[i].pos) != 1)
 		{
 			i++;
 			continue ;
 		}
-		render_item_sprite(game, game->item.array[i]);
+		game->item.arr[i].dist.x = game->player.pos.x - game->item.arr[i].pos.x;
+		game->item.arr[i].dist.y = game->player.pos.y - game->item.arr[i].pos.y;
+		render_item_sprite(game, game->item.arr[i]);
 		i++;
 	}
 }
@@ -1702,10 +1691,10 @@ void	pickup_item(t_game *game)
 		i = 0;
 		while (i < game->item.count)
 		{
-			if (same_position(game->player.pos, game->item.array[i].pos))
+			if (same_position(game->player.pos, game->item.arr[i].pos))
 			{
 				game->item.collected++;
-				game->item.array[i].collected = 1;
+				game->item.arr[i].collected = 1;
 				g_map[(int)game->player.pos.y][(int)game->player.pos.x] = 0;
 				game->map.update = 1;
 				return ;
@@ -1794,7 +1783,8 @@ void	render_pwl_overlay(t_game *game)
 		if (game->pwl.frame == T_PWL_ARM4)
 			enemy_hit_check(game);
 	}
-	put_img((t_point){0, 136}, &game->pwl.overlay_img, &game->img[T_WIN]);
+	put_img_scale_mid((t_point){0, 68}, &game->pwl.overlay_img,
+		&game->img[T_WIN], (t_fpoint){game->player.zoom, game->player.zoom});
 }
 
 void	render_pwl(t_game *game)
@@ -1928,7 +1918,7 @@ void	init_items(t_game *game)
 	int	i;
 
 	game->item.count = count_tile(game, -3);
-	game->item.array = ft_calloc(game->item.count, sizeof(t_coin));
+	game->item.arr = ft_calloc(game->item.count, sizeof(t_coin));
 	i = 0;
 	y = 0;
 	while (y < g_map_y - 1)
@@ -1938,8 +1928,8 @@ void	init_items(t_game *game)
 		{
 			if (g_map[y][x] == -3)
 			{
-				game->item.array[i].pos.x = (float)x + 0.5;
-				game->item.array[i].pos.y = (float)y + 0.5;
+				game->item.arr[i].pos.x = (float)x + 0.5;
+				game->item.arr[i].pos.y = (float)y + 0.5;
 				i++;
 				if (i == game->item.count)
 					return ;

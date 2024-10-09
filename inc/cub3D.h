@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/07 17:41:27 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/09 20:15:01 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 # define UI_DOOR "OPEN/CLOSE"
 
 // Gameplay
-# define REQUIRED_ITEMS 5
+# define REQUIRED_ITEMS 0
 
 // Movement Constants
 # define MOUSE_SEN 0.0025
@@ -277,7 +277,7 @@ typedef struct s_pwl
 typedef struct s_item
 {
 	t_img			img;
-	t_coin			*array;
+	t_coin			*arr;
 	int				count;
 	int				collected;
 }					t_item;
