@@ -294,7 +294,7 @@ void	validate_input(int ac, char **av)
 	
 	load_scene_except_map(av[1], scene); // includes checking if scene_details are valid
 	
-	print_scene_struct(scene);
+
 // restarted here, 09 Oct 2024	
 /*
 	load_map();

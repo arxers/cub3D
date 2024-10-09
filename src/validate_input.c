@@ -62,28 +62,6 @@ t_scene	*alloc_scene(void)
 }
 
 /*
-as long as line starts with any one of the six possible identifiers, return 1
-else return 0 (line does NOT start with an expected identifier)
-*/
-int	is_start_with_expected_identifier(char *s)
-{
-	if (!ft_strncmp(s, "NO ", 3) 
-		|| !ft_strncmp(s, "SO ", 3)
-		|| !ft_strncmp(s, "EA ", 3)
-		|| !ft_strncmp(s, "WE ", 3)
-		|| !ft_strncmp(s, "F ", 2)
-		|| !ft_strncmp(s, "C ", 2)
-		)
-		return (1);
-	else
-		return (0);
-}
-
-//# DONE above
-//##############################################################################
-//# pending below
-
-/*
 as long as there is a single char that is NOT "whitespace"
 	return 0 (line is NOT an empty line)
 else only when all chars are "whitespace"
@@ -109,20 +87,54 @@ int is_empty_line(char *s)
 }
 
 /*
-if any of the six details is NULL, return 1 (error)
-else return 0 (success)
+as long as line starts with any one of the six possible identifiers, return 1
+else return 0 (line does NOT start with an expected identifier)
+*/
+int	is_start_with_expected_identifier(char *s)
+{
+	if (!ft_strncmp(s, "NO ", 3) 
+		|| !ft_strncmp(s, "SO ", 3)
+		|| !ft_strncmp(s, "EA ", 3)
+		|| !ft_strncmp(s, "WE ", 3)
+		|| !ft_strncmp(s, "F ", 2)
+		|| !ft_strncmp(s, "C ", 2)
+		)
+		return (1);
+	else
+		return (0);
+}
+
+//# DONE above
+//##############################################################################
+//# pending below
+
+void	assign_wall_texture_to_struct(char *s, t_scene **scene)
+{
+	if (ft_strcmp(s, "NO") == 0 && (*scene)->no == NULL)
+		(*scene)->no = s;
+	else if (ft_strcmp(s, "SO") == 0 && (*scene)->so == NULL)
+		(*scene)->no = s;
+	else if (ft_strcmp(s, "EA") == 0 && (*scene)->ea == NULL)
+		(*scene)->no = s;
+	else if (ft_strcmp(s, "WE") == 0 && (*scene)->we == NULL)
+		(*scene)->no = s;
+}
+
+/*
+only if ALL of the six details are present, then return 1
+else return 0 (one or more of the details are missing)
 */
 int	is_all_six_scene_details_present(t_scene *scene)
 {
-	if ((scene->no) 
-		&& (scene->so) 
-		&& (scene->ea) 
-		&& (scene->we) 
-		&& (scene->floor) 
-		&& (scene->ceiling))
-		return (0);
-	else
+	if ((scene->no != NULL) 
+		&& (scene->so != NULL) 
+		&& (scene->ea != NULL) 
+		&& (scene->we != NULL) 
+		&& (scene->floor != NULL) 
+		&& (scene->ceiling != NULL))
 		return (1);
+	else
+		return (0);
 }
 
 void	print_scene_struct(t_scene *scene)
@@ -241,28 +253,26 @@ void	load_scene_details(int map_fd, t_scene **scene)
 	line = get_next_line(map_fd); // gnl() will return a line, ending with '\n'
 	while (line)
 	{
-		if (is_empty_line(line) == 1)
-		{
-			free(line);
-			line = get_next_line(map_fd);
-			//printf("found an empty line\n");
-			continue ;
-		}
-		
-		if (is_all_six_scene_details_present(*scene) == 0)
+		if (is_all_six_scene_details_present(*scene) == 1)
 		{
 			printf("found all six scene details!\n");		
 			return ; // because we have accepted ENOUGH scene details
 		}
-		
-		if (is_start_with_expected_identifier(line) == 0)
+
+		if (is_empty_line(line) == 1)
 		{
-			// free_members_and_scene(); // to do
-			ft_putstr_fd("cub3D: Cannot load scene details\n", 2);
-			exit(1);						
+			free(line);
+			line = get_next_line(map_fd);
+			printf("found an empty line\n");
+			continue ;
 		}
-		else
+		
+		if (is_start_with_expected_identifier(line) == 1)
+		{
 			printf("found one scene detail!\n"); // remove, for debugging only
+			assign_wall_texture_to_struct(line, scene);	
+		}
+		
 
 		
 		
@@ -306,6 +316,7 @@ void	load_scene_except_map(char *mapfile, t_scene *scene)
 		exit(1);
 	}
 	load_scene_details(map_fd, &scene);
+	print_scene_struct(scene);
 	
 	
 	// first map line, is line after texture line, that is not just newline
