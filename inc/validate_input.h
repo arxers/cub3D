@@ -4,9 +4,9 @@ typedef struct s_scene
 	char	*so;
 	char	*ea;
 	char	*we;
-	char	**floor;	// (char **)
-	char	**ceiling;	// (char **)
-	char	**map;		// (char **)
+	char	*floor;
+	char	*ceiling;
+	char	**map; // (char **)
 } t_scene;
 
 void	check_n_cmdline_args(int ac);
@@ -16,8 +16,12 @@ t_scene	*alloc_scene(void);
 void	load_scene_except_map(char *mapfile, t_scene *scene);
 void	load_scene_details(int map_fd, t_scene **scene);
 
+int		is_empty_line(char *s); // return 1, when arg is indeed an empty line
 int		is_start_with_expected_identifier(char *s);
-
+int		is_all_six_scene_details_present(t_scene *scene);
 
 int 	is_wall_texture(char *s);
 int		is_end_with_xpm(char *s);
+
+// for debugging only
+void	print_scene_struct(t_scene *scene);

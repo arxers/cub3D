@@ -61,9 +61,97 @@ t_scene	*alloc_scene(void)
 		return (tmp_ptr);
 }
 
+/*
+as long as line starts with any one of the six possible identifiers, return 1
+else return 0 (line does NOT start with an expected identifier)
+*/
+int	is_start_with_expected_identifier(char *s)
+{
+	if (!ft_strncmp(s, "NO ", 3) 
+		|| !ft_strncmp(s, "SO ", 3)
+		|| !ft_strncmp(s, "EA ", 3)
+		|| !ft_strncmp(s, "WE ", 3)
+		|| !ft_strncmp(s, "F ", 2)
+		|| !ft_strncmp(s, "C ", 2)
+		)
+		return (1);
+	else
+		return (0);
+}
+
 //# DONE above
 //##############################################################################
 //# pending below
+
+/*
+as long as there is a single char that is NOT "whitespace"
+	return 0 (line is NOT an empty line)
+else only when all chars are "whitespace"
+	then return 0 (success, line is indeed an empty line)
+*/
+int is_empty_line(char *s)
+{
+	int i;
+	
+	i = 0;
+	while(s[i])
+	{
+		if (s[i] != '\t' 
+			&& s[i] != '\n'
+			&& s[i] != '\v'
+			&& s[i] != '\f'
+			&& s[i] != '\r'
+			&& s[i] != ' ')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+/*
+if any of the six details is NULL, return 1 (error)
+else return 0 (success)
+*/
+int	is_all_six_scene_details_present(t_scene *scene)
+{
+	if ((scene->no) 
+		&& (scene->so) 
+		&& (scene->ea) 
+		&& (scene->we) 
+		&& (scene->floor) 
+		&& (scene->ceiling))
+		return (0);
+	else
+		return (1);
+}
+
+void	print_scene_struct(t_scene *scene)
+{
+	printf("\nCurrent state of t_scene struct:\n");
+	printf("NO texture: %s\n", scene->no);
+	printf("SO texture: %s\n", scene->so);
+	printf("EA texture: %s\n", scene->ea);
+	printf("WE texture: %s\n", scene->we);
+	printf("F color: %s\n", scene->floor);
+	printf("C color: %s\n", scene->ceiling);
+//	printf("map ptr: %p", scene->map);
+}
+
+/*
+ft_split() the line, with ' ' as delimiter
+check if ft_split() returns TWO valid (char *) arrays
+if arr[0]  == "NO ", and scene->no == NULL
+{
+	scene->no = ft_strtrim(arr[1], "\n"); // trim the trailing newline, and assign to member in scene struct
+}
+
+int	proc_scene_detail(char *s, t_scene *scene)
+{
+
+}
+*/
+
+// ft_strcmp(&(s1[len - 4]), ".xpm")
 
 int is_end_with_xpm(char *s)
 {
@@ -80,23 +168,7 @@ int is_end_with_xpm(char *s)
 		return (1);
 }
 
-/*
-as long as line starts with any one of the six possible identifiers, return 0
-else return 1 (error)
-*/
-int	is_start_with_expected_identifier(char *s)
-{
-	if (!ft_strncmp(s, "NO ", 3) 
-		|| !ft_strncmp(s, "SO ", 3)
-		|| !ft_strncmp(s, "EA ", 3)
-		|| !ft_strncmp(s, "WE ", 3)
-		|| !ft_strncmp(s, "F ", 2)
-		|| !ft_strncmp(s, "C ", 2)
-		)
-		return (0);
-	else
-		return (1);
-}
+
 
 /*
 if line does NOT end with 4 chars ".xpm", return 1 (error)
@@ -107,7 +179,7 @@ first 3 chars: "NO ", "SO ", "EA ", "WE "
 first 2 chars: "F ", "C "
 
 if reach here, then return 0 (success)
-*/
+
 int is_wall_texture(char *s)
 {
 	printf("is_wall_texture()\n");
@@ -116,7 +188,7 @@ int is_wall_texture(char *s)
 	else
 		return (0);
 }
-
+*/
 
 /*
 if any of the scene details (less map) is NULL, return 1 (ERROR!)
@@ -136,13 +208,22 @@ static int	is_scene_details_exceptmap_loaded(t_scene *scene)
 
 /*
 read .cub file, line by line, using get_next_line()
-check if current line begins with any of the 5 expected identifiers:
+
+if current line STARTS with any of the 6 expected identifiers:
 "NO "
 "SO "
 "EA "
 "WE "
 "F "
 "C "
+then process the line:
+
+ft_split() the line, with ' ' as delimiter
+check if ft_split() returns TWO valid (char *) arrays
+if arr[0]  == "NO ", and scene->no == NULL
+{
+	scene->no = ft_strtrim(arr[1], "\n"); // trim the trailing newline, and assign to member in scene struct
+}
 
 if something else, read, and free, ie. skip the map!
 
@@ -155,38 +236,34 @@ NOTE. line returned from GNL, contains a terminating '\n'
 void	load_scene_details(int map_fd, t_scene **scene)
 {
 	char 	*line;
-	int		n;
-	int		n_total_lines;
-	int		n_texture_lines;
 	(void)	scene;
 	
-	n = 0;
-	n_total_lines = 0;
-	n_texture_lines = 0;
-	line = get_next_line(map_fd);
+	line = get_next_line(map_fd); // gnl() will return a line, ending with '\n'
 	while (line)
 	{
-		n_total_lines++;
+		if (is_empty_line(line) == 1)
+		{
+			free(line);
+			line = get_next_line(map_fd);
+			//printf("found an empty line\n");
+			continue ;
+		}
+		
+		if (is_all_six_scene_details_present(*scene) == 0)
+		{
+			printf("found all six scene details!\n");		
+			return ; // because we have accepted ENOUGH scene details
+		}
+		
 		if (is_start_with_expected_identifier(line) == 0)
 		{
-			n_texture_lines += 1;
-			printf("%s", line);					
+			// free_members_and_scene(); // to do
+			ft_putstr_fd("cub3D: Cannot load scene details\n", 2);
+			exit(1);						
 		}
-		//printf("line contents: %s", line);
-		//is_wall_texture(line);
-		/* 
-		// if all scene details except map, are loaded, then stop loading
-		if (is_scene_details_except_map_loaded(*scene)) 
-			break ;
-		
-		if (is_wall_texture(line)) // update scene struct with ONE wall texture line
-		{
-			// error handling
-			// finish reading and then flush gnl buffer, free_members_and_scene(), exit(1)
-			
-		}
-		*/
-		
+		else
+			printf("found one scene detail!\n"); // remove, for debugging only
+
 		
 		
 		
@@ -205,9 +282,6 @@ void	load_scene_details(int map_fd, t_scene **scene)
 		free(line);
 		line = get_next_line(map_fd);
 	}
-	printf("\n");
-	printf("n_texture_lines: %d\n", n_texture_lines);	// expect 6 for map.cub
-	printf("n_total_lines: %d\n", n_total_lines);		// expect 29 for map.cub
 	// if all scene details except map, are NOT loaded, then free the scene members + scene, and exit
 /*
 	if (!is_scene_details_exceptmap_loaded(*scene))
@@ -232,6 +306,10 @@ void	load_scene_except_map(char *mapfile, t_scene *scene)
 		exit(1);
 	}
 	load_scene_details(map_fd, &scene);
+	
+	
+	// first map line, is line after texture line, that is not just newline
+	// last map line, is the line before the first newline
 
 /*
 	if(!is_scene_details_exceptmap_loaded(scene))
@@ -269,19 +347,9 @@ free(scene)
 exit(1)
 */
 
-/*
-void is_all_seven_scene_details_present(t_scene *scene)
-{
-	if (!(scene->no) || !(scene->so) || !(scene->ea) || !(scene->we) 
-		|| !(scene->floor) || !(scene->ceiling) || !(scene->map))
-	{
-		// free members in 'scene' struct
-		free(scene); // free the 'scene' struct's memory
-		ft_putstr_fd("cub3D: Missing some scene details\n", 2);
-		exit(1);	
-	}
-}
-*/
+
+
+
 // if all seven scene details are present,
 // ft_split the map in a single line, into a (char **), using '\n' as delimiter
 // free the (char *) singleline map

@@ -291,9 +291,11 @@ void	validate_input(int ac, char **av)
 	is_map_file_openable(av[1]);
 	
 	scene = alloc_scene(); // t_scene struct is now live, on the heap! 
-// restarted here, 09 Oct 2024	
 	
 	load_scene_except_map(av[1], scene); // includes checking if scene_details are valid
+	
+	print_scene_struct(scene);
+// restarted here, 09 Oct 2024	
 /*
 	load_map();
 		is_map_valid(); // if map invalid, free resources/clean up, and exit
