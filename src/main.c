@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/09 21:14:25 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/09 21:18:03 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1777,8 +1777,11 @@ void	render_pwl_overlay(t_game *game)
 		if (game->pwl.frame == T_PWL_ARM4)
 			enemy_hit_check(game);
 	}
-	put_img_scale_mid((t_point){0, 68}, &game->pwl.overlay_img,
-		&game->img[T_WIN], (t_fpoint){game->player.zoom, game->player.zoom});
+	if (game->player.zoom != 1)
+		return (put_img_scale_mid((t_point){0, 68}, &game->pwl.overlay_img,
+			&game->img[T_WIN],
+			(t_fpoint){game->player.zoom, game->player.zoom}));
+	put_img((t_point){0, 136}, &game->pwl.overlay_img, &game->img[T_WIN]);
 }
 
 void	render_pwl(t_game *game)
