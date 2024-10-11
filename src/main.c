@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/09 21:21:26 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/11 13:49:21 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,7 @@ int	init_img(void *mlx_ptr, t_img *img, int width, int height)
 	return (0);
 }
 
+// Sets a pixel in the img address to a specified color in hexadecimal format.
 void	set_pixel(t_img *img, int x, int y, unsigned int color)
 {
 	const int	step = (img->bits_per_pixel / 8);
@@ -104,6 +105,8 @@ void	set_pixel(t_img *img, int x, int y, unsigned int color)
 	*(unsigned int *)dst = color;
 }
 
+// Sets a pixel in the img address to a specified color in hexadecimal format.
+// Ignores transparent pixels, as well as MAGENTA (0xFF00FF).
 void	set_pixel_alpha(t_img *img, int x, int y, unsigned int color)
 {
 	const int	step = (img->bits_per_pixel / 8);
@@ -116,6 +119,7 @@ void	set_pixel_alpha(t_img *img, int x, int y, unsigned int color)
 	*(unsigned int *)dst = color;
 }
 
+// Returns a pixel's color in the img address.
 unsigned int	get_pixel(t_img *img, int x, int y)
 {
 	const int	step = (img->bits_per_pixel / 8);
@@ -153,6 +157,8 @@ void	put_img_scale_mid(t_point ofs, t_img *src, t_img *dst, t_fpoint scale)
 	}
 }
 
+// Darkens a color in hexadecimal format, by a specified factor. (1.0 to 0.0)
+// The closer the factor is to 0, the closer to black it becomes.
 unsigned int	darken(unsigned int color, float factor)
 {
 	unsigned int	r;
@@ -253,6 +259,7 @@ void	put_img_scale(t_point offset, t_img *src, t_img *dst, t_fpoint scale)
 	}
 }
 
+// Draw an img to another img by rewriting parts the src addr with dst addr.
 void	put_img(t_point offset, t_img *src, t_img *dst)
 {
 	t_point	src_pos;
@@ -276,6 +283,8 @@ void	put_img(t_point offset, t_img *src, t_img *dst)
 	}
 }
 
+// Attempts to load and store an xpm file.
+// Returns (0) upon success, and (0) upon failure.
 int	load_xpm(void *mlx, char *path, t_img *img)
 {
 	img->img = mlx_xpm_file_to_image(mlx, path, &img->size.x, &img->size.y);
@@ -555,6 +564,7 @@ void	update_map_tiles(t_game *game)
 	game->map.update = 0;
 }
 
+// Fill an img with a specified color in hexadecimal format.
 void	fill_img(t_img *img, unsigned int color)
 {
 	int	x;
@@ -667,6 +677,8 @@ int	out_of_bounds(t_fpoint map)
 	return (0);
 }
 
+// Determines the traversal direction,
+// by comparing the distance a ray has to traverse, during a dda cycle.
 void	set_dda_step_side(t_ray *r)
 {
 	if (r->side_dist.x < r->side_dist.y)
@@ -706,6 +718,10 @@ int	dda_interact(t_ray *r)
 	return (0);
 }
 
+// Sets a rays direction, based on the player direction vector.
+// camera_x determines the angle in which ray originates from.
+// < 0: left of center, 0: center, > 0: right of center
+// flag for zoom can be enabled to include the players zoom in the calculation.
 void	set_ray_direction(t_game *game, t_ray *r, float camera_x, int incl_zoom)
 {
 	float	zoom;
@@ -729,6 +745,8 @@ void	set_ray_direction(t_game *game, t_ray *r, float camera_x, int incl_zoom)
 		r->delta_dist.y = fabsf(1 / r->dir.y);
 }
 
+// Determine the ray's array traversal direction (up, down, left, or right),
+// and how far it should increment itself in the array.
 void	set_ray_step_direction(t_game *game, t_ray *r)
 {
 	if (r->dir.x < 0)
@@ -755,13 +773,8 @@ void	set_ray_step_direction(t_game *game, t_ray *r)
 	}
 }
 
-void	set_entity_pos(t_fpoint *pos, float x, float y)
-{
-	if (out_of_bounds((t_fpoint){x, y}))
-		return ;
-	*pos = (t_fpoint){x, y};
-}
-
+// Unstucks the player by pushing them,
+// if it's radius would be within a door after one closes.
 void	unstuck_player(t_game *game, t_ray r)
 {
 	t_point	pos;
@@ -769,19 +782,20 @@ void	unstuck_player(t_game *game, t_ray r)
 	pos.x = (int)game->player.pos.x - (int)r.map.x;
 	pos.y = (int)game->player.pos.y - (int)r.map.y;
 	if (pos.x == -1)
-		set_entity_pos(&game->player.pos,
-			game->player.pos.x - PLAYER_RADIUS, game->player.pos.y);
+		game->player.pos = (t_fpoint){game->player.pos.x - PLAYER_RADIUS,
+			game->player.pos.y};
 	if (pos.x == 1)
-		set_entity_pos(&game->player.pos,
-			game->player.pos.x + PLAYER_RADIUS, game->player.pos.y);
+		game->player.pos = (t_fpoint){game->player.pos.x + PLAYER_RADIUS,
+			game->player.pos.y};
 	if (pos.y == -1)
-		set_entity_pos(&game->player.pos,
-			game->player.pos.x, game->player.pos.y - PLAYER_RADIUS);
+		game->player.pos = (t_fpoint){game->player.pos.x,
+			game->player.pos.y - PLAYER_RADIUS};
 	if (pos.y == 1)
-		set_entity_pos(&game->player.pos,
-			game->player.pos.x, game->player.pos.y + PLAYER_RADIUS);
+		game->player.pos = (t_fpoint){game->player.pos.x,
+			game->player.pos.y + PLAYER_RADIUS};
 }
 
+// Displays a button prompt at the center of the screen.
 void	display_ui_msg(t_game *game, char *key, char *msg)
 {
 	int	msg_y;
@@ -1209,6 +1223,8 @@ void	assign_wall_textures(t_game *game, t_ray *r, t_texture_map *tex)
 	}
 }
 
+// Sets the img pointer in texture struct,
+// based on the value in the array that the ray has hit.
 void	assign_tile_textures(t_game *game, t_ray *r, t_texture_map *tex)
 {
 	tex->wall_tex = NULL;
@@ -1226,6 +1242,7 @@ void	assign_tile_textures(t_game *game, t_ray *r, t_texture_map *tex)
 	assign_wall_textures(game, r, tex);
 }
 
+// Shoots a ray until it has hit a value in the array larger than 0.
 int	dda(t_ray *r)
 {
 	while (1)
@@ -1239,6 +1256,7 @@ int	dda(t_ray *r)
 	}
 }
 
+// Draws vertical slices of the wall projections, from left to right.
 void	draw_wall_slices(t_game *game, t_ray *r, t_texture_map *tex)
 {
 	tex->wall_tex->intensity
@@ -1259,6 +1277,7 @@ void	draw_wall_slices(t_game *game, t_ray *r, t_texture_map *tex)
 	}
 }
 
+// Determine the height of a vertical slice, based on how far a ray traversed.
 void	calculate_wall_projection(t_game *game, t_ray *r, t_texture_map *tex)
 {
 	if (r->side == VERTICAL)
@@ -1293,7 +1312,7 @@ void	draw_bg(t_game *game)
 			/ (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
 }
 
-void	render_viewport(t_game *game)
+void	render_walls(t_game *game)
 {
 	t_texture_map	tex;
 	t_ray			r;
@@ -1463,6 +1482,8 @@ void	game_over(t_game *game)
 {
 	if (game->pwl.item.collected)
 		return ;
+	if (!game->state[S_CAUGHT])
+		write(1, "\a", 1);
 	game->state[S_MAP_DISABLE] = 1;
 	set_player_look_at(&game->player, game->enemy.pos);
 	if (game->player.zoom < 1.8)
@@ -1812,13 +1833,16 @@ void	display_msg(t_game *game)
 	}
 	if (game->state[S_MOUSE] == 0)
 		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
-			"MOUSE DISABLED, [CLICK ANYWHERE] TO ENABLE");
+			"MOUSE DISABLED, [CLICK ANYWHERE] to enable");
 	else
 		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
-			"MOUSE ENABLED, [P] TO DISABLE");
+			"MOUSE ENABLED, [P] to disable");
 	if (game->pwl.item.collected)
 		mlx_string_put(game->mlx, game->win, 4, 39, WHITE,
 			"[SPACE] or [CLICK] to punch");
+	else
+		mlx_string_put(game->mlx, game->win, 4, 39, WHITE,
+			"[WSAD] or [ARROW KEYS] to move, [SHIFT] to run");
 }
 
 int	display_pause_screen(t_game *game)
@@ -1840,7 +1864,7 @@ int	game_loop(t_game *game)
 			return (0);
 		update_enemy_pos(game);
 		handle_movement(game);
-		render_viewport(game);
+		render_walls(game);
 		render_enemy_sprite(game);
 		pickup_item(game);
 		render_item(game);
