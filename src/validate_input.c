@@ -57,45 +57,6 @@ int	is_map_file_openable(char *mapfile)
 	return (0);
 }
 
-t_scene	*alloc_scene(void)
-{
-	t_scene *tmp_ptr;
-	
-	tmp_ptr = ft_calloc(1, sizeof(t_scene));
-	if (!tmp_ptr)
-	{
-		ft_putstr_fd("cub3D: Cannot alloc memory for scene\n", 2);
-		exit(1);
-	}
-	else
-		return (tmp_ptr);
-}
-
-/*
-as long as there is a single char that is NOT "whitespace"
-	return 0 (line is NOT an empty line)
-else only when all chars are "whitespace"
-	then return 0 (success, line is indeed an empty line)
-*/
-int is_empty_line(char *s)
-{
-	int i;
-	
-	i = 0;
-	while(s[i])
-	{
-		if (//s[i] != '\t' 
-			s[i] != '\n')
-			//&& s[i] != '\v'
-			//&& s[i] != '\f'
-			//&& s[i] != '\r'
-			//&& s[i] != ' ')
-			return (0);
-		i++;
-	}
-	return (1);
-}
-
 /*
 as long as line starts with any one of the six possible identifiers, return 1
 else return 0 (line does NOT start with an expected identifier)
@@ -147,57 +108,55 @@ int	is_all_six_scene_details_present(t_scene *scene)
 		return (0);
 }
 
+
+// PAUSED 16 Oct 2024
 /*
+if reading the map.cub part-way, 
+need to finish reading the file / flush the gnl buffer
+close the file/file descriptor
+*/
+
+
+/*
+try to load 6 lines into t_scene struct
+will only return 0, when all 6 scene details are present in t_scene struct
+else return -1 (error)
+
+HOW?
 read .cub file, line by line, using get_next_line()
-
-if current line STARTS with any of the 6 expected identifiers:
-"NO "
-"SO "
-"EA "
-"WE "
-"F "
-"C "
-then process the line:
-
+skip past lines, containing just a single '\n' char
+once the 6 lines in the t_scene struct are populated, return 0
+ 
 NOTE. 
 line returned from GNL, contains "\n\0"
 final line returned by GNL, may contain "\n\0", or "\0"
 */
-void	load_scene_details(int map_fd, t_scene **scene)
+int	load_scene_details(int map_fd, t_scene **scene)
 {
 	char 	*line;
-	(void)	scene;
-	
+
 	line = get_next_line(map_fd);
 	while (line)
 	{
 		if (is_all_six_scene_details_present(*scene) == 1)	
-			return ;
-		/*
-		if (is_empty_line(line) == 1)
+			return (0);
+		else if (ft_strcmp(line, "\n") == 0)
 		{
 			free(line);
 			line = get_next_line(map_fd);
 			continue ;
 		}
-		*/
-		if (ft_strcmp(line, "\n") == 0)
-		{
-			free(line);
-			line = get_next_line(map_fd);
-			continue ;
-		}
-		if (is_start_with_expected_identifier(line) == 1)
+		else if (is_start_with_expected_identifier(line) == 1)
 			assign_detail_to_scene_struct(line, scene);
 		else
 		{
-			printf("error\n");
-			return ;		
+			ft_putstr_fd("cub3D: Invalid/missing line for scene details\n", 2);
+			break ;
 		}
 		free(line);
 		line = get_next_line(map_fd);
 	}
-	return ;
+	return (-1);
 }
 
 //# DONE above
@@ -307,37 +266,33 @@ static int	is_scene_details_exceptmap_loaded(t_scene *scene)
 }
 */
 
+/*
+handle 6 scene details, broken down into several steps
+if error at any step, return -1
+else return 0
 
+open the ".cub" file
+load scene details. 
 
-
-void	load_scene_except_map(char *mapfile, t_scene *scene)
+*/
+int	load_scene_except_map(char *mapfile, t_scene *scene)
 {
 	int map_fd;
 	
 	map_fd = open(mapfile, O_RDONLY);
 	if (map_fd == -1)
 	{
-		free(scene);
 		ft_putstr_fd("cub3D: Map cannot be opened\n", 2);
-		exit(1);
+		return (-1);
 	}
-	load_scene_details(map_fd, &scene);
-	print_scene_struct(scene); // for debugging
-	exit(0);
+	if (load_scene_details(map_fd, &scene) == -1)
+		return (-1);
+	
 	//is_scene_details_valid(scene);
-	
-	
+
 	// first map line, is line after texture line, that is not just newline
 	// last map line, is the line before the first newline
-
-/*
-	if(!is_scene_details_exceptmap_loaded(scene))
-	{
-		free_scene_and_its_members();
-		ft_putstr_fd("cub3D: Cannot load wall(s)/floor/ceiling\n", 2);
-		exit(1);	
-	}
-*/
+	return (0);
 }
 	
 
