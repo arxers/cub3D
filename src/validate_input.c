@@ -16,8 +16,12 @@ int check_n_cmdline_args(int ac)
 	return (0);
 }
 
-// check if map ends with ".cub"
-void	is_map_a_dot_cub_file(char *s)
+/* 
+check if map ends with ".cub"
+if <map file> ends in ".cub", return 0
+else return -1
+*/
+int	is_map_a_dot_cub_file(char *s)
 {
 	int	len;
 	
@@ -27,12 +31,12 @@ void	is_map_a_dot_cub_file(char *s)
 		(s[len - 3] == 'c') && \
 		(s[len - 4] == '.') \
 		)
-		return ;
+		return (0);
 	else
 	{
 		ft_putstr_fd("cub3D: Map does not end in .cub\n", 2);
 		ft_putstr_fd("cub3D: usage: cub3D [*.cub]\n", 2);
-		exit(1);
+		return (-1);
 	}
 }
 

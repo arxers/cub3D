@@ -10,7 +10,7 @@ typedef struct s_scene
 } t_scene;
 
 int		check_n_cmdline_args(int ac);
-void	is_map_a_dot_cub_file(char *s);
+int		is_map_a_dot_cub_file(char *s);
 void	is_map_file_openable(char *mapfile);
 t_scene	*alloc_scene(void);
 void	load_scene_except_map(char *mapfile, t_scene *scene);

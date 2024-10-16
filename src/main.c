@@ -287,8 +287,9 @@ int	validate_input(int ac, char **av, t_scene *scene)
 {	
 	if (check_n_cmdline_args(ac) == -1)
 		return (-1);
+	if (is_map_a_dot_cub_file(av[1]) == -1)
+		return (-1);
 		
-	is_map_a_dot_cub_file(av[1]);
 	is_map_file_openable(av[1]);
 	
 	scene = alloc_scene(); // t_scene struct is now live, on the heap! 
