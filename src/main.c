@@ -283,11 +283,11 @@ void	draw_map_player(t_img *img, t_player p, t_point origin)
 
 // jsu: continue working here
 // if error, return -1, else return 0
-int	validate_input(int ac, char **av)
-{
-	t_scene	*scene;
-	
-	check_n_cmdline_args(ac);
+int	validate_input(int ac, char **av, t_scene *scene)
+{	
+	if (check_n_cmdline_args(ac) == -1)
+		return (-1);
+		
 	is_map_a_dot_cub_file(av[1]);
 	is_map_file_openable(av[1]);
 	

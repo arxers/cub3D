@@ -1,17 +1,19 @@
 #include "../inc/cub3D.h"
 
-// when success, return 0
-// when failure return 1
-
-// check num of cmdline args
-void check_n_cmdline_args(int ac)
+/* 
+check num of cmdline args
+if argc != 2, return -1 (error)
+else return 0
+*/
+int check_n_cmdline_args(int ac)
 {
 	if (ac != 2)
 	{
 		ft_putstr_fd("cub3D: Invalid number of arguments\n", 2);
 		ft_putstr_fd("cub3D: usage: cub3D [*.cub]\n", 2);
-		exit(1);
+		return(-1);
 	}
+	return (0);
 }
 
 // check if map ends with ".cub"
