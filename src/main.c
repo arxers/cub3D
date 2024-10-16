@@ -291,9 +291,12 @@ int	validate_input(int ac, char **av, t_scene *scene)
 		return (-1);
 	if (is_map_file_openable(av[1]) == -1)
 		return (-1);
+	//scene = alloc_scene(); // t_scene struct is now live, on the heap! 
+	if (load_scene_except_map(av[1], scene) == -1)
+		return (-1); 
+		
+	//print_scene_struct(scene); // for debugging
 	
-	scene = alloc_scene(); // t_scene struct is now live, on the heap! 
-	load_scene_except_map(av[1], scene); // if line starts with expected identifiers, then assign to scene struct
 	//is_scene_struct_valid(scene);
 
 // restarted here, 09 Oct 2024
@@ -1048,8 +1051,12 @@ int	main(int ac, char **av)
 	t_game	game;
 	t_scene	scene;
 
+	ft_memset((void *)&scene, 0, sizeof(t_scene));
 	if (validate_input(ac, av, &scene) == -1) // use this wrapper, to call the entire suite of checks
 		return (1);
+	
+	print_scene_struct(&scene); // for debugging; if uncommented, will cause segfault!
+	
 	if (init_game(&game) == -1)
 		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
