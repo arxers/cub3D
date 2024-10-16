@@ -293,9 +293,14 @@ void	validate_input(int ac, char **av)
 	scene = alloc_scene(); // t_scene struct is now live, on the heap! 
 	
 	load_scene_except_map(av[1], scene); // includes checking if scene_details are valid
-	
+	/*
+	load_scene_details(), ft_strtrim() ?
+	because gnl returns a line that is terminated with \n\0
+	and eof can be terminated with \n\0, or \0
+	*/
 
-// restarted here, 09 Oct 2024	
+// restarted here, 09 Oct 2024
+// restarted here, 16 Oct 2024
 /*
 	load_map();
 		is_map_valid(); // if map invalid, free resources/clean up, and exit

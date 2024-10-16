@@ -104,21 +104,23 @@ int	is_start_with_expected_identifier(char *s)
 		return (0);
 }
 
+void	assign_wall_to_scene_struct(char *s, t_scene **scene)
+{
+	if (ft_strncmp(s, "NO ", 3) == 0 && (*scene)->no == NULL)
+		(*scene)->no = ft_strdup(ft_strtrim(s, "\n"));
+	else if (ft_strncmp(s, "SO ", 3) == 0 && (*scene)->so == NULL)
+		(*scene)->so = ft_strdup(ft_strtrim(s, "\n"));
+	else if (ft_strncmp(s, "EA ", 3) == 0 && (*scene)->ea == NULL)
+		(*scene)->ea = ft_strdup(ft_strtrim(s, "\n"));
+	else if (ft_strncmp(s, "WE ", 3) == 0 && (*scene)->we == NULL)
+		(*scene)->we = ft_strdup(ft_strtrim(s, "\n"));
+}
+
 //# DONE above
 //##############################################################################
 //# pending below
 
-void	assign_wall_texture_to_struct(char *s, t_scene **scene)
-{
-	if (ft_strcmp(s, "NO") == 0 && (*scene)->no == NULL)
-		(*scene)->no = s;
-	else if (ft_strcmp(s, "SO") == 0 && (*scene)->so == NULL)
-		(*scene)->no = s;
-	else if (ft_strcmp(s, "EA") == 0 && (*scene)->ea == NULL)
-		(*scene)->no = s;
-	else if (ft_strcmp(s, "WE") == 0 && (*scene)->we == NULL)
-		(*scene)->no = s;
-}
+
 
 /*
 only if ALL of the six details are present, then return 1
@@ -253,6 +255,8 @@ void	load_scene_details(int map_fd, t_scene **scene)
 	line = get_next_line(map_fd); // gnl() will return a line, ending with '\n'
 	while (line)
 	{
+		//printf("%s: %zu\n\n", line, ft_strlen(line));
+		//printf("%s: %zu\n\n", ft_strtrim(line, "\n"), ft_strlen(ft_strtrim(line, "\n")));
 		if (is_all_six_scene_details_present(*scene) == 1)
 		{
 			printf("found all six scene details!\n");		
@@ -270,7 +274,7 @@ void	load_scene_details(int map_fd, t_scene **scene)
 		if (is_start_with_expected_identifier(line) == 1)
 		{
 			printf("found one scene detail!\n"); // remove, for debugging only
-			assign_wall_texture_to_struct(line, scene);	
+			assign_wall_to_scene_struct(line, scene);	
 		}
 		
 
