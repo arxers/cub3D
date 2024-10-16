@@ -11,7 +11,7 @@ typedef struct s_scene
 
 int		check_n_cmdline_args(int ac);
 int		is_map_a_dot_cub_file(char *s);
-void	is_map_file_openable(char *mapfile);
+int		is_map_file_openable(char *mapfile);
 t_scene	*alloc_scene(void);
 void	load_scene_except_map(char *mapfile, t_scene *scene);
 void	load_scene_details(int map_fd, t_scene **scene);

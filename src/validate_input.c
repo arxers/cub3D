@@ -40,7 +40,11 @@ int	is_map_a_dot_cub_file(char *s)
 	}
 }
 
-void	is_map_file_openable(char *mapfile)
+/*
+if file can be opened, then return 0
+else return -1
+*/
+int	is_map_file_openable(char *mapfile)
 {
 	int map_fd;
 	
@@ -48,9 +52,9 @@ void	is_map_file_openable(char *mapfile)
 	if (map_fd == -1)
 	{
 		ft_putstr_fd("cub3D: Map cannot be opened\n", 2);
-		exit(1);
+		return (-1);
 	}
-	return ;
+	return (0);
 }
 
 t_scene	*alloc_scene(void)
