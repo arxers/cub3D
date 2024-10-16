@@ -74,12 +74,12 @@ int is_empty_line(char *s)
 	i = 0;
 	while(s[i])
 	{
-		if (s[i] != '\t' 
-			&& s[i] != '\n'
-			&& s[i] != '\v'
-			&& s[i] != '\f'
-			&& s[i] != '\r'
-			&& s[i] != ' ')
+		if (//s[i] != '\t' 
+			s[i] != '\n')
+			//&& s[i] != '\v'
+			//&& s[i] != '\f'
+			//&& s[i] != '\r'
+			//&& s[i] != ' ')
 			return (0);
 		i++;
 	}
@@ -120,12 +120,6 @@ void	assign_detail_to_scene_struct(char *s, t_scene **scene)
 		(*scene)->ceiling = ft_strdup(ft_strtrim(s, "\n"));
 }
 
-//# DONE above
-//##############################################################################
-//# pending below
-
-
-
 /*
 only if ALL of the six details are present, then return 1
 else return 0 (one or more of the details are missing)
@@ -143,6 +137,63 @@ int	is_all_six_scene_details_present(t_scene *scene)
 		return (0);
 }
 
+/*
+read .cub file, line by line, using get_next_line()
+
+if current line STARTS with any of the 6 expected identifiers:
+"NO "
+"SO "
+"EA "
+"WE "
+"F "
+"C "
+then process the line:
+
+NOTE. 
+line returned from GNL, contains "\n\0"
+final line returned by GNL, may contain "\n\0", or "\0"
+*/
+void	load_scene_details(int map_fd, t_scene **scene)
+{
+	char 	*line;
+	(void)	scene;
+	
+	line = get_next_line(map_fd);
+	while (line)
+	{
+		if (is_all_six_scene_details_present(*scene) == 1)	
+			return ;
+		/*
+		if (is_empty_line(line) == 1)
+		{
+			free(line);
+			line = get_next_line(map_fd);
+			continue ;
+		}
+		*/
+		if (ft_strcmp(line, "\n") == 0)
+		{
+			free(line);
+			line = get_next_line(map_fd);
+			continue ;
+		}
+		if (is_start_with_expected_identifier(line) == 1)
+			assign_detail_to_scene_struct(line, scene);
+		else
+		{
+			printf("error\n");
+			return ;		
+		}
+		free(line);
+		line = get_next_line(map_fd);
+	}
+	return ;
+}
+
+//# DONE above
+//##############################################################################
+//# pending below
+
 void	print_scene_struct(t_scene *scene)
 {
 	printf("\nCurrent state of t_scene struct:\n");
@@ -154,6 +205,28 @@ void	print_scene_struct(t_scene *scene)
 	printf("C color: %s\n", scene->ceiling);
 //	printf("map ptr: %p", scene->map);
 }
+
+/*
+if all 6 details are valid, return 1; else return 0
+
+REMB. 
+load_scene_details() already guarantees that the the details in scene struct
+already starts w/ an expected identifier, eg. "NO ", "SO ", ... "F ", "C " etc
+
+for wall texture, is_scene_details_valid():
+if "NO ", "SO "..., line in scene struct, ends with .xpm
+	then, arr = ft_split(scene->no) with ' '/space as delimiter
+	re-assign arr[1], ???.xpm to scene struct
+if "F ..."/"C ..." line in scene struct, ft_split
+
+
+int	is_scene_details_valid(t_scene *scene)
+{
+	
+ //pass
+
+}
+*/
 
 /*
 ft_split() the line, with ' ' as delimiter
@@ -224,94 +297,7 @@ static int	is_scene_details_exceptmap_loaded(t_scene *scene)
 }
 */
 
-/*
-read .cub file, line by line, using get_next_line()
 
-if current line STARTS with any of the 6 expected identifiers:
-"NO "
-"SO "
-"EA "
-"WE "
-"F "
-"C "
-then process the line:
-
-ft_split() the line, with ' ' as delimiter
-check if ft_split() returns TWO valid (char *) arrays
-if arr[0]  == "NO ", and scene->no == NULL
-{
-	scene->no = ft_strtrim(arr[1], "\n"); // trim the trailing newline, and assign to member in scene struct
-}
-
-if something else, read, and free, ie. skip the map!
-
-after reading,
-check if 6 lines are present in t_scene struct
-
-NOTE. line returned from GNL, contains a terminating '\n'
-
-*/
-void	load_scene_details(int map_fd, t_scene **scene)
-{
-	char 	*line;
-	(void)	scene;
-	
-	line = get_next_line(map_fd); // gnl() will return a line, ending with '\n'
-	while (line)
-	{
-		//printf("%s: %zu\n\n", line, ft_strlen(line));
-		//printf("%s: %zu\n\n", ft_strtrim(line, "\n"), ft_strlen(ft_strtrim(line, "\n")));
-		if (is_all_six_scene_details_present(*scene) == 1)
-		{
-			printf("found all six scene details!\n");		
-			return ; // because we have accepted ENOUGH scene details
-		}
-
-		if (is_empty_line(line) == 1)
-		{
-			free(line);
-			line = get_next_line(map_fd);
-			printf("found an empty line\n");
-			continue ;
-		}
-		
-		if (is_start_with_expected_identifier(line) == 1)
-		{
-			printf("found one scene detail!\n"); // remove, for debugging only
-			assign_detail_to_scene_struct(line, scene);
-		}
-		
-		// if is_scene_struct_valid()
-		
-
-		
-		
-		
-		
-		/*
-		else if (is_floor_or_ceiling(line)) // update floor/ceiling with ONE line of color values
-		{
-			// pending
-		}
-		else // neither wall nor floor/ceiling
-		{
-			free(line);
-			line = get_next_line(map_fd);
-		}
-		*/
-		free(line);
-		line = get_next_line(map_fd);
-	}
-	// if all scene details except map, are NOT loaded, then free the scene members + scene, and exit
-/*
-	if (!is_scene_details_exceptmap_loaded(*scene))
-	{
-		free_scene_and_its_members(scene);
-		ft_putstr_fd("cub3D: Cannot load wall(s)/floor/ceiling\n", 2);
-		exit(1);
-	}
-*/
-}
 
 
 void	load_scene_except_map(char *mapfile, t_scene *scene)
@@ -326,7 +312,9 @@ void	load_scene_except_map(char *mapfile, t_scene *scene)
 		exit(1);
 	}
 	load_scene_details(map_fd, &scene);
-	print_scene_struct(scene);
+	print_scene_struct(scene); // for debugging
+	exit(0);
+	//is_scene_details_valid(scene);
 	
 	
 	// first map line, is line after texture line, that is not just newline

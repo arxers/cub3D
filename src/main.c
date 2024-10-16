@@ -282,7 +282,8 @@ void	draw_map_player(t_img *img, t_player p, t_point origin)
 }
 
 // jsu: continue working here
-void	validate_input(int ac, char **av)
+// if error, return -1, else return 0
+int	validate_input(int ac, char **av)
 {
 	t_scene	*scene;
 	
@@ -291,13 +292,8 @@ void	validate_input(int ac, char **av)
 	is_map_file_openable(av[1]);
 	
 	scene = alloc_scene(); // t_scene struct is now live, on the heap! 
-	
-	load_scene_except_map(av[1], scene); // includes checking if scene_details are valid
-	/*
-	load_scene_details(), ft_strtrim() ?
-	because gnl returns a line that is terminated with \n\0
-	and eof can be terminated with \n\0, or \0
-	*/
+	load_scene_except_map(av[1], scene); // if line starts with expected identifiers, then assign to scene struct
+	//is_scene_struct_valid(scene);
 
 // restarted here, 09 Oct 2024
 // restarted here, 16 Oct 2024
@@ -310,6 +306,7 @@ void	validate_input(int ac, char **av)
 	put_scene_to_mlx();
 		// write function to free/clean up resources, that are no longer needed
 */
+	return (0);
 }
 
 void	ft_destroy_image(void *mlx_ptr, void **img)
@@ -1048,9 +1045,10 @@ int mwheel(unsigned int key, int x, int y, t_game *game)
 int	main(int ac, char **av)
 {
 	t_game	game;
-	//t_scene	scene;
+	t_scene	scene;
 
-	validate_input(ac, av); // use this wrapper to call suite of checks
+	if (validate_input(ac, av, &scene) == -1) // use this wrapper, to call the entire suite of checks
+		return (1);
 	if (init_game(&game) == -1)
 		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
 	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, &key_press, &game);
