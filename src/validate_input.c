@@ -104,7 +104,7 @@ int	is_start_with_expected_identifier(char *s)
 		return (0);
 }
 
-void	assign_wall_to_scene_struct(char *s, t_scene **scene)
+void	assign_detail_to_scene_struct(char *s, t_scene **scene)
 {
 	if (ft_strncmp(s, "NO ", 3) == 0 && (*scene)->no == NULL)
 		(*scene)->no = ft_strdup(ft_strtrim(s, "\n"));
@@ -114,6 +114,10 @@ void	assign_wall_to_scene_struct(char *s, t_scene **scene)
 		(*scene)->ea = ft_strdup(ft_strtrim(s, "\n"));
 	else if (ft_strncmp(s, "WE ", 3) == 0 && (*scene)->we == NULL)
 		(*scene)->we = ft_strdup(ft_strtrim(s, "\n"));
+	else if (ft_strncmp(s, "F ", 2) == 0 && (*scene)->floor == NULL)
+		(*scene)->floor = ft_strdup(ft_strtrim(s, "\n"));
+	else if (ft_strncmp(s, "C ", 2) == 0 && (*scene)->ceiling == NULL)
+		(*scene)->ceiling = ft_strdup(ft_strtrim(s, "\n"));
 }
 
 //# DONE above
@@ -274,8 +278,10 @@ void	load_scene_details(int map_fd, t_scene **scene)
 		if (is_start_with_expected_identifier(line) == 1)
 		{
 			printf("found one scene detail!\n"); // remove, for debugging only
-			assign_wall_to_scene_struct(line, scene);	
+			assign_detail_to_scene_struct(line, scene);
 		}
+		
+		// if is_scene_struct_valid()
 		
 
 		
