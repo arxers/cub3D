@@ -1,5 +1,32 @@
 #include "../inc/cub3D.h"
 
+void	print_scene_struct(t_scene *scene)
+{
+	printf("\nCurrent state of t_scene struct:\n");
+	printf("NO texture: %s\n", scene->no);
+	printf("SO texture: %s\n", scene->so);
+	printf("EA texture: %s\n", scene->ea);
+	printf("WE texture: %s\n", scene->we);
+	printf("%s\n", scene->floor);
+	printf("%s\n", scene->ceiling);
+	printf("map ptr: %p\n", scene->map);
+	printf("f_rgb: %p\n", scene->f_rgb);
+	printf("c_rgb: %p\n", scene->c_rgb);
+}
+
+void	print_arr(char **arr)
+{
+	int i;
+	
+	i = 0;
+	printf("print_arr() eg. result of ft_split()\n");
+	while (arr[i] != NULL)
+	{
+		printf("%d: %s\n", i, arr[i]);
+		i++;
+	}
+}
+
 void flush_gnl(char *line, int map_fd)
 {
 	while (line)
@@ -36,27 +63,15 @@ void free_scene_struct(t_scene *s)
 		free(s->we);
 	if (s->floor != NULL)
 		free(s->floor);
-	if (s->f_rgb != NULL)
-		free(f_rgb);
 	if (s->ceiling != NULL)
 		free(s->ceiling);
-	if (s->c_rgb != NULL)
-		free(c_rgb);
 	if (s->map != NULL)
 		free_char_map(s->map);
+	//free(s->f_rgb);
+	//free(s->c_rgb);
 }
 
-void	print_scene_struct(t_scene *scene)
-{
-	printf("\nCurrent state of t_scene struct:\n");
-	printf("NO texture: %s\n", scene->no);
-	printf("SO texture: %s\n", scene->so);
-	printf("EA texture: %s\n", scene->ea);
-	printf("WE texture: %s\n", scene->we);
-	printf("F color: %s\n", scene->floor);
-	printf("C color: %s\n", scene->ceiling);
-	printf("map ptr: %p\n", scene->map);
-}
+
 
 /* 
 check num of cmdline args
@@ -136,22 +151,16 @@ int	is_start_with_expected_identifier(char *s)
 void	assign_detail_to_scene_struct(char *s, t_scene **scene)
 {
 	if (ft_strncmp(s, "NO ", 3) == 0 && (*scene)->no == NULL)
-		//(*scene)->no = ft_strdup(ft_strtrim(s, "\n"));
 		(*scene)->no = ft_strdup(s);
 	else if (ft_strncmp(s, "SO ", 3) == 0 && (*scene)->so == NULL)
-		//(*scene)->so = ft_strdup(ft_strtrim(s, "\n"));
 		(*scene)->so = ft_strdup(s);
 	else if (ft_strncmp(s, "EA ", 3) == 0 && (*scene)->ea == NULL)
-		//(*scene)->ea = ft_strdup(ft_strtrim(s, "\n"));
 		(*scene)->ea = ft_strdup(s);
 	else if (ft_strncmp(s, "WE ", 3) == 0 && (*scene)->we == NULL)
-		//(*scene)->we = ft_strdup(ft_strtrim(s, "\n"));
 		(*scene)->we = ft_strdup(s);
 	else if (ft_strncmp(s, "F ", 2) == 0 && (*scene)->floor == NULL)
-		//(*scene)->floor = ft_strdup(ft_strtrim(s, "\n"));
 		(*scene)->floor = ft_strdup(s);
 	else if (ft_strncmp(s, "C ", 2) == 0 && (*scene)->ceiling == NULL)
-		//(*scene)->ceiling = ft_strdup(ft_strtrim(s, "\n"));
 		(*scene)->ceiling = ft_strdup(s);
 }
 
@@ -214,17 +223,79 @@ int	load_scene_details(int map_fd, t_scene **scene)
 //##############################################################################
 //# pending below
 
+
+
+
+/* 
+replace the original line:
+	NO no_texture.xpm\n
+with:
+	no_texture.xpm
+	
+credits to @filim, for helping me "over the hump"!
+*/
+char	*prepare_a_wall(char *s)
+{
+	char **arr;
+	char *tmp;
+	char *res;
+	
+	tmp = NULL;
+	arr = NULL;
+	res = NULL;
+	arr = ft_split(s, ' ');
+	if (!arr)
+		return (NULL);
+	free(s);
+	tmp = ft_strdup(arr[1]);
+	if (!tmp)
+		return (NULL);	
+	free_char_map(arr);
+	res = ft_strtrim(tmp, "\n");
+	if (!res)
+		return (NULL);
+	free(tmp);
+	return (res);
+}
+
+/* 
+wrapper + retval check for prepare_a_wall()
+*/
+int	prepare_walls(t_scene **scene)
+{
+	(*scene)->no = prepare_a_wall((*scene)->no);
+	(*scene)->so = prepare_a_wall((*scene)->so);
+	(*scene)->ea = prepare_a_wall((*scene)->ea);
+	(*scene)->we = prepare_a_wall((*scene)->we);	
+	if ((*scene)->no == NULL || \
+		(*scene)->so == NULL || \
+		(*scene)->ea == NULL || \
+		(*scene)->we == NULL)
+		return (-1);
+	return (0);
+}
+
+
+
 /*
 ft_split four wall texture lines, with space char as delimiter
+
+
 ft_split floor/ceiling lines, with comma as delimiter
 
 check if wall texture, that should already start with expected identifier, end with ".xpm"
-*/
+	
+
+check if 2nd array in ft_split result, for floor / ceiling contains
+	3 integers
+	each integer's value can only range from 0 to 255, inclusive
+
 int is_details_valid(t_scene *scene)
 {
 
 
 }
+*/
 
 
 /*
@@ -291,13 +362,12 @@ int	load_scene_except_map(char *mapfile, t_scene *scene) // TO DO: rename as loa
 		ft_putstr_fd("cub3D: Map cannot be opened\n", 2);
 		return (-1);
 	}
-	
-	
-	// load map
-	if (load_scene_details(map_fd, &scene) == -1)
-	{
+	if (load_scene_details(map_fd, &scene) == -1) // to do: load map()
 		return (-1);
-	}
+	if (prepare_walls(&scene) == -1)
+		return (-1);
+	
+	//prepare_floor_ceiling(scene);
 	//is_details_valid(scene);
 	//is_map_valid(scene>map);
 	

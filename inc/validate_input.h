@@ -5,10 +5,10 @@ typedef struct s_scene
 	char	*ea;
 	char	*we;
 	char	*floor;
-	int		f_rgb[3];
 	char	*ceiling;
-	int		c_rgb[3];
 	char	**map; // (char **)
+	int		f_rgb[3];
+	int		c_rgb[3];
 } t_scene;
 
 int		check_n_cmdline_args(int ac);
@@ -23,11 +23,14 @@ int		is_start_with_expected_identifier(char *s);
 void	free_char_map(char **arr);
 void	free_scene_struct(t_scene *s);
 void	assign_detail_to_scene_struct(char *s, t_scene **scene);
-
 int		is_all_six_scene_details_present(t_scene *scene);
+char	*prepare_a_wall(char *s);
+int		prepare_walls(t_scene **scene);
 
+// pending ?
 int 	is_wall_texture(char *s);
 int		is_end_with_xpm(char *s);
 
 // for debugging only
 void	print_scene_struct(t_scene *scene);
+void	print_arr(char **arr);
