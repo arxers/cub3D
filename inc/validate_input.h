@@ -7,8 +7,8 @@ typedef struct s_scene
 	char	*floor;
 	char	*ceiling;
 	char	**map; // (char **)
-	int		f_rgb[3];
-	int		c_rgb[3];
+	int		*f_rgb;
+	int		*c_rgb;
 } t_scene;
 
 int		check_n_cmdline_args(int ac);
