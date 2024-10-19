@@ -3,12 +3,12 @@
 void	print_scene_struct(t_scene *scene)
 {
 	printf("\nCurrent state of t_scene struct:\n");
-	printf("NO texture: %s\n", scene->no);
-	printf("SO texture: %s\n", scene->so);
-	printf("EA texture: %s\n", scene->ea);
-	printf("WE texture: %s\n", scene->we);
-	printf("%s\n", scene->floor);
-	printf("%s\n", scene->ceiling);
+	printf("NO:%s\n", scene->no);
+	printf("SO:%s\n", scene->so);
+	printf("EA:%s\n", scene->ea);
+	printf("WE:%s\n", scene->we);
+	printf("F:%s\n", scene->floor);
+	printf("C:%s\n", scene->ceiling);
 	printf("map ptr: %p\n", scene->map);
 	printf("f_rgb: %p\n", scene->f_rgb);
 	printf("c_rgb: %p\n", scene->c_rgb);
@@ -222,7 +222,7 @@ int	load_scene_details(int map_fd, t_scene **scene)
 }
 
 /* 
-ft_split, the passed in arg
+ft_split, the passed in arg // to discard identifiers at start of line
 ft_strdup, the second array from the ft_split result
 ft_strtrim, the ft_strdup result
 	
@@ -260,11 +260,16 @@ int	prepare_walls(t_scene **scene)
 	(*scene)->no = prepare_a_wall((*scene)->no);
 	(*scene)->so = prepare_a_wall((*scene)->so);
 	(*scene)->ea = prepare_a_wall((*scene)->ea);
-	(*scene)->we = prepare_a_wall((*scene)->we);	
+	(*scene)->we = prepare_a_wall((*scene)->we);
+	(*scene)->floor = prepare_a_wall((*scene)->floor);
+	(*scene)->ceiling = prepare_a_wall((*scene)->ceiling);
 	if ((*scene)->no == NULL || \
 		(*scene)->so == NULL || \
 		(*scene)->ea == NULL || \
-		(*scene)->we == NULL)
+		(*scene)->we == NULL || \
+		(*scene)->floor == NULL || \
+		(*scene)->ceiling == NULL
+		)
 		return (-1);
 	return (0);
 }
@@ -274,57 +279,6 @@ int	prepare_walls(t_scene **scene)
 //# pending below
 
 /*
-ft_split, the passed in arg, space as delimiter 		// F 0,42,255\n
-ft_strdup, the second array from the ft_split result	// 0,42,255\n
-ft_strtrim, the ft_strdup result						// 0,42,255
-
-NOTE. have to ft_split() a SECOND TIME!, 				
-ft_split, the ft_strtrim result, comma as delimiter
-
-*/
-int	*prepare_a_surface(char *s)
-{
-/*
-	char **arr;
-	char *tmp;
-	char *res;
-	
-	tmp = NULL;
-	arr = NULL;
-	res = NULL;
-*/	
-	printf("%s\n", prepare_a_wall(s));
-	
-	return (NULL);
-}
-
-
-
-int	prepare_floor_ceiling(t_scene **scene)
-{
-	(*scene)->f_rgb = prepare_a_surface((*scene)->floor);
-	(*scene)->c_rgb = prepare_a_surface((*scene)->ceiling);
-	if ((*scene)->f_rgb == NULL || (*scene)->c_rgb == NULL)
-		return (-1);
-	return (0);
-}
-
-
-
-
-
-/*
-ft_split four wall texture lines, with space char as delimiter
-
-
-ft_split floor/ceiling lines, with comma as delimiter
-
-check if wall texture, that should already start with expected identifier, end with ".xpm"
-	
-
-check if 2nd array in ft_split result, for floor / ceiling contains
-	3 integers
-	each integer's value can only range from 0 to 255, inclusive
 
 int is_details_valid(t_scene *scene)
 {
@@ -403,7 +357,7 @@ int	load_scene_except_map(char *mapfile, t_scene *scene) // TO DO: rename as loa
 	if (prepare_walls(&scene) == -1)
 		return (-1);
 	
-	prepare_floor_ceiling(scene);
+	//prepare_floor_ceiling(&scene);
 	//is_details_valid(scene);
 	//is_map_valid(scene>map);
 	
@@ -442,3 +396,37 @@ exit(1)
 // if all seven scene details are present,
 // ft_split the map in a single line, into a (char **), using '\n' as delimiter
 // free the (char *) singleline map
+
+/*
+ft_split, the passed in arg, space as delimiter 		// F 0,42,255\n
+ft_strdup, the second array from the ft_split result	// 0,42,255\n
+ft_strtrim, the ft_strdup result						// 0,42,255
+
+NOTE. have to ft_split() a SECOND TIME!, 				
+ft_split, the ft_strtrim result, comma as delimiter
+
+
+char	*prepare_a_surface(char *s)
+{
+	char 	*tmp;
+	int		*res;
+	
+	res = NULL;
+	tmp = prepare_a_wall(s);
+	if (!tmp)
+		return (NULL);
+	free(s);
+	return (tmp);
+}
+
+
+
+int	prepare_floor_ceiling(t_scene **scene)
+{
+	(*scene)->floor = prepare_a_surface((*scene)->floor);
+	(*scene)->ceiling = prepare_a_surface((*scene)->ceiling);
+	if ((*scene)->floor == NULL || (*scene)->ceiling == NULL)
+		return (-1);
+	return (0);
+}
+*/
