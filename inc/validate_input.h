@@ -17,8 +17,10 @@ int		load_scene_details(int map_fd, t_scene **scene);
 
 int		is_empty_line(char *s); // return 1, when arg is indeed an empty line
 int		is_start_with_expected_identifier(char *s);
-void	assign_detail_to_scene_struct(char *s, t_scene **scene);
 
+void	free_char_map(char **arr);
+void	free_scene_struct(t_scene *s);
+void	assign_detail_to_scene_struct(char *s, t_scene **scene);
 
 int		is_all_six_scene_details_present(t_scene *scene);
 

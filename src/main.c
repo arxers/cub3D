@@ -291,9 +291,11 @@ int	validate_input(int ac, char **av, t_scene *scene)
 		return (-1);
 	if (is_map_file_openable(av[1]) == -1)
 		return (-1);
-	//scene = alloc_scene(); // t_scene struct is now live, on the heap! 
 	if (load_scene_except_map(av[1], scene) == -1)
-		return (-1); 
+	{
+		//free_scene_struct(scene);	
+		return (-1); // need to free 'scene" struct, and its members
+	}
 		
 	//print_scene_struct(scene); // for debugging
 	
@@ -1053,9 +1055,14 @@ int	main(int ac, char **av)
 
 	ft_memset((void *)&scene, 0, sizeof(t_scene));
 	if (validate_input(ac, av, &scene) == -1) // use this wrapper, to call the entire suite of checks
+	{
+		print_scene_struct(&scene);
+		free_scene_struct(&scene);
 		return (1);
+	}
 	
-	print_scene_struct(&scene); // for debugging; if uncommented, will cause segfault!
+	print_scene_struct(&scene);
+	free_scene_struct(&scene);
 	
 	if (init_game(&game) == -1)
 		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
