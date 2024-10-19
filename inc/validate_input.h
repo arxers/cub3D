@@ -5,7 +5,9 @@ typedef struct s_scene
 	char	*ea;
 	char	*we;
 	char	*floor;
+	int		f_rgb[3];
 	char	*ceiling;
+	int		c_rgb[3];
 	char	**map; // (char **)
 } t_scene;
 

@@ -1,5 +1,63 @@
 #include "../inc/cub3D.h"
 
+void flush_gnl(char *line, int map_fd)
+{
+	while (line)
+	{
+		free(line);
+		line = get_next_line(map_fd);
+	}
+	close(map_fd);
+	line = NULL;
+}
+
+void free_char_map(char **arr)
+{
+	int i;
+	
+	i = 0;
+	while (arr[i] != NULL)
+	{
+		free(arr[i]);
+		i++;
+	}
+	free(arr);
+}
+
+void free_scene_struct(t_scene *s)
+{
+	if (s->no != NULL)
+		free(s->no);
+	if (s->so != NULL)
+		free(s->so);
+	if (s->ea != NULL)
+		free(s->ea);
+	if (s->we != NULL)
+		free(s->we);
+	if (s->floor != NULL)
+		free(s->floor);
+	if (s->f_rgb != NULL)
+		free(f_rgb);
+	if (s->ceiling != NULL)
+		free(s->ceiling);
+	if (s->c_rgb != NULL)
+		free(c_rgb);
+	if (s->map != NULL)
+		free_char_map(s->map);
+}
+
+void	print_scene_struct(t_scene *scene)
+{
+	printf("\nCurrent state of t_scene struct:\n");
+	printf("NO texture: %s\n", scene->no);
+	printf("SO texture: %s\n", scene->so);
+	printf("EA texture: %s\n", scene->ea);
+	printf("WE texture: %s\n", scene->we);
+	printf("F color: %s\n", scene->floor);
+	printf("C color: %s\n", scene->ceiling);
+	printf("map ptr: %p\n", scene->map);
+}
+
 /* 
 check num of cmdline args
 if argc != 2, return -1 (error)
@@ -114,18 +172,6 @@ int	is_all_six_scene_details_present(t_scene *scene)
 		return (-1);
 }
 
-
-void flush_gnl(char *line, int map_fd)
-{
-	while (line)
-	{
-		free(line);
-		line = get_next_line(map_fd);
-	}
-	close(map_fd);
-	line = NULL;
-}
-
 /*
 try to load 6 expected lines, into t_scene struct
 if invalid line:
@@ -168,48 +214,27 @@ int	load_scene_details(int map_fd, t_scene **scene)
 //##############################################################################
 //# pending below
 
-void free_char_map(char **arr)
+/*
+ft_split four wall texture lines, with space char as delimiter
+ft_split floor/ceiling lines, with comma as delimiter
+
+check if wall texture, that should already start with expected identifier, end with ".xpm"
+*/
+int is_details_valid(t_scene *scene)
 {
-	int i;
-	
-	i = 0;
-	while (arr[i] != NULL)
-	{
-		free(arr[i]);
-		i++;
-	}
-	free(arr);
+
+
 }
 
-void free_scene_struct(t_scene *s)
-{
-	if (s->no != NULL)
-		free(s->no);
-	if (s->so != NULL)
-		free(s->so);
-	if (s->ea != NULL)
-		free(s->ea);
-	if (s->we != NULL)
-		free(s->we);
-	if (s->floor != NULL)
-		free(s->floor);
-	if (s->ceiling != NULL)
-		free(s->ceiling);
-	if (s->map != NULL)
-		free_char_map(s->map);
-}
 
-void	print_scene_struct(t_scene *scene)
+/*
+int	load_map(char *line, int map_fd)
 {
-	printf("\nCurrent state of t_scene struct:\n");
-	printf("NO texture: %s\n", scene->no);
-	printf("SO texture: %s\n", scene->so);
-	printf("EA texture: %s\n", scene->ea);
-	printf("WE texture: %s\n", scene->we);
-	printf("F color: %s\n", scene->floor);
-	printf("C color: %s\n", scene->ceiling);
-	printf("map ptr: %p\n", scene->map);
+
+
 }
+*/
+
 
 /*
 ft_split() the line, with ' ' as delimiter
@@ -218,15 +243,9 @@ if arr[0]  == "NO ", and scene->no == NULL
 {
 	scene->no = ft_strtrim(arr[1], "\n"); // trim the trailing newline, and assign to member in scene struct
 }
-
-int	proc_scene_detail(char *s, t_scene *scene)
-{
-
-}
 */
 
 // ft_strcmp(&(s1[len - 4]), ".xpm")
-
 int is_end_with_xpm(char *s)
 {
 	int	len;
@@ -243,15 +262,26 @@ int is_end_with_xpm(char *s)
 }
 
 /*
-handle 6 scene details, broken down into several steps
-if error at any step, return -1
-else return 0
+TO BE RENAMED as load_scene()
+# overall:
+if invalid/missing/error, return -1; 
+	t_scene struct will be freed by caller
+	gnl buffer will be flushed, and then fd closed, by callee
+else return 0 (success)
 
-open the ".cub" file
-load scene details. 
+# steps:
+open file
+load scene details
+	is_all_six_details_present() // start with expected identifiers
+	load_map()
+	
+is_details_valid()
+is_map_valid()
 
+NOTE. if 
 */
-int	load_scene_except_map(char *mapfile, t_scene *scene)
+
+int	load_scene_except_map(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 {
 	int map_fd;
 	
@@ -262,19 +292,15 @@ int	load_scene_except_map(char *mapfile, t_scene *scene)
 		return (-1);
 	}
 	
+	
+	// load map
 	if (load_scene_details(map_fd, &scene) == -1)
 	{
-		//print_scene_struct(scene);
-		//free_scene_struct(scene);
-		//print_scene_struct(scene);
 		return (-1);
 	}
-	//if (is_all_six_scene_details_present(scene) == -1)
-	//	return (-1);
-	//is_scene_details_valid(scene);
-
-	// first map line, is line after texture line, that is not just newline
-	// last map line, is the line before the first newline
+	//is_details_valid(scene);
+	//is_map_valid(scene>map);
+	
 	return (0);
 }
 	
