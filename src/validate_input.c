@@ -67,8 +67,10 @@ void free_scene_struct(t_scene *s)
 		free(s->ceiling);
 	if (s->map != NULL)
 		free_char_map(s->map);
-	//free(s->f_rgb);
-	//free(s->c_rgb);
+	if (s->f_rgb != NULL)
+		free(s->f_rgb);
+	if (s->c_rgb != NULL)
+		free(s->c_rgb);
 }
 
 
@@ -170,7 +172,7 @@ else return -1 (error; one or more of the details are missing)
 */
 int	is_all_six_scene_details_present(t_scene *scene)
 {
-	if ((scene->no != NULL) 
+	if ((scene->no != NULL) 	
 		&& (scene->so != NULL) 
 		&& (scene->ea != NULL) 
 		&& (scene->we != NULL) 
@@ -219,18 +221,10 @@ int	load_scene_details(int map_fd, t_scene **scene)
 	return (0);
 }
 
-//# DONE above
-//##############################################################################
-//# pending below
-
-
-
-
 /* 
-replace the original line:
-	NO no_texture.xpm\n
-with:
-	no_texture.xpm
+ft_split, the passed in arg
+ft_strdup, the second array from the ft_split result
+ft_strtrim, the ft_strdup result
 	
 credits to @filim, for helping me "over the hump"!
 */
@@ -274,6 +268,48 @@ int	prepare_walls(t_scene **scene)
 		return (-1);
 	return (0);
 }
+
+//# DONE above
+//##############################################################################
+//# pending below
+
+/*
+ft_split, the passed in arg, space as delimiter 		// F 0,42,255\n
+ft_strdup, the second array from the ft_split result	// 0,42,255\n
+ft_strtrim, the ft_strdup result						// 0,42,255
+
+NOTE. have to ft_split() a SECOND TIME!, 				
+ft_split, the ft_strtrim result, comma as delimiter
+
+*/
+int	*prepare_a_surface(char *s)
+{
+/*
+	char **arr;
+	char *tmp;
+	char *res;
+	
+	tmp = NULL;
+	arr = NULL;
+	res = NULL;
+*/	
+	printf("%s\n", prepare_a_wall(s));
+	
+	return (NULL);
+}
+
+
+
+int	prepare_floor_ceiling(t_scene **scene)
+{
+	(*scene)->f_rgb = prepare_a_surface((*scene)->floor);
+	(*scene)->c_rgb = prepare_a_surface((*scene)->ceiling);
+	if ((*scene)->f_rgb == NULL || (*scene)->c_rgb == NULL)
+		return (-1);
+	return (0);
+}
+
+
 
 
 
@@ -367,7 +403,7 @@ int	load_scene_except_map(char *mapfile, t_scene *scene) // TO DO: rename as loa
 	if (prepare_walls(&scene) == -1)
 		return (-1);
 	
-	//prepare_floor_ceiling(scene);
+	prepare_floor_ceiling(scene);
 	//is_details_valid(scene);
 	//is_map_valid(scene>map);
 	
