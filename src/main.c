@@ -281,39 +281,7 @@ void	draw_map_player(t_img *img, t_player p, t_point origin)
 	draw_circle(img, pointer_pos, dir_radius, WHITE);
 }
 
-// jsu: continue working here
-// if error, return -1, else return 0
-int	validate_input(int ac, char **av, t_scene *scene)
-{	
-	if (check_n_cmdline_args(ac) == -1)
-		return (-1);
-	if (is_map_a_dot_cub_file(av[1]) == -1)
-		return (-1);
-	if (is_map_file_openable(av[1]) == -1)
-		return (-1);
-	if (load_scene_except_map(av[1], scene) == -1)
-	{
-		//free_scene_struct(scene);	
-		return (-1); // need to free 'scene" struct, and its members
-	}
-		
-	//print_scene_struct(scene); // for debugging
-	
-	//is_scene_struct_valid(scene);
 
-// restarted here, 09 Oct 2024
-// restarted here, 16 Oct 2024
-/*
-	load_map();
-		is_map_valid(); // if map invalid, free resources/clean up, and exit
-		// subsume is_map_valid(), in load_map()?
-
-	is_all_seven_scene_details_present();	
-	put_scene_to_mlx();
-		// write function to free/clean up resources, that are no longer needed
-*/
-	return (0);
-}
 
 void	ft_destroy_image(void *mlx_ptr, void **img)
 {
@@ -1048,6 +1016,32 @@ int mwheel(unsigned int key, int x, int y, t_game *game)
 	return (0);
 }
 
+// jsu: continue working here
+// if error, return -1, else return 0
+int	validate_input(int ac, char **av, t_scene *scene)
+{	
+	if (check_n_cmdline_args(ac) == -1)
+		return (-1);
+	if (is_map_a_dot_cub_file(av[1]) == -1)
+		return (-1);
+	if (is_map_file_openable(av[1]) == -1)
+		return (-1);
+	if (load_scene_except_map(av[1], scene) == -1)
+		return (-1);
+	
+
+
+// restarted here, 21 Oct 2024
+/*
+	load_map();
+	
+	is_scene_struct_valid(scene);
+		is_details_valid()
+		is_map_valid()
+*/
+	return (0); // success
+}
+
 int	main(int ac, char **av)
 {
 	t_game	game;
@@ -1056,13 +1050,15 @@ int	main(int ac, char **av)
 	ft_memset((void *)&scene, 0, sizeof(t_scene));
 	if (validate_input(ac, av, &scene) == -1) // use this wrapper, to call the entire suite of checks
 	{
-		print_scene_struct(&scene);
-		free_scene_struct(&scene);
+		print_scene_struct(&scene); // remove, in final; for debugging only
+		free_scene_struct(&scene); // keep in final
 		return (1);
 	}
-	
-	print_scene_struct(&scene);
-	free_scene_struct(&scene);
+	else // in final, remove this else block; for debugging only, 
+	{
+		print_scene_struct(&scene);
+		free_scene_struct(&scene);	
+	}
 	
 	if (init_game(&game) == -1)
 		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));
