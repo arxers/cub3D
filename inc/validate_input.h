@@ -22,7 +22,7 @@ int		is_start_with_expected_identifier(char *s);
 
 void	free_char_map(char **arr);
 void	free_scene_struct(t_scene *s);
-void	assign_detail_to_scene_struct(char *s, t_scene **scene);
+int		assign_detail_to_scene_struct(char *s, t_scene **scene);
 int		is_all_six_scene_details_present(t_scene *scene);
 char	*prepare_a_wall(char *s);
 int		prepare_walls(t_scene **scene);
