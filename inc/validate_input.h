@@ -22,6 +22,7 @@ int		is_start_with_expected_identifier(char *s);
 
 void	free_char_map(char **arr);
 void	free_scene_struct(t_scene *s);
+int		is_first_detail(char *s, t_scene *scene);
 //int		assign_detail_to_scene_struct(char *s, t_scene **scene);
 int		assign_f_or_c_to_scene_struct(char *s, t_scene **scene);
 int		assign_wall_to_scene_struct(char *s, t_scene **scene);

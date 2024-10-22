@@ -150,20 +150,52 @@ int	is_start_with_expected_identifier(char *s)
 		return (-1);
 }
 
-void	assign_detail_to_scene_struct(char *s, t_scene **scene)
+
+int	assign_f_or_c_to_scene_struct(char *s, t_scene **scene)
+{
+	if (ft_strncmp(s, "F ", 2) == 0 && (*scene)->floor == NULL)
+	{
+		(*scene)->floor = ft_strdup(s);
+		return (0);	
+	}
+	else if (ft_strncmp(s, "C ", 2) == 0 && (*scene)->ceiling == NULL)
+	{
+		(*scene)->ceiling = ft_strdup(s);
+		return (0);	
+	}
+	return (-1);
+}
+
+/*
+if line starts with expected identifier AND detail is still empty in struct
+then assign detail to 'scene' struct
+
+if line starts with expected identifier, BUT detail is already filled in struct
+then error out, return (-1)
+*/
+int	assign_wall_to_scene_struct(char *s, t_scene **scene)
 {
 	if (ft_strncmp(s, "NO ", 3) == 0 && (*scene)->no == NULL)
+	{
 		(*scene)->no = ft_strdup(s);
+		return (0);
+	}
 	else if (ft_strncmp(s, "SO ", 3) == 0 && (*scene)->so == NULL)
+	{
 		(*scene)->so = ft_strdup(s);
+		return (0);
+	}
 	else if (ft_strncmp(s, "EA ", 3) == 0 && (*scene)->ea == NULL)
+	{
 		(*scene)->ea = ft_strdup(s);
+		return (0);	
+	}
 	else if (ft_strncmp(s, "WE ", 3) == 0 && (*scene)->we == NULL)
+	{
 		(*scene)->we = ft_strdup(s);
-	else if (ft_strncmp(s, "F ", 2) == 0 && (*scene)->floor == NULL)
-		(*scene)->floor = ft_strdup(s);
-	else if (ft_strncmp(s, "C ", 2) == 0 && (*scene)->ceiling == NULL)
-		(*scene)->ceiling = ft_strdup(s);
+		return (0);	
+	}
+	return (-1);
 }
 
 /*
@@ -183,43 +215,7 @@ int	is_all_six_scene_details_present(t_scene *scene)
 		return (-1);
 }
 
-/*
-try to load 6 expected lines, into t_scene struct
-if invalid line:
-	print error msg to stderr
-	flush gnl buffer AND close fd
-*/
-int	load_scene_details(int map_fd, t_scene **scene)
-{
-	char 	*line;
-	
-	line = get_next_line(map_fd);
-	while (line)
-	{
-		if (is_all_six_scene_details_present(*scene) == 0)
-		{
-			flush_gnl(line, map_fd); // temporary! remove after implementing read_map()
-			return (0); // call read_map() here
-		}
-		if (ft_strcmp(line, "\n") == 0)
-		{
-			free(line);
-			line = get_next_line(map_fd);
-			continue ;
-		}
-		else if (is_start_with_expected_identifier(line) == 0)
-			assign_detail_to_scene_struct(line, scene);
-		else
-		{
-			ft_putstr_fd("cub3D: Invalid/missing line for scene details\n", 2);
-			flush_gnl(line, map_fd);
-			return (-1);
-		}		
-		free(line);
-		line = get_next_line(map_fd);
-	}
-	return (0);
-}
+
 
 /* 
 ft_split, the passed in arg // to discard identifiers at start of line
@@ -279,12 +275,77 @@ int	prepare_walls(t_scene **scene)
 //# pending below
 
 /*
+checks whether a specific scene detail (char *s), is the first to be loaded into
+the t_scene struct
 
-int is_details_valid(t_scene *scene)
+if yes, return (0), for success, 
+else return (-1) for failure
+*/
+int	is_first_detail(char *s, t_scene *scene)
 {
-
-
+	if ( (ft_strncmp(s, "NO ", 3) == 0 && scene->no == NULL) || \
+		(ft_strncmp(s, "SO ", 3) == 0 && scene->so == NULL) || \
+		(ft_strncmp(s, "EA ", 3) == 0 && scene->ea == NULL) || \
+		(ft_strncmp(s, "WE ", 3) == 0 && scene->we == NULL) || \
+		(ft_strncmp(s, "F ", 2) == 0 && scene->floor == NULL) || \
+		(ft_strncmp(s, "C ", 2) == 0 && scene->ceiling == NULL))
+		return (0);
+	return (-1);
 }
+
+
+/*
+checks if passed in string argument (char *)
+has ONLY three elements, AND
+each element is within the range of zero to 255, inclusive
+
+arr = ft_split(string arg), using comma, as delimiter char
+
+CHECK #1. 3 elements only
+
+is_valid_rgb_value(arr[0])
+is_valid_rgb_value(arr[1])
+is_valid_rgb_value(arr[2])
+
+CHECK #2
+
+return -1 (error)
+else return 0 (success)
+*/
+int is_valid_rgb_array(char *s)
+{
+	(void)s;
+	return (0);
+}
+
+/*
+checks if:
+FOUR wall textures, end in ".xpm"
+TWO colors, are 3 integers, ranging from 0 to 255 inclusive
+
+if any error, return (-1)
+else return (0), success
+*/
+int is_six_details_valid(t_scene *scene)
+{
+	if (is_end_with_xpm(scene->no) == -1 || \
+		is_end_with_xpm(scene->so) == -1 || \
+		is_end_with_xpm(scene->ea) == -1 || \
+		is_end_with_xpm(scene->we) == -1)
+		return (-1);
+
+/*
+	// manual assignment, for debugging only!
+	scene->f_rgb = {1, 2, 3};
+	scene->c_rgb = {4, 5, 6};
+*/
+	
+	if (is_valid_rgb_array(scene->floor) == -1 || \
+		is_valid_rgb_array(scene->ceiling) == -1)
+		return (-1);
+	return (0);
+}
+/*
 */
 
 
@@ -319,8 +380,58 @@ int is_end_with_xpm(char *s)
 		)
 		return (0);
 	else
-		return (1);
+		return (-1);
 }
+
+/*
+read map.cub line by line, with gnl()
+(if) 6 scene details are loaded
+	load remainder of map.cub file to temp buffer
+(if) current line is "empty"
+	move to next line
+(else if) current line, starts with expected id & is first (not a duplicate)
+	then assign detail to t_scene struct
+(else)
+	err msg, flush_gnl(), return (-1)
+
+*/
+int	load_scene_details(int map_fd, t_scene **scene)
+{
+	char 	*line;
+	
+	line = get_next_line(map_fd);
+	while (line)
+	{
+		if (is_all_six_scene_details_present(*scene) == 0)
+		{
+			//load_map_buffer();
+			flush_gnl(line, map_fd); // temporary! remove after implementing read_map()
+			return (0); // call read_map() here
+		}
+		if (ft_strcmp(line, "\n") == 0)
+		{
+			free(line);
+			line = get_next_line(map_fd);
+			continue ;
+		}
+		else if (is_start_with_expected_identifier(line) == 0 && \
+			is_first_detail(line, *scene) == 0)
+		{
+			assign_wall_to_scene_struct(line, scene);
+			assign_f_or_c_to_scene_struct(line, scene);
+		}
+		else
+		{
+			ft_putstr_fd("cub3D: Error in line for scene details\n", 2);
+			flush_gnl(line, map_fd);
+			return (-1);
+		}		
+		free(line);
+		line = get_next_line(map_fd);
+	}
+	return (0);
+}
+
 
 /*
 TO BE RENAMED as load_scene()
@@ -338,8 +449,6 @@ load scene details
 	
 is_details_valid()
 is_map_valid()
-
-NOTE. if 
 */
 
 int	load_scene_except_map(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
@@ -357,8 +466,8 @@ int	load_scene_except_map(char *mapfile, t_scene *scene) // TO DO: rename as loa
 	if (prepare_walls(&scene) == -1)
 		return (-1);
 	
-	//prepare_floor_ceiling(&scene);
-	//is_details_valid(scene);
+
+	//is_six_details_valid(scene);
 	//is_map_valid(scene>map);
 	
 	return (0);
@@ -383,50 +492,7 @@ set, char **map = NULL, in 'scene' struct
 void is_empty_line_in_singleline_map()
 */
 
-/*
-if any of the 7 scene details are NULL
-free(scene)
-
-exit(1)
-*/
-
-
-
-
 // if all seven scene details are present,
 // ft_split the map in a single line, into a (char **), using '\n' as delimiter
 // free the (char *) singleline map
 
-/*
-ft_split, the passed in arg, space as delimiter 		// F 0,42,255\n
-ft_strdup, the second array from the ft_split result	// 0,42,255\n
-ft_strtrim, the ft_strdup result						// 0,42,255
-
-NOTE. have to ft_split() a SECOND TIME!, 				
-ft_split, the ft_strtrim result, comma as delimiter
-
-
-char	*prepare_a_surface(char *s)
-{
-	char 	*tmp;
-	int		*res;
-	
-	res = NULL;
-	tmp = prepare_a_wall(s);
-	if (!tmp)
-		return (NULL);
-	free(s);
-	return (tmp);
-}
-
-
-
-int	prepare_floor_ceiling(t_scene **scene)
-{
-	(*scene)->floor = prepare_a_surface((*scene)->floor);
-	(*scene)->ceiling = prepare_a_surface((*scene)->ceiling);
-	if ((*scene)->floor == NULL || (*scene)->ceiling == NULL)
-		return (-1);
-	return (0);
-}
-*/
