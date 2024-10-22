@@ -150,6 +150,24 @@ int	is_start_with_expected_identifier(char *s)
 		return (-1);
 }
 
+/*
+checks whether a specific scene detail (char *s), is the first to be loaded into
+the t_scene struct
+
+if yes, return (0), for success, 
+else return (-1) for failure
+*/
+int	is_first_detail(char *s, t_scene *scene)
+{
+	if ( (ft_strncmp(s, "NO ", 3) == 0 && scene->no == NULL) || \
+		(ft_strncmp(s, "SO ", 3) == 0 && scene->so == NULL) || \
+		(ft_strncmp(s, "EA ", 3) == 0 && scene->ea == NULL) || \
+		(ft_strncmp(s, "WE ", 3) == 0 && scene->we == NULL) || \
+		(ft_strncmp(s, "F ", 2) == 0 && scene->floor == NULL) || \
+		(ft_strncmp(s, "C ", 2) == 0 && scene->ceiling == NULL))
+		return (0);
+	return (-1);
+}
 
 int	assign_f_or_c_to_scene_struct(char *s, t_scene **scene)
 {
@@ -274,47 +292,109 @@ int	prepare_walls(t_scene **scene)
 //##############################################################################
 //# pending below
 
-/*
-checks whether a specific scene detail (char *s), is the first to be loaded into
-the t_scene struct
 
-if yes, return (0), for success, 
-else return (-1) for failure
-*/
-int	is_first_detail(char *s, t_scene *scene)
+// ft_strcmp(&(s1[len - 4]), ".xpm")
+int is_end_with_xpm(char *s)
 {
-	if ( (ft_strncmp(s, "NO ", 3) == 0 && scene->no == NULL) || \
-		(ft_strncmp(s, "SO ", 3) == 0 && scene->so == NULL) || \
-		(ft_strncmp(s, "EA ", 3) == 0 && scene->ea == NULL) || \
-		(ft_strncmp(s, "WE ", 3) == 0 && scene->we == NULL) || \
-		(ft_strncmp(s, "F ", 2) == 0 && scene->floor == NULL) || \
-		(ft_strncmp(s, "C ", 2) == 0 && scene->ceiling == NULL))
+	int	len;
+	
+	len = ft_strlen(s);
+	if ((s[len - 1] == 'm') && \
+		(s[len - 2] == 'p') && \
+		(s[len - 3] == 'x') && \
+		(s[len - 4] == '.') \
+		)
+		return (0);
+	else
+		return (-1);
+}
+
+int	ft_arr_len(char **arr)
+{
+	int i;
+	
+	i = 0;
+	while (arr[i] != NULL)
+		i++;
+	return (i);
+}
+
+/*
+accepts a (char *) argument
+(char *) argument has to have minimum 1 char, or maximum 3 chars
+
+each char in char array, must be a digit!
+
+convert (char *) to integer
+if (i is >= 0 && i <= 255)
+	return 0 (success)
+else
+	return -1 (error)
+*/
+int	is_valid_rgb_value(char *s)
+{
+	int i;
+	int	len;
+	
+	len = ft_strlen(s);
+	if (len == 0 || len > 3)
+		return (-1);
+	i = 0;
+	while (i < len)
+	{
+		if (ft_isdigit(s[i]) == 0)
+			return (-1);
+		i++;
+	}
+	i = ft_atoi(s);
+	if (i >= 0 && i <= 255)
 		return (0);
 	return (-1);
 }
 
 
 /*
-checks if passed in string argument (char *)
+arr = ft_split(), passed in string argument (char *), comma as delimiter 
+
+check if arr:
 has ONLY three elements, AND
 each element is within the range of zero to 255, inclusive
 
-arr = ft_split(string arg), using comma, as delimiter char
+CHECK #1. ft_split() result, has 3 elements only
 
-CHECK #1. 3 elements only
-
-is_valid_rgb_value(arr[0])
-is_valid_rgb_value(arr[1])
-is_valid_rgb_value(arr[2])
-
-CHECK #2
+CHECK #2. 
+for each element in ft_split() result:
+convert char array("0" to "255") to int
+check if int is between 0 to 255 inclusive
 
 return -1 (error)
 else return 0 (success)
 */
 int is_valid_rgb_array(char *s)
 {
-	(void)s;
+	char 	**arr;
+	int		i;
+	
+	arr = ft_split(s, ',');
+	if (!arr)
+		return (-1);
+	i = ft_arr_len(arr);
+	if (i != 3)
+	{
+		free_char_map(arr);	
+		return (-1);
+	}
+	i = 0;
+	while (i < 3)
+	{
+		if ((is_valid_rgb_value(arr[i])) == -1)
+		{
+			free_char_map(arr);	
+			return (-1);
+		}
+		i++;
+	}
+	free_char_map(arr);
 	return (0);
 }
 
@@ -332,21 +412,18 @@ int is_six_details_valid(t_scene *scene)
 		is_end_with_xpm(scene->so) == -1 || \
 		is_end_with_xpm(scene->ea) == -1 || \
 		is_end_with_xpm(scene->we) == -1)
+	{
+		ft_putstr_fd("cub3D: Not .xpm extension\n", 2);
 		return (-1);
-
-/*
-	// manual assignment, for debugging only!
-	scene->f_rgb = {1, 2, 3};
-	scene->c_rgb = {4, 5, 6};
-*/
-	
+	}	
 	if (is_valid_rgb_array(scene->floor) == -1 || \
 		is_valid_rgb_array(scene->ceiling) == -1)
+	{
+		ft_putstr_fd("cub3D: Problematic RGB array value(s)\n", 2);	
 		return (-1);
+	}	
 	return (0);
 }
-/*
-*/
 
 
 /*
@@ -367,21 +444,7 @@ if arr[0]  == "NO ", and scene->no == NULL
 }
 */
 
-// ft_strcmp(&(s1[len - 4]), ".xpm")
-int is_end_with_xpm(char *s)
-{
-	int	len;
-	
-	len = ft_strlen(s);
-	if ((s[len - 1] == 'm') && \
-		(s[len - 2] == 'p') && \
-		(s[len - 3] == 'x') && \
-		(s[len - 4] == '.') \
-		)
-		return (0);
-	else
-		return (-1);
-}
+
 
 /*
 read map.cub line by line, with gnl()
@@ -465,9 +528,9 @@ int	load_scene_except_map(char *mapfile, t_scene *scene) // TO DO: rename as loa
 		return (-1);
 	if (prepare_walls(&scene) == -1)
 		return (-1);
+	if (is_six_details_valid(scene) == -1)
+		return (-1);
 	
-
-	//is_six_details_valid(scene);
 	//is_map_valid(scene>map);
 	
 	return (0);

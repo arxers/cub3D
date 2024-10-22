@@ -1054,11 +1054,11 @@ int	main(int ac, char **av)
 		free_scene_struct(&scene); // keep in final
 		return (1);
 	}
-	else // in final, remove this else block; for debugging only, 
-	{
-		print_scene_struct(&scene);
-		free_scene_struct(&scene);	
-	}
+	
+	print_scene_struct(&scene);
+	free_scene_struct(&scene);	
+	printf("in main()\n");
+	
 	
 	if (init_game(&game) == -1)
 		return (cleanup(&game, 1, "cub3D: Error initializing game\n"));

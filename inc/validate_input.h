@@ -30,9 +30,15 @@ int		is_all_six_scene_details_present(t_scene *scene);
 char	*prepare_a_wall(char *s);
 int		prepare_walls(t_scene **scene);
 
+int		is_end_with_xpm(char *s);
+int		ft_arr_len(char **arr);
+int		is_valid_rgb_value(char *s);
+int		is_valid_rgb_array(char *s);
+int		is_six_details_valid(t_scene *scene);
+
+
 // pending ?
 int 	is_wall_texture(char *s);
-int		is_end_with_xpm(char *s);
 
 // for debugging only
 void	print_scene_struct(t_scene *scene);
