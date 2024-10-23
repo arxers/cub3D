@@ -10,6 +10,7 @@ void	print_scene_struct(t_scene *scene)
 	printf("F:%s\n", scene->floor);
 	printf("C:%s\n", scene->ceiling);
 	printf("map ptr: %p\n", scene->map);
+	printf("map, as arr of char arrays: %p\n", scene->map);
 	printf("f_rgb: %p\n", scene->f_rgb);
 	printf("c_rgb: %p\n", scene->c_rgb);
 }
@@ -129,6 +130,7 @@ int	is_map_file_openable(char *mapfile)
 		ft_putstr_fd("cub3D: Map cannot be opened\n", 2);
 		return (-1);
 	}
+	close(map_fd);
 	return (0);
 }
 
@@ -288,11 +290,6 @@ int	prepare_walls(t_scene **scene)
 	return (0);
 }
 
-//# DONE above
-//##############################################################################
-//# pending below
-
-
 // ft_strcmp(&(s1[len - 4]), ".xpm")
 int is_end_with_xpm(char *s)
 {
@@ -425,25 +422,81 @@ int is_six_details_valid(t_scene *scene)
 	return (0);
 }
 
+//# DONE above
+//##############################################################################
+//# pending below
 
 /*
-int	load_map(char *line, int map_fd)
-{
 
+# load_map()
+continue reading remainder of map.cub file (via map_fd), via gnl(), line by line
 
-}
+join line, by line, into a single long (char *), use ft_strjoin()
+
+check if (char *) contains any invalid chars
+
+valid chars: 
+' ', space 
+'\n', newline
+'1', one
+'0', zero
+'N', north
+'S', south
+'E', east
+'W', west
+
+# is_map_valid()
+CHECK #1.
+if ft_strchr() returns NULL, means some char, not in valid chars, was found in buffer
+
+CHECK #2.
+if "\n\n" means empty line found in map, return -1 (error)
+
+# prepare_map() // convert map from (char *) to (char **)
+ft_split(char * line), using '\n' as delimiter char
+
+CHECK #3.
+min num of rows == 3
+min num of cols == 3
+else return -1 (error)
+
+COUNT:
+max_width, num of cols
+max_length, num of rows
+to alloc space on heap, for final valid map
+
+replace ' '/spaces in (char **) map with ? char?
+
+flood fill from player position
+if leak, then return -1 (error)
+
+thanks to @jolai for spotting the error
+get_next_line(map_fd); // logic error, not assigning return value !?
+line = get_next_line(map_fd); // solution... LOL
 */
-
-
-/*
-ft_split() the line, with ' ' as delimiter
-check if ft_split() returns TWO valid (char *) arrays
-if arr[0]  == "NO ", and scene->no == NULL
+char	*load_map_buffer(char *line, int map_fd, t_scene **scene)
 {
-	scene->no = ft_strtrim(arr[1], "\n"); // trim the trailing newline, and assign to member in scene struct
-}
-*/
+	(void)scene;
+	char	*buf;
 
+	buf = NULL;
+	while (line)
+	{
+		buf = safe_strjoin(buf, line);
+		if (!buf)
+		{
+			ft_putstr_fd("cub3D: Cannot load map section)\n", 2);
+			flush_gnl(line, map_fd);
+			buf = NULL;
+			return (NULL);
+		}
+		free(line);
+		line = get_next_line(map_fd);
+	}
+	//printf("exited while loop\n");
+	//printf("buf:%s\n", buf);
+	return (buf);
+}
 
 
 /*
@@ -461,15 +514,27 @@ read map.cub line by line, with gnl()
 int	load_scene_details(int map_fd, t_scene **scene)
 {
 	char 	*line;
+	char	*map_buf;
 	
+	map_buf = NULL;
 	line = get_next_line(map_fd);
 	while (line)
 	{
 		if (is_all_six_scene_details_present(*scene) == 0)
 		{
-			//load_map_buffer();
-			flush_gnl(line, map_fd); // temporary! remove after implementing read_map()
-			return (0); // call read_map() here
+			map_buf = load_map_buffer(line, map_fd, scene);
+			if (map_buf == NULL)
+			{
+				free(map_buf);
+				ft_putstr_fd("cub3D: Cannot load map\n", 2);
+				return (-1);			
+			}
+			free(map_buf); // pass map_buf (char *) to prepare_map()
+			close(map_fd); 
+			map_buf = NULL;
+			return (0);
+			//close(map_fd);
+			//printf("load_map_buffer() ret 0\n");
 		}
 		if (ft_strcmp(line, "\n") == 0)
 		{
@@ -531,7 +596,8 @@ int	load_scene_except_map(char *mapfile, t_scene *scene) // TO DO: rename as loa
 	if (is_six_details_valid(scene) == -1)
 		return (-1);
 	
-	//is_map_valid(scene>map);
+	// prepare_map()
+	// is_map_valid(scene>map);
 	
 	return (0);
 }
