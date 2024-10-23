@@ -1031,15 +1031,11 @@ int	validate_input(int ac, char **av, t_scene *scene)
 	
 
 
-// restarted here, 23 Oct 2024
 /*
-	load_map();
-	
-	is_scene_struct_valid(scene);
-		is_details_valid()
-		is_map_valid()
+last updated 23 Oct 2024
+restart at load_scene() in validate_input.c
 */
-	return (0); // success
+	return (0); // successfully validated input file, map.cub
 }
 
 int	main(int ac, char **av)
@@ -1057,7 +1053,7 @@ int	main(int ac, char **av)
 	
 	print_scene_struct(&scene);
 	free_scene_struct(&scene);	
-	printf("in main()\n");
+	printf("returned to main()\n");
 	
 	
 	if (init_game(&game) == -1)

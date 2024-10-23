@@ -9,8 +9,8 @@ void	print_scene_struct(t_scene *scene)
 	printf("WE:%s\n", scene->we);
 	printf("F:%s\n", scene->floor);
 	printf("C:%s\n", scene->ceiling);
-	printf("tmp_map_buf (char *):%s\n", scene->tmp_map_buf);
-	printf("map ptr (char **): %p\n", scene->map);
+	printf("tmp_map_buf (char *) will begin on next line:\n%s\n", scene->tmp_map_buf);
+	printf("map ptr (char **) NOTE. should have empty/newline above: %p\n", scene->map);
 	//printf("f_rgb: %p\n", scene->f_rgb);
 	//printf("c_rgb: %p\n", scene->c_rgb);
 }
@@ -426,57 +426,18 @@ int is_six_details_valid(t_scene *scene)
 	return (0);
 }
 
-//# DONE above
-//##############################################################################
-//# pending below
-
 /*
+only reach here when prev six details are preliminarily loaded to 'scene' struct
 
-# load_map()
-continue reading remainder of map.cub file (via map_fd), via gnl(), line by line
-
-join line, by line, into a single long (char *), use ft_strjoin()
-
-check if (char *) contains any invalid chars
-
-valid chars: 
-' ', space 
-'\n', newline
-'1', one
-'0', zero
-'N', north
-'S', south
-'E', east
-'W', west
-
-# is_map_valid()
-CHECK #1.
-if ft_strchr() returns NULL, means some char, not in valid chars, was found in buffer
-
-CHECK #2.
-if "\n\n" means empty line found in map, return -1 (error)
-
-# prepare_map() // convert map from (char *) to (char **)
-ft_split(char * line), using '\n' as delimiter char
-
-CHECK #3.
-min num of rows == 3
-min num of cols == 3
-else return -1 (error)
-
-COUNT:
-max_width, num of cols
-max_length, num of rows
-to alloc space on heap, for final valid map
-
-replace ' '/spaces in (char **) map with ? char?
-
-flood fill from player position
-if leak, then return -1 (error)
-
-thanks to @jolai for spotting the error
-get_next_line(map_fd); // logic error, not assigning return value !?
-line = get_next_line(map_fd); // solution... LOL
+continue to read line by line, with gnl()
+NOTE. used safe_strjoin(), instead of ft_strjoin() to sidestep unfreed s1 param
+if cannot safe_strjoin() fails:
+	print errmsg to stderr
+	flush gnl buffer, and close fd
+	return -1 (error)
+else
+	close fd
+	return 0 (success)
 */
 int	load_map_buffer(char *line, int map_fd, t_scene **scene)
 {
@@ -500,7 +461,7 @@ int	load_map_buffer(char *line, int map_fd, t_scene **scene)
 /*
 read map.cub line by line, with gnl()
 (if) 6 scene details are loaded
-	load remainder of map.cub file to temp buffer
+	load remainder of map.cub file to a (char *)tmp_map_buf, in 'scene' struct
 (if) current line is "empty"
 	move to next line
 (else if) current line, starts with expected id & is first (not a duplicate)
@@ -549,9 +510,14 @@ int	load_scene_details(int map_fd, t_scene **scene)
 	return (0);
 }
 
+//# DONE above
+//##############################################################################
+//# pending below
+
+
+
 
 /*
-TO BE RENAMED as load_scene()
 # overall:
 if invalid/missing/error, return -1; 
 	t_scene struct will be freed by caller
@@ -562,10 +528,17 @@ else return 0 (success)
 open file
 load scene details
 	is_all_six_details_present() // start with expected identifiers
-	load_map()
+	load_map_buffer() // currently, called in load_scene_details()
+
+	!!! RESTART HERE, last updated 23 Oct 2024 !!!
 	
-is_details_valid()
-is_map_valid()
+	prepare_map() 
+		check if map only contains valid chars
+		check if map contains emptyline ("\n\n")
+		ft_split(char *tmp_map_buf), using \n as delimiter
+		assign (char **) result of ft_split() to t_scene struct
+		is_map_valid() // check pdf etc...
+		milestone, done? OMG!
 */
 
 int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
@@ -592,9 +565,59 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 }
 	
 
+/*
+MISC NOTES...
+
+
+# load_map()
+continue reading remainder of map.cub file (via map_fd), via gnl(), line by line
+
+join line, by line, into a single long (char *), use ft_strjoin()
+
+check if (char *) contains any invalid chars
+
+valid chars: 
+' ', space 
+'\n', newline
+'1', one
+'0', zero
+'N', north
+'S', south
+'E', east
+'W', west
+
+# is_map_valid()
+CHECK #1.
+if ft_strchr() returns NULL, means some char, not in valid chars, was found in buffer
+
+CHECK #2.
+if "\n\n" means empty line found in map, return -1 (error)
+
+# prepare_map() // convert map from (char *) to (char **)
+ft_split(char * line), using '\n' as delimiter char
+
+CHECK #3.
+min num of rows == 3
+min num of cols == 3
+else return -1 (error)
+
+COUNT:
+max_width, num of cols
+max_length, num of rows
+to alloc space on heap, for final valid map
+
+replace ' '/spaces in (char **) map with ? char?
+
+flood fill from player position
+if leak, then return -1 (error)
+
+thanks to @jolai for spotting the error
+get_next_line(map_fd); // logic error, not assigning return value !?
+line = get_next_line(map_fd); // solution... LOL
+*/
 
 /*
-void load_map()
+int is_map_valid(char **map)
 {
 	// check if is_wall_texture() / is_floor_or_ceiling() / neither, and iterate past these lines
 	// read map line by line, until EOF
