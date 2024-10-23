@@ -9,10 +9,10 @@ void	print_scene_struct(t_scene *scene)
 	printf("WE:%s\n", scene->we);
 	printf("F:%s\n", scene->floor);
 	printf("C:%s\n", scene->ceiling);
-	printf("map ptr: %p\n", scene->map);
-	printf("map, as arr of char arrays: %p\n", scene->map);
-	printf("f_rgb: %p\n", scene->f_rgb);
-	printf("c_rgb: %p\n", scene->c_rgb);
+	printf("tmp_map_buf (char *):%s\n", scene->tmp_map_buf);
+	printf("map ptr (char **): %p\n", scene->map);
+	//printf("f_rgb: %p\n", scene->f_rgb);
+	//printf("c_rgb: %p\n", scene->c_rgb);
 }
 
 void	print_arr(char **arr)
@@ -66,12 +66,16 @@ void free_scene_struct(t_scene *s)
 		free(s->floor);
 	if (s->ceiling != NULL)
 		free(s->ceiling);
+	if (s->tmp_map_buf != NULL)
+		free(s->tmp_map_buf);
 	if (s->map != NULL)
 		free_char_map(s->map);
+	/*
 	if (s->f_rgb != NULL)
 		free(s->f_rgb);
 	if (s->c_rgb != NULL)
 		free(s->c_rgb);
+	*/
 }
 
 
@@ -474,28 +478,21 @@ thanks to @jolai for spotting the error
 get_next_line(map_fd); // logic error, not assigning return value !?
 line = get_next_line(map_fd); // solution... LOL
 */
-char	*load_map_buffer(char *line, int map_fd, t_scene **scene)
+int	load_map_buffer(char *line, int map_fd, t_scene **scene)
 {
-	(void)scene;
-	char	*buf;
-
-	buf = NULL;
 	while (line)
 	{
-		buf = safe_strjoin(buf, line);
-		if (!buf)
+		(*scene)->tmp_map_buf = safe_strjoin((*scene)->tmp_map_buf, line);
+		if ((*scene)->tmp_map_buf == NULL)
 		{
 			ft_putstr_fd("cub3D: Cannot load map section)\n", 2);
 			flush_gnl(line, map_fd);
-			buf = NULL;
-			return (NULL);
+			return (-1);
 		}
 		free(line);
 		line = get_next_line(map_fd);
 	}
-	//printf("exited while loop\n");
-	//printf("buf:%s\n", buf);
-	return (buf);
+	return (0);
 }
 
 
@@ -514,27 +511,19 @@ read map.cub line by line, with gnl()
 int	load_scene_details(int map_fd, t_scene **scene)
 {
 	char 	*line;
-	char	*map_buf;
-	
-	map_buf = NULL;
+
 	line = get_next_line(map_fd);
 	while (line)
 	{
 		if (is_all_six_scene_details_present(*scene) == 0)
 		{
-			map_buf = load_map_buffer(line, map_fd, scene);
-			if (map_buf == NULL)
+			if (load_map_buffer(line, map_fd, scene) == -1)
 			{
-				free(map_buf);
 				ft_putstr_fd("cub3D: Cannot load map\n", 2);
 				return (-1);			
 			}
-			free(map_buf); // pass map_buf (char *) to prepare_map()
-			close(map_fd); 
-			map_buf = NULL;
-			return (0);
 			//close(map_fd);
-			//printf("load_map_buffer() ret 0\n");
+			return (0);
 		}
 		if (ft_strcmp(line, "\n") == 0)
 		{

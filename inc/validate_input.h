@@ -8,8 +8,8 @@ typedef struct s_scene
 	char	*ceiling;
 	char	*tmp_map_buf;
 	char	**map; // (char **)
-	int		*f_rgb;
-	int		*c_rgb;
+	//int		*f_rgb;
+	//int		*c_rgb;
 } t_scene;
 
 int		check_n_cmdline_args(int ac);
