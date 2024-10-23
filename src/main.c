@@ -1026,12 +1026,12 @@ int	validate_input(int ac, char **av, t_scene *scene)
 		return (-1);
 	if (is_map_file_openable(av[1]) == -1)
 		return (-1);
-	if (load_scene_except_map(av[1], scene) == -1)
+	if (load_scene(av[1], scene) == -1)
 		return (-1);
 	
 
 
-// restarted here, 21 Oct 2024
+// restarted here, 23 Oct 2024
 /*
 	load_map();
 	

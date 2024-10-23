@@ -491,7 +491,8 @@ int	load_map_buffer(char *line, int map_fd, t_scene **scene)
 		}
 		free(line);
 		line = get_next_line(map_fd);
-	}
+	}	
+	close(map_fd);
 	return (0);
 }
 
@@ -522,7 +523,6 @@ int	load_scene_details(int map_fd, t_scene **scene)
 				ft_putstr_fd("cub3D: Cannot load map\n", 2);
 				return (-1);			
 			}
-			//close(map_fd);
 			return (0);
 		}
 		if (ft_strcmp(line, "\n") == 0)
@@ -587,7 +587,7 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 	
 	// prepare_map()
 	// is_map_valid(scene>map);
-	close(map_fd);
+	//close(map_fd);
 	return (0);
 }
 	
