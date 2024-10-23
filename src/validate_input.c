@@ -568,7 +568,7 @@ is_details_valid()
 is_map_valid()
 */
 
-int	load_scene_except_map(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
+int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 {
 	int map_fd;
 	
@@ -587,7 +587,7 @@ int	load_scene_except_map(char *mapfile, t_scene *scene) // TO DO: rename as loa
 	
 	// prepare_map()
 	// is_map_valid(scene>map);
-	
+	close(map_fd);
 	return (0);
 }
 	
