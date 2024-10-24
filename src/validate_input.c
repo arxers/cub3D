@@ -514,7 +514,26 @@ int	load_scene_details(int map_fd, t_scene **scene)
 //##############################################################################
 //# pending below
 
+/*
 
+*/
+int	is_map_char_valid(char *s)
+{
+	int 	i;
+	char	ref[] = " \n10NSEW";
+	
+	i = 0;
+	while (s[i] != '\0')
+	{
+		if (ft_strchr(ref, s[i]) == NULL)
+		{
+			ft_putstr_fd("cub3D: Invalid map char\n", 2);		
+			return (-1);
+		}
+		i++;	
+	}
+	return (0);
+}
 
 
 /*
@@ -560,6 +579,8 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 	
 	// prepare_map()
 	// is_map_valid(scene>map);
+	if (is_map_char_valid(scene->tmp_map_buf) == -1)
+		return (-1);
 	//close(map_fd);
 	return (0);
 }
