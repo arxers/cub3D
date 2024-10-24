@@ -515,7 +515,34 @@ int	load_scene_details(int map_fd, t_scene **scene)
 //# pending below
 
 /*
+trim away:
+leading AND trailing \n in tmp_map_buf
+re-assign to scene->tmp_map_buf
+*/
+int	trim_tmp_map_buf(t_scene **scene)
+{
+	char	*tmp;
+	char	*res;
+	
+	tmp = (*scene)->tmp_map_buf;
+	res = ft_strtrim(tmp, "\n");
+	if (!res)
+	{
+		ft_putstr_fd("cub3D: Problem while preparing map\n", 2);	
+		return (-1);
+	}
+	(*scene)->tmp_map_buf = res;
+	free(tmp);
+	return (0);
+}
 
+/*
+checks tmp_map_buf in scene struct, char by char
+if ft_strchr() returns NULL, means it is an invalid char,
+	ie. a char NOT found in (char *)ref literal
+	then return -1 (error)
+else
+	return 0 (success)
 */
 int	is_map_char_valid(char *s)
 {
@@ -534,6 +561,31 @@ int	is_map_char_valid(char *s)
 	}
 	return (0);
 }
+
+/*
+AFTER passing is_map_char_valid()
+
+tmp_map_buf may contain:
+	empty_lines before start of map
+	empty lines in between map lines ie. \n\n
+	empty lines after end of map
+
+to do:
+trim leading newlines, before start of map
+trim trailing newlines, after end of map
+re-assign trimmed tmp_map_buf to scene->tmp_map_buf 
+ft_strtrim() ?
+
+
+check if there are empty lines in between, map lines
+use ft_strnstr() to see if "little" is found in "big"
+where big is tmp_map_buf
+where little is "\n\n", 
+
+ft_split(tmp_map_buf), using \n as delimiter char
+assign result of ft_split() to scene->map // (char **)
+*/
+
 
 
 /*
@@ -577,10 +629,11 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 	if (is_six_details_valid(scene) == -1)
 		return (-1);
 	
-	// prepare_map()
-	// is_map_valid(scene>map);
 	if (is_map_char_valid(scene->tmp_map_buf) == -1)
 		return (-1);
+	if (trim_tmp_map_buf(&scene) == -1)
+		return (-1);
+	// is_map_valid(scene>map);
 	//close(map_fd);
 	return (0);
 }
