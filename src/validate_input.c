@@ -511,17 +511,28 @@ int	load_scene_details(int map_fd, t_scene **scene)
 }
 
 /*
+NOTE. There are TWO versions of this function:
+valid map chars
+" \n10NSEW" (mandatory)
+" \n10NSEWCDPX" (bonus)
+
 checks tmp_map_buf in scene struct, char by char
 if ft_strchr() returns NULL, means it is an invalid char,
 	ie. a char NOT found in (char *)ref literal
 	then return -1 (error)
 else
 	return 0 (success)
+	
+BONUS add 4 chars:
+C: Collectible
+D: Door
+P: Powerloader
+X: Xeno
 */
-int	is_map_char_valid(char *s)
+int	is_map_char_valid_bonus(char *s)
 {
 	int 	i;
-	char	ref[] = " \n10NSEW";
+	char	ref[] = " \n10NSEWCDPX";
 	
 	i = 0;
 	while (s[i] != '\0')
@@ -580,12 +591,22 @@ int	is_tmp_map_buf_split_by_empty_line(char *s)
 //##############################################################################
 //# pending below
 
-
-
-
-
-
-
+/*
+accepts a str (tmp_map_buf)
+replaces space char, with 1 char, using ft_memset()
+*/
+void	replace_space_with_wall(char *s)
+{
+	int		i;
+	
+	i = 0;
+	while (s[i] != '\0')
+	{
+		if (s[i] == ' ')
+			ft_memset((void *)&(s[i]), '1', sizeof(char));
+		i++;
+	}
+}
 
 /*
 AFTER passing is_map_char_valid()
@@ -654,15 +675,16 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 	if (is_six_details_valid(scene) == -1)
 		return (-1);
 	
-	if (is_map_char_valid(scene->tmp_map_buf) == -1)
+	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
 		return (-1);
 	if (trim_tmp_map_buf(&scene) == -1)
 		return (-1);
-	// replace space char with 1, in tmp_map_buf
-	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1) // can pass, but
+	replace_space_with_wall(scene->tmp_map_buf);
+	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1) // can pass, but ?
 		return (-1);
 		
 	// is_map_valid(scene>map);
+	// for bonus NSEW one each, one P one X only
 	//close(map_fd);
 	return (0);
 }
