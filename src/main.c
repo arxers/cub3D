@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/25 17:30:52 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/25 17:33:58 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -487,46 +487,57 @@ void	draw_map_player(t_img *img, t_player p)
 	draw_circle(img, pointer_pos, dir_radius, WHITE);
 }
 
-void	validate_input(int ac, char **av)
-{
-	if (ac != 2)
-	{
-		ft_putstr_fd("cub3D: Invalid number of arguments\n", 2);
-		ft_putstr_fd("cub3D: usage: cub3D [*.cub]\n", 2);
-		exit(1);
-	}
-	// if (open(av[1]) == -1) //check if able to open
-	// 	;remove (void)av when this check is done
-	(void)av;
+int	validate_input(int ac, char **av, t_scene *scene)
+{	
+	if (check_n_cmdline_args(ac) == -1)
+		return (-1);
+	if (is_map_a_dot_cub_file(av[1]) == -1)
+		return (-1);
+	if (is_map_file_openable(av[1]) == -1)
+		return (-1);
+	if (load_scene(av[1], scene) == -1)
+		return (-1);
+	
+
+
+/*
+last updated 24 Oct 2024
+restart at trim_tmp_map_buf() in validate_input.c
+
+next task: check for empty line(s) in between map lines, in tmp_map_buf
+with ft_strnstr
+
+*/
+	return (0); // successfully validated input file, map.cub
 }
 
-void	ft_destroy_image(void *mlx_ptr, void **img)
-{
-	if (mlx_ptr && img && *img)
-		mlx_destroy_image(mlx_ptr, *img);
-	*img = NULL;
-}
+// void	ft_destroy_image(void *mlx_ptr, void **img)
+// {
+// 	if (mlx_ptr && img && *img)
+// 		mlx_destroy_image(mlx_ptr, *img);
+// 	*img = NULL;
+// }
 
-int	cleanup(t_game *game, unsigned char status, char *msg)
-{
-	ft_destroy_image(game->mlx_ptr, &game->img.misc[0].img);
-	ft_destroy_image(game->mlx_ptr, &game->img.win.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.map.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.map_mask.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.map_bg.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.ceiling.img);
-	ft_destroy_image(game->mlx_ptr, &game->img.floor.img);
-	if (game->win_ptr)
-		mlx_destroy_window(game->mlx_ptr, game->win_ptr);
-	game->win_ptr = NULL;
-	if (game->mlx_ptr)
-		mlx_destroy_display(game->mlx_ptr);
-	ft_free_void(&game->mlx_ptr);
-	ft_free(&game->frame.fps_str);
-	if (msg)
-		ft_putstr_fd(msg, 2);
-	exit(status);
-}
+// int	cleanup(t_game *game, unsigned char status, char *msg)
+// {
+// 	ft_destroy_image(game->mlx_ptr, &game->img.misc[0].img);
+// 	ft_destroy_image(game->mlx_ptr, &game->img.win.img);
+// 	ft_destroy_image(game->mlx_ptr, &game->img.map.img);
+// 	ft_destroy_image(game->mlx_ptr, &game->img.map_mask.img);
+// 	ft_destroy_image(game->mlx_ptr, &game->img.map_bg.img);
+// 	ft_destroy_image(game->mlx_ptr, &game->img.ceiling.img);
+// 	ft_destroy_image(game->mlx_ptr, &game->img.floor.img);
+// 	if (game->win_ptr)
+// 		mlx_destroy_window(game->mlx_ptr, game->win_ptr);
+// 	game->win_ptr = NULL;
+// 	if (game->mlx_ptr)
+// 		mlx_destroy_display(game->mlx_ptr);
+// 	ft_free_void(&game->mlx_ptr);
+// 	ft_free(&game->frame.fps_str);
+// 	if (msg)
+// 		ft_putstr_fd(msg, 2);
+// 	exit(status);
+// }
 
 t_point	center(t_point origin, t_point size)
 {
