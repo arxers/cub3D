@@ -8,7 +8,7 @@ LIBFT_FLAGS = -Llibft -lft
 MLXDIR = mlx
 MLX_URL = https://github.com/42Paris/minilibx-linux
 MLX = $(MLXDIR)/libmlx.a
-MLX_FLAGS = -I$(MLXDIR) -L$(MLXDIR) -lXext -lX11
+MLX_FLAGS = -L$(MLXDIR) -lXext -lX11
 LIBRARY = $(LIBFT) $(MLX)
 LIBRARY_FLAGS = $(LIBFT_FLAGS) $(MLX_FLAGS) -lm
 

@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/11 13:49:21 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/22 18:16:39 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -2089,7 +2089,7 @@ int	main(int ac, char **av)
 	mlx_hook(game.win, KeyPress, KeyPressMask, &key_press, &game);
 	mlx_hook(game.win, KeyRelease, KeyReleaseMask, &key_release, &game);
 	mlx_hook(game.win, ButtonPress, ButtonPressMask, &mouse_event, &game);
-	mlx_hook(game.win, DestroyNotify, StructureNotifyMask, &exit_game, &game);
+	mlx_hook(game.win, DestroyNotify, DestroyAll, &exit_game, &game);
 	mlx_loop_hook(game.mlx, &game_loop, &game);
 	mlx_loop(game.mlx);
 	return (0);
