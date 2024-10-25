@@ -43,6 +43,13 @@ int		trim_tmp_map_buf(t_scene **scene);
 void	replace_space_with_wall(char *s);
 int		is_tmp_map_buf_split_by_empty_line(char *s);
 
+int		is_toprow_all_walls(char **s);
+int		is_botrow_all_walls(char **s);
+int		is_lcol_all_walls(char **s);
+int		is_rcol_all_walls(char **s);
+int		is_map_surrounded_by_walls(char **s);
+
+
 
 // pending ?
 int 	is_wall_texture(char *s);

@@ -570,6 +570,27 @@ int	trim_tmp_map_buf(t_scene **scene)
 }
 
 /*
+accepts a str (tmp_map_buf)
+replaces space char, with 1 char, using ft_memset()
+
+NOW, even when there is/are space char(s) in between map lines,
+they will show up as 1/wall, 
+so the next check, is_tmp_map_buf_split_by_empty_line(), will work
+*/
+void	replace_space_with_wall(char *s)
+{
+	int		i;
+	
+	i = 0;
+	while (s[i] != '\0')
+	{
+		if (s[i] == ' ')
+			ft_memset((void *)&(s[i]), '1', sizeof(char));
+		i++;
+	}
+}
+
+/*
 checks if 'big', trimmed tmp_map_buf (char *s), contains 'little ("\n\n")
 if ft_strnstr returns non-NULL, means 'little' is found in 'big'
 then return -1 (error)
@@ -592,20 +613,106 @@ int	is_tmp_map_buf_split_by_empty_line(char *s)
 //# pending below
 
 /*
-accepts a str (tmp_map_buf)
-replaces space char, with 1 char, using ft_memset()
+iterate thru chars in top (zeroth) row,
+if any of them are NOT '1', return -1 (error)
 */
-void	replace_space_with_wall(char *s)
+int is_toprow_all_walls(char **s)
 {
-	int		i;
+	int i;
 	
 	i = 0;
-	while (s[i] != '\0')
+	while(s[0][i] != '\0')
 	{
-		if (s[i] == ' ')
-			ft_memset((void *)&(s[i]), '1', sizeof(char));
+		if (s[0][i] != '1')
+			return (-1);
 		i++;
 	}
+	return (0);
+}
+
+/*
+iterate thru chars in bottom row, ie. the row before the last/final NULL ptr
+if any of them are NOT '1', return -1 (error)
+*/
+int	is_botrow_all_walls(char **s)
+{
+	int	i;
+	int	j;
+	
+	i = 0;
+	while (s[i + 1] != NULL)
+		i++;
+	j = 0;
+	while (s[i][j] != '\0')
+	{
+		if (s[i][j] != '1')
+			return (-1);
+		j++;
+	}
+	return (0);
+}
+
+/* 
+checks if left col of rectangular map, consists of only wall chars
+if any of them are NOT '1', return -1 (error)
+*/
+int is_lcol_all_walls(char **s)
+{
+	int	i;
+	
+	i = 0;
+	while(s[i] != NULL)
+	{
+		if(s[i][0] != '1')
+			return (-1);
+		i++;
+	}
+	return (0);
+}
+
+/* 
+checks if char, before the \0 char, consists of only wall chars
+if any of them are NOT '1', return -1 (error)
+
+NOTE. does not guarantee/ensure map is rectangular!
+*/
+int is_rcol_all_walls(char **s)
+{
+	int i;
+	int	j;
+	
+	i = 0;
+	while (s[i] != NULL)
+	{
+		j = 0;
+		while (s[i][j + 1] != '\0')
+			j++;
+		if (s[i][j] != '1')
+			return (-1);
+		i++;
+	}
+	return (0);
+}
+
+/*
+check if all 4 sides of rectangular map, consists of only wall chars
+
+check top row
+check bot row
+check lcol
+check rcol
+*/
+int	is_map_surrounded_by_walls(char **s)
+{
+	if ((is_toprow_all_walls(s) == -1) || \
+		(is_botrow_all_walls(s) == -1) || \
+		(is_lcol_all_walls(s) == -1) || \
+		(is_rcol_all_walls(s) == -1 ))
+	{
+		ft_putstr_fd("cub3D: Map is NOT surrounded by walls\n", 2);
+		return (-1);
+	}
+	return (0);
 }
 
 /*
@@ -674,17 +781,19 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 		return (-1);
 	if (is_six_details_valid(scene) == -1)
 		return (-1);
-	
 	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
 		return (-1);
 	if (trim_tmp_map_buf(&scene) == -1)
 		return (-1);
 	replace_space_with_wall(scene->tmp_map_buf);
-	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1) // can pass, but ?
+	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
+		return (-1);
+	scene->map = ft_split(scene->tmp_map_buf, '\n');	
+	if (is_map_surrounded_by_walls(scene->map) == -1)
 		return (-1);
 		
+	// is map minimum 3 by 3 
 	// is_map_valid(scene>map);
-	// for bonus NSEW one each, one P one X only
 	//close(map_fd);
 	return (0);
 }
