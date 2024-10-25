@@ -1032,8 +1032,12 @@ int	validate_input(int ac, char **av, t_scene *scene)
 
 
 /*
-last updated 23 Oct 2024
-restart at load_scene() in validate_input.c
+last updated 24 Oct 2024
+restart at trim_tmp_map_buf() in validate_input.c
+
+next task: check for empty line(s) in between map lines, in tmp_map_buf
+with ft_strnstr
+
 */
 	return (0); // successfully validated input file, map.cub
 }

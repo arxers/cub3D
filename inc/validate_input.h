@@ -39,6 +39,7 @@ int		is_six_details_valid(t_scene *scene);
 
 int		is_map_char_valid(char *s);
 int		trim_tmp_map_buf(t_scene **scene);
+int		is_tmp_map_buf_split_by_empty_line(char *s);
 
 
 // pending ?

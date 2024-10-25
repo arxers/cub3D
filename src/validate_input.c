@@ -510,32 +510,6 @@ int	load_scene_details(int map_fd, t_scene **scene)
 	return (0);
 }
 
-//# DONE above
-//##############################################################################
-//# pending below
-
-/*
-trim away:
-leading AND trailing \n in tmp_map_buf
-re-assign to scene->tmp_map_buf
-*/
-int	trim_tmp_map_buf(t_scene **scene)
-{
-	char	*tmp;
-	char	*res;
-	
-	tmp = (*scene)->tmp_map_buf;
-	res = ft_strtrim(tmp, "\n");
-	if (!res)
-	{
-		ft_putstr_fd("cub3D: Problem while preparing map\n", 2);	
-		return (-1);
-	}
-	(*scene)->tmp_map_buf = res;
-	free(tmp);
-	return (0);
-}
-
 /*
 checks tmp_map_buf in scene struct, char by char
 if ft_strchr() returns NULL, means it is an invalid char,
@@ -561,6 +535,57 @@ int	is_map_char_valid(char *s)
 	}
 	return (0);
 }
+
+/*
+trim away:
+leading AND trailing \n in tmp_map_buf
+re-assign to scene->tmp_map_buf
+*/
+int	trim_tmp_map_buf(t_scene **scene)
+{
+	char	*tmp;
+	char	*res;
+	
+	tmp = (*scene)->tmp_map_buf;
+	res = ft_strtrim(tmp, "\n");
+	if (!res)
+	{
+		ft_putstr_fd("cub3D: Problem while preparing map\n", 2);	
+		return (-1);
+	}
+	(*scene)->tmp_map_buf = res;
+	free(tmp);
+	return (0);
+}
+
+/*
+checks if 'big', trimmed tmp_map_buf (char *s), contains 'little ("\n\n")
+if ft_strnstr returns non-NULL, means 'little' is found in 'big'
+then return -1 (error)
+*/
+int	is_tmp_map_buf_split_by_empty_line(char *s)
+{
+	int len;
+	
+	len = ft_strlen(s);
+	if (ft_strnstr(s, "\n\n", len) != NULL)
+	{
+		ft_putstr_fd("cub3D: empty line found in between map lines\n", 2);	
+		return (-1);
+	}
+	return (0);
+}
+
+//# DONE above
+//##############################################################################
+//# pending below
+
+
+
+
+
+
+
 
 /*
 AFTER passing is_map_char_valid()
@@ -633,6 +658,10 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 		return (-1);
 	if (trim_tmp_map_buf(&scene) == -1)
 		return (-1);
+	// replace space char with 1, in tmp_map_buf
+	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1) // can pass, but
+		return (-1);
+		
 	// is_map_valid(scene>map);
 	//close(map_fd);
 	return (0);
