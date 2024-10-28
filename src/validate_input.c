@@ -1140,7 +1140,7 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 		return (-1);
 	if (trim_tmp_map_buf(&scene) == -1)
 		return (-1);
-	replace_space_with_zero(scene->tmp_map_buf); // replace space with zeroes instead
+	replace_space_with_zero(scene->tmp_map_buf);
 	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
 		return (-1);
 	
@@ -1158,28 +1158,21 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 	load_map_data(tmp, scene);
 	free_char_map(tmp);
 	
-	// count number of player chars, N, S, E, W
-	// is_num_player_valid(), ensure only 1 player char in total
 	if (is_num_player_valid(scene->map) == -1)
 		return (-1);
-	// load_player_char_coordinates
 	if (load_player_pos(scene->map, scene) == -1)
 		return (-1);
-	
-	// flood fill from player char coordinates
-	
-	printf("map bef ff\n");
-	print_2d_map(scene->map); // debug
+
+	printf("map bef ff\n"); 	//debug only
+	print_2d_map(scene->map);	// debug only
 	
 	ff(scene->player_start_x, scene->player_start_y, scene);
 	
-	printf("map aft ff\n");
-	print_2d_map(scene->map); // debug
+	printf("map aft ff\n");		// debug only
+	print_2d_map(scene->map);	// debug only
 	
 	if (is_fill_char_at_map_border(scene) == 0)
-		return (-1);
-
-	
+		return (-1);	
 	return (0);
 }
 	

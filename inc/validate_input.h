@@ -57,6 +57,13 @@ int		is_lcol_all_walls(char **s);
 int		is_rcol_all_walls(char **s);
 int		is_map_surrounded_by_walls(char **s);
 
+void	ff(int i, int j, t_scene *s);
+int		is_fill_char_at_toprow(t_scene *s)
+int 	is_fill_char_at_botrow(t_scene *s)
+int		is_fill_char_at_lcol(t_scene *s);
+int		is_fill_char_at_rcol(t_scene *s);
+int		is_fill_char_at_map_border(t_scene *scene);
+
 
 
 // pending ?
