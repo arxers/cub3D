@@ -2126,14 +2126,12 @@ int	main(int ac, char **av)
 	ft_memset((void *)&scene, 0, sizeof(t_scene));
 	if (validate_input(ac, av, &scene) == -1) // use this wrapper, to call the entire suite of checks
 	{
-		print_scene_struct(&scene); // remove, in final; for debugging only
 		free_scene_struct(&scene); // keep in final
 		return (1);
 	}
 	
-	print_scene_struct(&scene);
-	free_scene_struct(&scene);	
-	printf("returned to main()\n");
+	print_scene_struct(&scene); // for debug only
+	free_scene_struct(&scene);	// for debug only
 	
 	
 	status = init_game(&game);

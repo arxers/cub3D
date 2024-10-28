@@ -35,8 +35,6 @@ void	print_scene_struct(t_scene *scene)
 	printf("map_height: %d\n", scene->map_height);
 	printf("player_start_x: %d\n", scene->player_start_x);
 	printf("player_start_y: %d\n", scene->player_start_y);
-	//printf("f_rgb: %p\n", scene->f_rgb);
-	//printf("c_rgb: %p\n", scene->c_rgb);
 }
 
 void	print_arr(char **arr)
@@ -76,6 +74,12 @@ void free_char_map(char **arr)
 	free(arr);
 }
 
+/*
+for t_scene struct,
+checks if alloc~ed elements are present, and if so, free() them!
+
+NOTE. no need to free() the t_scene elements that are NOT alloc~ed
+*/
 void free_scene_struct(t_scene *s)
 {
 	if (s->no != NULL)
@@ -94,12 +98,6 @@ void free_scene_struct(t_scene *s)
 		free(s->tmp_map_buf);
 	if (s->map != NULL)
 		free_char_map(s->map);
-	/*
-	if (s->f_rgb != NULL)
-		free(s->f_rgb);
-	if (s->c_rgb != NULL)
-		free(s->c_rgb);
-	*/
 }
 
 
@@ -618,7 +616,7 @@ accepts a str (tmp_map_buf)
 replaces space char, with 1 char, using ft_memset()
 
 NOW, even when there is/are space char(s) in between map lines,
-they will show up as 1/wall, 
+they will show up as 0/zeroes
 so the next check, is_tmp_map_buf_split_by_empty_line(), will work
 */
 void	replace_space_with_zero(char *s)
@@ -773,8 +771,10 @@ int	count_char_in_map(char **map, char ch)
 }
 
 /*
+wrapper for count_char_in_map()
+
 scan the map, and count the number of valid player chars
-if sum total of valid player char is non-zero, return -1 (error)
+if sum total of valid player char is NOT one, return -1 (error)
 else return 0 (success) 
 */
 int	is_num_player_valid(char **map)
@@ -798,8 +798,9 @@ int	is_num_player_valid(char **map)
 
 
 /*
-returns 0 after finding the first occurrence of a valid player char
-also loads the coordinates of first valid player char found, into scene struct
+returns 0 (success) after finding the first occurrence of a valid player char
+
+SIDE EFFECT: load coordinates of firstplayer char found, into scene struct
 */
 int load_player_pos(char **map, t_scene *scene)
 {
@@ -829,8 +830,8 @@ int load_player_pos(char **map, t_scene *scene)
 }
 
 /*
-set a tmp (char *) ptr to the top row of map
-iterate thru chars in the top row,
+set a tmp (char *) ptr to the TOP row of map
+iterate thru chars in the row,
 if fill char 'F' found, return 0 (success)
 else return -1 (failure)
 */
@@ -851,8 +852,8 @@ int is_fill_char_at_toprow(t_scene *s)
 }
 
 /*
-set a tmp (char *) ptr to the bot row of map
-iterate thru chars in the top row,
+set a tmp (char *) ptr to the BOTTOM row of map
+iterate thru chars in the row,
 if fill char 'F' found, return 0 (success)
 else return -1 (failure)
 */
@@ -874,7 +875,7 @@ int is_fill_char_at_botrow(t_scene *s)
 
 /*
 iterate thru rows in the map
-if fill char 'F' found in left col, return 0 (success)
+if fill char 'F' found in LEFT col, return 0 (success)
 else return -1 (failure)
 */
 int is_fill_char_at_lcol(t_scene *s)
@@ -893,7 +894,7 @@ int is_fill_char_at_lcol(t_scene *s)
 
 /*
 iterate thru rows in the map
-if fill char 'F' found in left col, return 0 (success)
+if fill char 'F' found in RIGHT col, return 0 (success)
 else return -1 (failure)
 */
 int is_fill_char_at_rcol(t_scene *s)
@@ -910,8 +911,12 @@ int is_fill_char_at_rcol(t_scene *s)
 	return (-1);
 }
 
+/*
+If a fill char is found in any border side of the map,
+then return 0 (success) 
 
-
+NOTE. If there is a fill char at the map's border. REJECT the map
+*/
 int	is_fill_char_at_map_border(t_scene *s)
 {
 	if ((is_fill_char_at_toprow(s) == 0) || \
@@ -926,13 +931,15 @@ int	is_fill_char_at_map_border(t_scene *s)
 }
 
 /*
+NOTE. ff is short for flood fill
+
 if out of bounds row-wise, return
 if out of bounds col-wise, return
 if char at current pos: is wall '1', or fill 'F', return
-if char at current pos: is empty '0', or valid player char, replace with 'F'
+if char at current pos: is empty '0', or valid (player) char, replace with 'F'
 try to ff() the four cardinal directions, relative to current char pos
 */
-void	ff(int i, int j, t_scene *s)
+void	ff_mandatory(int i, int j, t_scene *s)
 {
 	if (i < 0 || i > s->map_height - 1)
 		return ;
@@ -942,77 +949,50 @@ void	ff(int i, int j, t_scene *s)
 		return ;
 	if (s->map[i][j] == '0' || ft_strchr("NSEW", s->map[i][j]))
 		s->map[i][j] = 'F';
-	ff(i - 1, j, s);
-	ff(i + 1, j, s);
-	ff(i, j - 1, s);
-	ff(i, j + 1, s);
+	ff_mandatory(i + 1, j, s);
+	ff_mandatory(i - 1, j, s);
+	ff_mandatory(i, j + 1, s);
+	ff_mandatory(i, j - 1, s);
 }
 
-//# DONE above
-//##############################################################################
-//# pending below
-
-
-
-
-
-
-
-
-
-
-
-
 /*
-AFTER passing is_map_char_valid()
-
-tmp_map_buf may contain:
-	empty_lines before start of map
-	empty lines in between map lines ie. \n\n
-	empty lines after end of map
-
-to do:
-trim leading newlines, before start of map
-trim trailing newlines, after end of map
-re-assign trimmed tmp_map_buf to scene->tmp_map_buf 
-ft_strtrim() ?
-
-
-check if there are empty lines in between, map lines
-use ft_strnstr() to see if "little" is found in "big"
-where big is tmp_map_buf
-where little is "\n\n", 
-
-ft_split(tmp_map_buf), using \n as delimiter char
-assign result of ft_split() to scene->map // (char **)
+same as mandatory version
+only difference is first arg for ft_strchr() includes 4 extra chars: C D X P
 */
+void	ff_bonus(int i, int j, t_scene *s)
+{
+	if (i < 0 || i > s->map_height - 1)
+		return ;
+	if (j < 0 || j > s->map_width - 1)
+		return ;
+	if (s->map[i][j] == '1' || s->map[i][j] == 'F')
+		return ;
+	if (s->map[i][j] == '0' || ft_strchr("NSEWCDXP", s->map[i][j]))
+		s->map[i][j] = 'F';
+	ff_bonus(i - 1, j, s);
+	ff_bonus(i + 1, j, s);
+	ff_bonus(i, j - 1, s);
+	ff_bonus(i, j + 1, s);
+}
 
+/* 
+IMPT! for bonus implementation
+need to replace TWO functions, in load_scene()
 
+#1:
+replace, is_map_char_valid_mandatory(),
+with, is_map_char_valid_bonus()
 
-/*
-# overall:
-if invalid/missing/error, return -1; 
-	t_scene struct will be freed by caller
-	gnl buffer will be flushed, and then fd closed, by callee
-else return 0 (success)
+#2:
+replace, ff_mandatory(),
+with, ff_bonus()
 
-# steps:
-open file
-load scene details
-	is_all_six_details_present() // start with expected identifiers
-	load_map_buffer() // currently, called in load_scene_details()
+key difference is that in the bonus versions, they consider FOUR extra chars:
+C, D, X, P
 
-	!!! RESTART HERE, last updated 23 Oct 2024 !!!
-	
-	prepare_map() 
-		check if map only contains valid chars
-		check if map contains emptyline ("\n\n")
-		ft_split(char *tmp_map_buf), using \n as delimiter
-		assign (char **) result of ft_split() to t_scene struct
-		is_map_valid() // check pdf etc...
-		milestone, done? OMG!
+TO DO? maybe need to add another version of 
+is_num_player_is_valid() to account for num of C D X P chars ???
 */
-
 int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 {
 	int		map_fd;
@@ -1024,7 +1004,7 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 		ft_putstr_fd("cub3D: Map cannot be opened\n", 2);
 		return (-1);
 	}
-	if (load_scene_details(map_fd, &scene) == -1) // to do: load map()
+	if (load_scene_details(map_fd, &scene) == -1)
 		return (-1);
 	if (prepare_walls(&scene) == -1)
 		return (-1);
@@ -1037,7 +1017,6 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 	replace_space_with_zero(scene->tmp_map_buf);
 	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
 		return (-1);
-	
 	tmp = ft_split(scene->tmp_map_buf, '\n');
 	if (!tmp)
 	{
@@ -1051,95 +1030,16 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 	}
 	load_map_data(tmp, scene);
 	free_char_map(tmp);
-	
 	if (is_num_player_valid(scene->map) == -1)
 		return (-1);
 	if (load_player_pos(scene->map, scene) == -1)
 		return (-1);
-
-	printf("map bef ff\n"); 	//debug only
-	print_2d_map(scene->map);	// debug only
-	
-	ff(scene->player_start_x, scene->player_start_y, scene);
-	
-	printf("map aft ff\n");		// debug only
-	print_2d_map(scene->map);	// debug only
-	
+	ff_mandatory(scene->player_start_x, scene->player_start_y, scene);
 	if (is_fill_char_at_map_border(scene) == 0)
 		return (-1);	
 	return (0);
 }
-	
 
-/*
-MISC NOTES...
-
-
-# load_map()
-continue reading remainder of map.cub file (via map_fd), via gnl(), line by line
-
-join line, by line, into a single long (char *), use ft_strjoin()
-
-check if (char *) contains any invalid chars
-
-valid chars: 
-' ', space 
-'\n', newline
-'1', one
-'0', zero
-'N', north
-'S', south
-'E', east
-'W', west
-
-# is_map_valid()
-CHECK #1.
-if ft_strchr() returns NULL, means some char, not in valid chars, was found in buffer
-
-CHECK #2.
-if "\n\n" means empty line found in map, return -1 (error)
-
-# prepare_map() // convert map from (char *) to (char **)
-ft_split(char * line), using '\n' as delimiter char
-
-CHECK #3.
-min num of rows == 3
-min num of cols == 3
-else return -1 (error)
-
-COUNT:
-max_width, num of cols
-max_length, num of rows
-to alloc space on heap, for final valid map
-
-replace ' '/spaces in (char **) map with ? char?
-
-flood fill from player position
-if leak, then return -1 (error)
-
-thanks to @jolai for spotting the error
-get_next_line(map_fd); // logic error, not assigning return value !?
-line = get_next_line(map_fd); // solution... LOL
-*/
-
-/*
-int is_map_valid(char **map)
-{
-	// check if is_wall_texture() / is_floor_or_ceiling() / neither, and iterate past these lines
-	// read map line by line, until EOF
-	// join map lines, into one single line (as a (char *)), NOTE. \n will be included!
-}
-*/
-
-/*
-checks if "\n\n" sequence is present in (char *) map as single line
-if present, means empty line in map, then reject map, 
-set, char **map = NULL, in 'scene' struct
-
-void is_empty_line_in_singleline_map()
-*/
-
-// if all seven scene details are present,
-// ft_split the map in a single line, into a (char **), using '\n' as delimiter
-// free the (char *) singleline map
-
+//# DONE above
+//##############################################################################
+//# pending below
