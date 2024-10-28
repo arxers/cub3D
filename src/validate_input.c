@@ -648,6 +648,102 @@ int	is_tmp_map_buf_split_by_empty_line(char *s)
 }
 
 /*
+calculates the map's dimensions
+and assign the values to map_width & map_height, in 'scene' struct
+*/
+void	count_map_area(char **map_temp, t_scene *scene)
+{
+	t_point	index;
+	int		count;
+	int		max_x;
+
+	count = 0;
+	max_x = 0;
+	index.y = 0;
+	while (map_temp[index.y])
+	{
+		index.x = 0;
+		count = 0;
+		while (map_temp[index.y][index.x])
+		{
+			count++;
+			index.x++;
+		}
+		if (count > max_x)
+			max_x = count;
+		index.y++;
+	}
+	scene->map_width = max_x;
+	scene->map_height = index.y;
+}
+
+/*
+accepts a (char **)tmp_map, and ptr to scene struct
+callocs space for (char **) for scene->map
+*/
+int	init_map_array(char **map_temp, t_scene *scene)
+{
+	t_point	index;
+	
+	count_map_area(map_temp, scene);
+	//map_size = count_map_area(map_temp, scene);
+	//scene->map = ft_calloc(map_size.y + 1, sizeof(char *));
+	scene->map = ft_calloc(scene->map_height + 1, sizeof(char *));
+	if (!scene->map)
+		return (-1);
+	index.y = 0;
+	//while (index.y < map_size.y)
+	while (index.y < scene->map_height)
+	{
+		//scene->map[index.y] = ft_calloc (map_size.x + 1, sizeof(char));
+		scene->map[index.y] = ft_calloc (scene->map_width + 1, sizeof(char));
+		if (!scene->map[index.y])
+			return (-1);
+		index.y++;
+	}
+	index.y = 0;
+	while (scene->map[index.y])
+	{
+		index.x = 0;
+		//while (index.x < map_size.x)
+		while (index.x < scene->map_width)
+		{
+			scene->map[index.y][index.x] = '0';
+			index.x++;
+		}
+		index.y++;
+	}
+	return (0);
+}
+
+/*
+copy data from src, (char **)tmp map
+to scene->map
+*/
+void	load_map_data(char **s, t_scene *scene)
+{
+	char	**dst;
+	int 	i;
+	int		j;
+	int		len;
+	
+	dst = scene->map;
+	i = 0;
+	while (s[i] != NULL)
+	{
+		j = 0;
+		len = ft_strlen(s[i]);
+		while (j < len)
+		{
+			dst[i][j] = s[i][j];
+			j++;
+		}	
+		i++;
+	}
+}
+
+
+/*
 iterate thru chars in top (zeroth) row,
 if any of them are NOT '1', return -1 (error)
 */
@@ -807,101 +903,10 @@ int	is_num_player_valid(char **map)
 
 
 
-/*
-copy data from src, (char **)tmp map
-to scene->map
-*/
-void	load_map_data(char **s, t_scene *scene)
-{
-	char	**dst;
-	int 	i;
-	int		j;
-	int		len;
-	
-	dst = scene->map;
-	i = 0;
-	while (s[i] != NULL)
-	{
-		j = 0;
-		len = ft_strlen(s[i]);
-		while (j < len)
-		{
-			dst[i][j] = s[i][j];
-			j++;
-		}	
-		i++;
-	}
-}
 
 
-/*
-calculates the map's dimensions
-and assign the values to map_width & map_height, in 'scene' struct
-*/
-void	count_map_area(char **map_temp, t_scene *scene)
-{
-	t_point	index;
-	int		count;
-	int		max_x;
 
-	count = 0;
-	max_x = 0;
-	index.y = 0;
-	while (map_temp[index.y])
-	{
-		index.x = 0;
-		count = 0;
-		while (map_temp[index.y][index.x])
-		{
-			count++;
-			index.x++;
-		}
-		if (count > max_x)
-			max_x = count;
-		index.y++;
-	}
-	scene->map_width = max_x;
-	scene->map_height = index.y;
-}
 
-/*
-accepts a (char **)tmp_map, and ptr to scene struct
-callocs space for (char **) for scene->map
-*/
-int	init_map_array(char **map_temp, t_scene *scene)
-{
-	t_point	index;
-	
-	count_map_area(map_temp, scene);
-	//map_size = count_map_area(map_temp, scene);
-	//scene->map = ft_calloc(map_size.y + 1, sizeof(char *));
-	scene->map = ft_calloc(scene->map_height + 1, sizeof(char *));
-	if (!scene->map)
-		return (-1);
-	index.y = 0;
-	//while (index.y < map_size.y)
-	while (index.y < scene->map_height)
-	{
-		//scene->map[index.y] = ft_calloc (map_size.x + 1, sizeof(char));
-		scene->map[index.y] = ft_calloc (scene->map_width + 1, sizeof(char));
-		if (!scene->map[index.y])
-			return (-1);
-		index.y++;
-	}
-	index.y = 0;
-	while (scene->map[index.y])
-	{
-		index.x = 0;
-		//while (index.x < map_size.x)
-		while (index.x < scene->map_width)
-		{
-			scene->map[index.y][index.x] = '0';
-			index.x++;
-		}
-		index.y++;
-	}
-	return (0);
-}
 
 /*
 AFTER passing is_map_char_valid()
