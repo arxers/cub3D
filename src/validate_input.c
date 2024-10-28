@@ -828,118 +828,6 @@ int load_player_pos(char **map, t_scene *scene)
 	return (-1);
 }
 
-
-
-
-
-/*
-iterate thru chars in top (zeroth) row,
-if any of them are NOT '1', return -1 (error)
-*/
-int is_toprow_all_walls(char **s)
-{
-	int i;
-	
-	i = 0;
-	while(s[0][i] != '\0')
-	{
-		if (s[0][i] != '1')
-			return (-1);
-		i++;
-	}
-	return (0);
-}
-
-/*
-iterate thru chars in bottom row, ie. the row before the last/final NULL ptr
-if any of them are NOT '1', return -1 (error)
-*/
-int	is_botrow_all_walls(char **s)
-{
-	int	i;
-	int	j;
-	
-	i = 0;
-	while (s[i + 1] != NULL)
-		i++;
-	j = 0;
-	while (s[i][j] != '\0')
-	{
-		if (s[i][j] != '1')
-			return (-1);
-		j++;
-	}
-	return (0);
-}
-
-/* 
-checks if left col of rectangular map, consists of only wall chars
-if any of them are NOT '1', return -1 (error)
-*/
-int is_lcol_all_walls(char **s)
-{
-	int	i;
-	
-	i = 0;
-	while(s[i] != NULL)
-	{
-		if(s[i][0] != '1')
-			return (-1);
-		i++;
-	}
-	return (0);
-}
-
-/* 
-checks if char, before the \0 char, consists of only wall chars
-if any of them are NOT '1', return -1 (error)
-
-NOTE. does not guarantee/ensure map is rectangular!
-*/
-int is_rcol_all_walls(char **s)
-{
-	int i;
-	int	j;
-	
-	i = 0;
-	while (s[i] != NULL)
-	{
-		j = 0;
-		while (s[i][j + 1] != '\0')
-			j++;
-		if (s[i][j] != '1')
-			return (-1);
-		i++;
-	}
-	return (0);
-}
-
-/*
-To do
-check if all 4 sides of rectangular map, consists of only 1 or 0, but not F chars
-
-check top row
-check bot row
-check lcol
-check rcol
-*/
-int	is_map_surrounded_by_walls(char **s)
-{
-	if ((is_toprow_all_walls(s) == -1) || \
-		(is_botrow_all_walls(s) == -1) || \
-		(is_lcol_all_walls(s) == -1) || \
-		(is_rcol_all_walls(s) == -1 ))
-	{
-		ft_putstr_fd("cub3D: Map is NOT surrounded by walls\n", 2);
-		return (-1);
-	}
-	return (0);
-}
-
-//# DONE above
-//##############################################################################
-//# pending below
-
 /*
 set a tmp (char *) ptr to the top row of map
 iterate thru chars in the top row,
@@ -1059,6 +947,12 @@ void	ff(int i, int j, t_scene *s)
 	ff(i, j - 1, s);
 	ff(i, j + 1, s);
 }
+
+//# DONE above
+//##############################################################################
+//# pending below
+
+
 
 
 
