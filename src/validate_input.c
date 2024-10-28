@@ -29,7 +29,8 @@ void	print_scene_struct(t_scene *scene)
 	printf("F:%s\n", scene->floor);
 	printf("C:%s\n", scene->ceiling);
 	printf("tmp_map_buf (char *) will begin on next line:\n%s\n", scene->tmp_map_buf);
-	printf("map ptr (char **) NOTE. should have empty/newline above: %p\n", scene->map);
+	printf("map ptr (char **): %p\n", scene->map);
+	print_2d_map(scene->map);
 	printf("map_width: %d\n", scene->map_width);
 	printf("map_height: %d\n", scene->map_height);
 	printf("player_start_x: %d\n", scene->player_start_x);
@@ -620,7 +621,7 @@ NOW, even when there is/are space char(s) in between map lines,
 they will show up as 1/wall, 
 so the next check, is_tmp_map_buf_split_by_empty_line(), will work
 */
-void	replace_space_with_wall(char *s)
+void	replace_space_with_zero(char *s)
 {
 	int		i;
 	
@@ -628,7 +629,7 @@ void	replace_space_with_wall(char *s)
 	while (s[i] != '\0')
 	{
 		if (s[i] == ' ')
-			ft_memset((void *)&(s[i]), '1', sizeof(char));
+			ft_memset((void *)&(s[i]), '0', sizeof(char));
 		i++;
 	}
 }
@@ -939,7 +940,125 @@ int	is_map_surrounded_by_walls(char **s)
 //##############################################################################
 //# pending below
 
+/*
+set a tmp (char *) ptr to the top row of map
+iterate thru chars in the top row,
+if fill char 'F' found, return 0 (success)
+else return -1 (failure)
+*/
+int is_fill_char_at_toprow(t_scene *s)
+{
+	int 	i;
+	char	*tmp;
+	
+	i = 0;
+	tmp = s->map[0];
+	while(tmp[i] != '\0')
+	{
+		if (tmp[i] == 'F')
+			return (0);
+		i++;
+	}
+	return (-1);
+}
 
+/*
+set a tmp (char *) ptr to the bot row of map
+iterate thru chars in the top row,
+if fill char 'F' found, return 0 (success)
+else return -1 (failure)
+*/
+int is_fill_char_at_botrow(t_scene *s)
+{
+	int 	i;
+	char	*tmp;
+	
+	i = 0;
+	tmp = s->map[s->map_height - 1];
+	while(tmp[i] != '\0')
+	{
+		if (tmp[i] == 'F')
+			return (0);
+		i++;
+	}
+	return (-1);
+}
+
+/*
+iterate thru rows in the map
+if fill char 'F' found in left col, return 0 (success)
+else return -1 (failure)
+*/
+int is_fill_char_at_lcol(t_scene *s)
+{
+	int 	i;
+	
+	i = 0;
+	while(s->map[i] != NULL)
+	{
+		if (s->map[i][0] == 'F')
+			return (0);
+		i++;
+	}
+	return (-1);
+}
+
+/*
+iterate thru rows in the map
+if fill char 'F' found in left col, return 0 (success)
+else return -1 (failure)
+*/
+int is_fill_char_at_rcol(t_scene *s)
+{
+	int 	i;
+	
+	i = 0;
+	while(s->map[i] != NULL)
+	{
+		if (s->map[i][s->map_width - 1] == 'F')
+			return (0);
+		i++;
+	}
+	return (-1);
+}
+
+
+
+int	is_fill_char_at_map_border(t_scene *s)
+{
+	if ((is_fill_char_at_toprow(s) == 0) || \
+		(is_fill_char_at_botrow(s) == 0) || \
+		(is_fill_char_at_lcol(s) == 0) || \
+		(is_fill_char_at_rcol(s) == 0))
+	{
+		ft_putstr_fd("cub3D: Flood fill char found at border wall\n", 2);	
+		return (0);
+	}
+	return (-1);
+}
+
+/*
+if out of bounds row-wise, return
+if out of bounds col-wise, return
+if char at current pos: is wall '1', or fill 'F', return
+if char at current pos: is empty '0', or valid player char, replace with 'F'
+try to ff() the four cardinal directions, relative to current char pos
+*/
+void	ff(int i, int j, t_scene *s)
+{
+	if (i < 0 || i > s->map_height - 1)
+		return ;
+	if (j < 0 || j > s->map_width - 1)
+		return ;
+	if (s->map[i][j] == '1' || s->map[i][j] == 'F')
+		return ;
+	if (s->map[i][j] == '0' || ft_strchr("NSEW", s->map[i][j]))
+		s->map[i][j] = 'F';
+	ff(i - 1, j, s);
+	ff(i + 1, j, s);
+	ff(i, j - 1, s);
+	ff(i, j + 1, s);
+}
 
 
 
@@ -1021,9 +1140,10 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 		return (-1);
 	if (trim_tmp_map_buf(&scene) == -1)
 		return (-1);
-	replace_space_with_wall(scene->tmp_map_buf); // replace space with zeroes instead
+	replace_space_with_zero(scene->tmp_map_buf); // replace space with zeroes instead
 	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
 		return (-1);
+	
 	tmp = ft_split(scene->tmp_map_buf, '\n');
 	if (!tmp)
 	{
@@ -1042,21 +1162,24 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 	// is_num_player_valid(), ensure only 1 player char in total
 	if (is_num_player_valid(scene->map) == -1)
 		return (-1);
+	// load_player_char_coordinates
 	if (load_player_pos(scene->map, scene) == -1)
 		return (-1);
 	
-	// load_player_char_coordinates
 	// flood fill from player char coordinates
 	
-	//if (is_map_surrounded_by_walls(scene->map) == -1)
-	//	return (-1);
-
+	printf("map bef ff\n");
 	print_2d_map(scene->map); // debug
 	
-		
-	// is map minimum 3 by 3 
-	// is_map_valid(scene>map);
-	//close(map_fd);
+	ff(scene->player_start_x, scene->player_start_y, scene);
+	
+	printf("map aft ff\n");
+	print_2d_map(scene->map); // debug
+	
+	if (is_fill_char_at_map_border(scene) == 0)
+		return (-1);
+
+	
 	return (0);
 }
 	
