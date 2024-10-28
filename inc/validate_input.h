@@ -10,6 +10,8 @@ typedef struct s_scene
 	char	**map; // (char **)
 	int		map_width;
 	int		map_height;
+	int		player_start_x;
+	int		player_start_y;
 	//int		*f_rgb;
 	//int		*c_rgb;
 } t_scene;

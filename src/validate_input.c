@@ -30,6 +30,10 @@ void	print_scene_struct(t_scene *scene)
 	printf("C:%s\n", scene->ceiling);
 	printf("tmp_map_buf (char *) will begin on next line:\n%s\n", scene->tmp_map_buf);
 	printf("map ptr (char **) NOTE. should have empty/newline above: %p\n", scene->map);
+	printf("map_width: %d\n", scene->map_width);
+	printf("map_height: %d\n", scene->map_height);
+	printf("player_start_x: %d\n", scene->player_start_x);
+	printf("player_start_y: %d\n", scene->player_start_y);
 	//printf("f_rgb: %p\n", scene->f_rgb);
 	//printf("c_rgb: %p\n", scene->c_rgb);
 }
@@ -742,6 +746,90 @@ void	load_map_data(char **s, t_scene *scene)
 	}
 }
 
+/*
+returns the count of chars 'ch' found in (char **)map
+*/
+int	count_char_in_map(char **map, char ch)
+{
+	int	i;
+	int	j;
+	int	res;
+	
+	res = 0;
+	i = 0;
+	while (map[i] != NULL)
+	{
+		j = 0;
+		while(map[i][j] != '\0')
+		{
+			if (map[i][j] == ch)
+				res += 1;
+			j++;
+		}
+		i++;
+	}
+	return (res);
+}
+
+/*
+scan the map, and count the number of valid player chars
+if sum total of valid player char is non-zero, return -1 (error)
+else return 0 (success) 
+*/
+int	is_num_player_valid(char **map)
+{
+	int num_N;
+	int num_S;
+	int num_E;
+	int num_W;
+	
+	num_N = count_char_in_map(map, 'N');
+	num_S = count_char_in_map(map, 'S');
+	num_E = count_char_in_map(map, 'E');
+	num_W = count_char_in_map(map, 'W');
+	if (num_N + num_S + num_E + num_W != 1)
+	{
+		ft_putstr_fd("cub3D: Incorrect number of player char in map\n", 2);
+		return (-1);
+	}
+	return (0);
+}
+
+
+/*
+returns 0 after finding the first occurrence of a valid player char
+also loads the coordinates of first valid player char found, into scene struct
+*/
+int load_player_pos(char **map, t_scene *scene)
+{
+	int		i;
+	int		j;
+	char 	*player_char;
+	
+	player_char = "NSEW";
+	i = 0;
+	while (map[i] != NULL)
+	{
+		j = 0;
+		while (map[i][j] != '\0')
+		{
+			if (ft_strchr(player_char, map[i][j]))
+			{
+				scene->player_start_x = i;
+				scene->player_start_y = j;
+				return (0);
+			}
+			j++;
+		}
+		i++;
+	}
+	ft_putstr_fd("cub3D: Player char missing from map\n", 2);
+	return (-1);
+}
+
+
+
+
 
 /*
 iterate thru chars in top (zeroth) row,
@@ -852,54 +940,8 @@ int	is_map_surrounded_by_walls(char **s)
 //# pending below
 
 
-/*
-returns the count of chars 'ch' found in (char **)map
-*/
-int	count_char_in_map(char **map, char ch)
-{
-	int	i;
-	int	j;
-	int	res;
-	
-	res = 0;
-	i = 0;
-	while (map[i] != NULL)
-	{
-		j = 0;
-		while(map[i][j] != '\0')
-		{
-			if (map[i][j] == ch)
-				res += 1;
-			j++;
-		}
-		i++;
-	}
-	return (res);
-}
 
-/*
-scan the map, and count the number of valid player chars
-if sum total of valid player char is non-zero, return -1 (error)
-else return 0 (success) 
-*/
-int	is_num_player_valid(char **map)
-{
-	int num_N;
-	int num_S;
-	int num_E;
-	int num_W;
-	
-	num_N = count_char_in_map(map, 'N');
-	num_S = count_char_in_map(map, 'S');
-	num_E = count_char_in_map(map, 'E');
-	num_W = count_char_in_map(map, 'W');
-	if (num_N + num_S + num_E + num_W != 1)
-	{
-		ft_putstr_fd("cub3D: Incorrect number of player char in map\n", 2);
-		return (-1);
-	}
-	return (0);
-}
+
 
 
 
@@ -1000,7 +1042,8 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 	// is_num_player_valid(), ensure only 1 player char in total
 	if (is_num_player_valid(scene->map) == -1)
 		return (-1);
-
+	if (load_player_pos(scene->map, scene) == -1)
+		return (-1);
 	
 	// load_player_char_coordinates
 	// flood fill from player char coordinates
