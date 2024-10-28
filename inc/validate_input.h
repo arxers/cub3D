@@ -51,12 +51,6 @@ int		is_tmp_map_buf_split_by_empty_line(char *s);
 int		count_char_in_map(char **map, char ch);
 int		is_num_player_valid(char **map);
 
-int		is_toprow_all_walls(char **s);
-int		is_botrow_all_walls(char **s);
-int		is_lcol_all_walls(char **s);
-int		is_rcol_all_walls(char **s);
-int		is_map_surrounded_by_walls(char **s);
-
 void	ff(int i, int j, t_scene *s);
 int		is_fill_char_at_toprow(t_scene *s);
 int 	is_fill_char_at_botrow(t_scene *s);
