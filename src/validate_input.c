@@ -1,5 +1,24 @@
 #include "../inc/cub3D.h"
 
+void	print_2d_map(char **s)
+{
+	int i;
+	int	j;
+	
+	i = 0;
+	while (s[i] != NULL)
+	{
+		j = 0;
+		while (s[i][j] != '\0')
+		{
+			write(1, &(s[i][j]), 1);
+			j++;
+		}
+		write(1, "\n", 1);
+		i++;
+	}
+}
+
 void	print_scene_struct(t_scene *scene)
 {
 	printf("\nCurrent state of t_scene struct:\n");
@@ -547,6 +566,26 @@ int	is_map_char_valid_bonus(char *s)
 	return (0);
 }
 
+int	is_map_char_valid_mandatory(char *s)
+{
+	int 	i;
+	char	ref[] = " \n10NSEW";
+	
+	i = 0;
+	while (s[i] != '\0')
+	{
+		if (ft_strchr(ref, s[i]) == NULL)
+		{
+			ft_putstr_fd("cub3D: Invalid map char\n", 2);		
+			return (-1);
+		}
+		i++;	
+	}
+	return (0);
+}
+
+
+
 /*
 trim away:
 leading AND trailing \n in tmp_map_buf
@@ -607,10 +646,6 @@ int	is_tmp_map_buf_split_by_empty_line(char *s)
 	}
 	return (0);
 }
-
-//# DONE above
-//##############################################################################
-//# pending below
 
 /*
 iterate thru chars in top (zeroth) row,
@@ -715,6 +750,106 @@ int	is_map_surrounded_by_walls(char **s)
 	return (0);
 }
 
+//# DONE above
+//##############################################################################
+//# pending below
+
+/*
+copy data from src, (char **)tmp map
+to scene->map
+*/
+void	load_map_data(char **s, t_scene *scene)
+{
+	char	**dst;
+	int 	i;
+	int		j;
+	int		len;
+	
+	dst = scene->map;
+	i = 0;
+	while (s[i] != NULL)
+	{
+		j = 0;
+		len = ft_strlen(s[i]);
+		while (j < len)
+		{
+			dst[i][j] = s[i][j];
+			j++;
+		}	
+		i++;
+	}
+}
+
+
+/*
+calculates the map's dimensions
+and assign the values to map_width & map_height, in 'scene' struct
+*/
+void	count_map_area(char **map_temp, t_scene *scene)
+{
+	t_point	index;
+	int		count;
+	int		max_x;
+
+	count = 0;
+	max_x = 0;
+	index.y = 0;
+	while (map_temp[index.y])
+	{
+		index.x = 0;
+		count = 0;
+		while (map_temp[index.y][index.x])
+		{
+			count++;
+			index.x++;
+		}
+		if (count > max_x)
+			max_x = count;
+		index.y++;
+	}
+	scene->map_width = max_x;
+	scene->map_height = index.y;
+}
+
+/*
+accepts a (char **)tmp_map, and ptr to scene struct
+callocs space for (char **) for scene->map
+*/
+int	init_map_array(char **map_temp, t_scene *scene)
+{
+	t_point	index;
+	
+	count_map_area(map_temp, scene);
+	//map_size = count_map_area(map_temp, scene);
+	//scene->map = ft_calloc(map_size.y + 1, sizeof(char *));
+	scene->map = ft_calloc(scene->map_height + 1, sizeof(char *));
+	if (!scene->map)
+		return (-1);
+	index.y = 0;
+	//while (index.y < map_size.y)
+	while (index.y < scene->map_height)
+	{
+		//scene->map[index.y] = ft_calloc (map_size.x + 1, sizeof(char));
+		scene->map[index.y] = ft_calloc (scene->map_width + 1, sizeof(char));
+		if (!scene->map[index.y])
+			return (-1);
+		index.y++;
+	}
+	index.y = 0;
+	while (scene->map[index.y])
+	{
+		index.x = 0;
+		//while (index.x < map_size.x)
+		while (index.x < scene->map_width)
+		{
+			scene->map[index.y][index.x] = '0';
+			index.x++;
+		}
+		index.y++;
+	}
+	return (0);
+}
+
 /*
 AFTER passing is_map_char_valid()
 
@@ -767,7 +902,8 @@ load scene details
 
 int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 {
-	int map_fd;
+	int		map_fd;
+	char	**tmp;
 	
 	map_fd = open(mapfile, O_RDONLY);
 	if (map_fd == -1)
@@ -781,14 +917,25 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 		return (-1);
 	if (is_six_details_valid(scene) == -1)
 		return (-1);
-	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
+	if (is_map_char_valid_mandatory(scene->tmp_map_buf) == -1)
 		return (-1);
 	if (trim_tmp_map_buf(&scene) == -1)
 		return (-1);
-	replace_space_with_wall(scene->tmp_map_buf);
+	replace_space_with_wall(scene->tmp_map_buf); // replace space with zeroes instead
 	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
 		return (-1);
-	scene->map = ft_split(scene->tmp_map_buf, '\n');	
+	
+	tmp = ft_split(scene->tmp_map_buf, '\n');	
+	if (init_map_array(tmp, scene) == -1)
+	{
+		ft_putstr_fd("cub3D: Error in malloc map\n", 2);
+		return (-1);
+	}
+	// copy data from (char **)tmp to (char **)scene->map
+	
+	load_map_data(tmp, scene);
+	print_2d_map(scene->map);
+	
 	if (is_map_surrounded_by_walls(scene->map) == -1)
 		return (-1);
 		

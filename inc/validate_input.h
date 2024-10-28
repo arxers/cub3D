@@ -8,6 +8,8 @@ typedef struct s_scene
 	char	*ceiling;
 	char	*tmp_map_buf;
 	char	**map; // (char **)
+	int		map_width;
+	int		map_height;
 	//int		*f_rgb;
 	//int		*c_rgb;
 } t_scene;
@@ -39,6 +41,7 @@ int		is_six_details_valid(t_scene *scene);
 
 //int	is_map_char_valid(char *s);
 int		is_map_char_valid_bonus(char *s);
+int		is_map_char_valid_mandatory(char *s);
 int		trim_tmp_map_buf(t_scene **scene);
 void	replace_space_with_wall(char *s);
 int		is_tmp_map_buf_split_by_empty_line(char *s);
