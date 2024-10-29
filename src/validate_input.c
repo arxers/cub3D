@@ -1,4 +1,4 @@
-#include "../inc/cub3D.h"
+#include "../inc/validate_input.h"
 
 void	print_2d_map(char **s)
 {
@@ -33,10 +33,14 @@ void	print_scene_struct(t_scene *scene)
 	print_2d_map(scene->map);
 	printf("map_bak ptr (char **): %p\n", scene->map_bak);
 	print_2d_map(scene->map_bak);
-	printf("map_width: %d\n", scene->map_width);
-	printf("map_height: %d\n", scene->map_height);
-	printf("player_start_x: %d\n", scene->player_start_x);
-	printf("player_start_y: %d\n", scene->player_start_y);
+	printf("map_width: %d\n", scene->map_dim.x);
+	printf("map_height: %d\n", scene->map_dim.y);
+	printf("pos_player.x: %d\n", scene->pos_player.x);
+	printf("pos_player.y: %d\n", scene->pos_player.y);
+	printf("pos_xeno.x: %d\n", scene->pos_xeno.x);
+	printf("pos_xeno.y: %d\n", scene->pos_xeno.y);
+	printf("pos_powerloader.x: %d\n", scene->pos_powerloader.x);
+	printf("pos_powerloader.y: %d\n", scene->pos_powerloader.y);
 }
 
 void	print_arr(char **arr)
@@ -383,15 +387,11 @@ int	is_valid_rgb_value(char *s)
 /*
 arr = ft_split(), passed in string argument (char *), comma as delimiter 
 
-check if arr:
-has ONLY three elements, AND
-each element is within the range of zero to 255, inclusive
-
 CHECK #1. ft_split() result, has 3 elements only
 
 CHECK #2. 
 for each element in ft_split() result:
-convert char array("0" to "255") to int
+convert char array to int
 check if int is between 0 to 255 inclusive
 
 return -1 (error)
@@ -423,6 +423,14 @@ int is_valid_rgb_array(char *s)
 	}
 	free_char_map(arr);
 	return (0);
+}
+
+unsigned int	convert_rgb_array_to_int(char *s)
+{
+	unsigned int	res;
+
+
+	return (res);
 }
 
 /*
@@ -680,8 +688,8 @@ void	count_map_area(char **map_temp, t_scene *scene)
 			max_x = count;
 		index.y++;
 	}
-	scene->map_width = max_x;
-	scene->map_height = index.y;
+	scene->map_dim.x = max_x;
+	scene->map_dim.y = index.y;
 }
 
 /*
@@ -693,13 +701,13 @@ int	init_map_array(char **map_temp, t_scene *scene)
 	t_point	index;
 	
 	count_map_area(map_temp, scene);
-	scene->map = ft_calloc(scene->map_height + 1, sizeof(char *));
+	scene->map = ft_calloc(scene->map_dim.y + 1, sizeof(char *));
 	if (!scene->map)
 		return (-1);
 	index.y = 0;
-	while (index.y < scene->map_height)
+	while (index.y < scene->map_dim.y)
 	{
-		scene->map[index.y] = ft_calloc (scene->map_width + 1, sizeof(char));
+		scene->map[index.y] = ft_calloc (scene->map_dim.x + 1, sizeof(char));
 		if (!scene->map[index.y])
 			return (-1);
 		index.y++;
@@ -708,7 +716,7 @@ int	init_map_array(char **map_temp, t_scene *scene)
 	while (scene->map[index.y])
 	{
 		index.x = 0;
-		while (index.x < scene->map_width)
+		while (index.x < scene->map_dim.x)
 		{
 			scene->map[index.y][index.x] = '0';
 			index.x++;
@@ -727,13 +735,13 @@ int	init_map_bak_array(char **map_temp, t_scene *scene)
 	t_point	index;
 	
 	count_map_area(map_temp, scene);
-	scene->map_bak = ft_calloc(scene->map_height + 1, sizeof(char *));
+	scene->map_bak = ft_calloc(scene->map_dim.y + 1, sizeof(char *));
 	if (!scene->map_bak)
 		return (-1);
 	index.y = 0;
-	while (index.y < scene->map_height)
+	while (index.y < scene->map_dim.y)
 	{
-		scene->map_bak[index.y] = ft_calloc (scene->map_width + 1, sizeof(char));
+		scene->map_bak[index.y] = ft_calloc (scene->map_dim.x + 1, sizeof(char));
 		if (!scene->map_bak[index.y])
 			return (-1);
 		index.y++;
@@ -742,7 +750,7 @@ int	init_map_bak_array(char **map_temp, t_scene *scene)
 	while (scene->map_bak[index.y])
 	{
 		index.x = 0;
-		while (index.x < scene->map_width)
+		while (index.x < scene->map_dim.x)
 		{
 			scene->map_bak[index.y][index.x] = '0';
 			index.x++;
@@ -850,44 +858,40 @@ int	is_num_player_valid(char **map)
 	num_W = count_char_in_map(map, 'W');
 	if (num_N + num_S + num_E + num_W != 1)
 	{
-		ft_putstr_fd("cub3D: Incorrect number of player char in map\n", 2);
+		ft_putstr_fd("cub3D: Incorrect number of PLAYER char in map\n", 2);
+		return (-1);
+	}
+	return (0);
+}
+
+int is_num_xeno_valid(char **map)
+{
+	int	num_enemy;
+
+	num_enemy = count_char_in_map(map, 'X');
+	if (num_enemy != 1)
+	{
+		ft_putstr_fd("cub3D: Incorrect number of ENEMY char in map\n", 2);
+		return (-1);
+	}
+	return (0);
+}
+
+int	is_num_powerloader_valid(char **map)
+{
+	int	num_armor;
+
+	num_armor = count_char_in_map(map, 'P');
+	if (num_armor != 1)
+	{
+		ft_putstr_fd("cub3D: Incorrect number of ARMOR char in map\n", 2);
 		return (-1);
 	}
 	return (0);
 }
 
 
-/*
-returns 0 (success) after finding the first occurrence of a valid player char
 
-SIDE EFFECT: load coordinates of firstplayer char found, into scene struct
-*/
-int load_player_pos(char **map, t_scene *scene)
-{
-	int		i;
-	int		j;
-	char 	*player_char;
-	
-	player_char = "NSEW";
-	i = 0;
-	while (map[i] != NULL)
-	{
-		j = 0;
-		while (map[i][j] != '\0')
-		{
-			if (ft_strchr(player_char, map[i][j]))
-			{
-				scene->player_start_x = i;
-				scene->player_start_y = j;
-				return (0);
-			}
-			j++;
-		}
-		i++;
-	}
-	ft_putstr_fd("cub3D: Player char missing from map\n", 2);
-	return (-1);
-}
 
 /*
 set a tmp (char *) ptr to the TOP row of map
@@ -923,7 +927,7 @@ int is_fill_char_at_botrow(t_scene *s)
 	char	*tmp;
 	
 	i = 0;
-	tmp = s->map_bak[s->map_height - 1];
+	tmp = s->map_bak[s->map_dim.y - 1];
 	while(tmp[i] != '\0')
 	{
 		if (tmp[i] == 'F')
@@ -964,7 +968,7 @@ int is_fill_char_at_rcol(t_scene *s)
 	i = 0;
 	while(s->map[i] != NULL)
 	{
-		if (s->map_bak[i][s->map_width - 1] == 'F')
+		if (s->map_bak[i][s->map_dim.x - 1] == 'F')
 			return (0);
 		i++;
 	}
@@ -1001,9 +1005,9 @@ try to ff() the four cardinal directions, relative to current char pos
 */
 void	ff_mandatory(int i, int j, t_scene *s)
 {
-	if (i < 0 || i > s->map_height - 1)
+	if (i < 0 || i > s->map_dim.y - 1)
 		return ;
-	if (j < 0 || j > s->map_width - 1)
+	if (j < 0 || j > s->map_dim.x - 1)
 		return ;
 	if (s->map_bak[i][j] == '1' || s->map_bak[i][j] == 'F')
 		return ;
@@ -1021,9 +1025,9 @@ only difference is first arg for ft_strchr() includes 4 extra chars: C D X P
 */
 void	ff_bonus(int i, int j, t_scene *s)
 {
-	if (i < 0 || i > s->map_height - 1)
+	if (i < 0 || i > s->map_dim.y - 1)
 		return ;
-	if (j < 0 || j > s->map_width - 1)
+	if (j < 0 || j > s->map_dim.x - 1)
 		return ;
 	if (s->map_bak[i][j] == '1' || s->map_bak[i][j] == 'F')
 		return ;
@@ -1070,8 +1074,12 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 		return (-1);
 	if (is_six_details_valid(scene) == -1)
 		return (-1);
-	if (is_map_char_valid_mandatory(scene->tmp_map_buf) == -1)
+	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
 		return (-1);
+/*
+if (is_map_char_valid_mandatory(scene->tmp_map_buf) == -1)	// swap with is_map_char_valid_bonus()
+		return (-1);
+*/	
 	if (trim_tmp_map_buf(&scene) == -1)
 		return (-1);
 	replace_space_with_zero(scene->tmp_map_buf);
@@ -1100,20 +1108,125 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 		return (-1);
 	if (load_player_pos(scene->map, scene) == -1)
 		return (-1);
-	ff_mandatory(scene->player_start_x, scene->player_start_y, scene);
+	if (is_num_xeno_valid(scene->map) == -1)
+		return (-1);
+	if (load_xeno_pos(scene->map, scene) == -1)
+		return (-1);
+	if (is_num_powerloader_valid(scene->map) == -1)
+		return (-1);	
+	if (load_powerloader_pos(scene->map, scene) == -1)
+		return (-1);
+
+	ff_bonus(scene->pos_player.x, scene->pos_player.y, scene);
 	if (is_fill_char_at_map_border(scene) == 0)
 		return (-1);
-	/*
-	currently, scene->map contains the flood-filled version of the map
 	
-	OPTION #1: call load_map_data(tmp, scene) again, free_char_map(tmp) after
-	
-	OPTION #2: duplicate scene->map, for flood fill, and free_char_map(ff~ed map) after
-	
-	*/
 	return (0);
 }
 
 //# DONE above
 //##############################################################################
 //# pending below
+
+/*
+to do 29 Oct 2024
+
+in t_scene struct, add: 
+floor_hex
+ceiling_hex
+*/
+
+
+
+/*
+returns 0 (success) after finding the first occurrence of a valid PLAYER char, 'N'/'S'/'E'/'W'
+SIDE EFFECT: load its coordinates into (t_point) scene->pos_player
+*/
+int load_player_pos(char **map, t_scene *scene)
+{
+	int		i;
+	int		j;
+	char 	*player;
+	
+	player = "NSEW";
+	i = 0;
+	while (map[i] != NULL)
+	{
+		j = 0;
+		while (map[i][j] != '\0')
+		{
+			if (ft_strchr(player, map[i][j]))
+			{
+				scene->pos_player.x = i;
+				scene->pos_player.y = j;
+				return (0);
+			}
+			j++;
+		}
+		i++;
+	}
+	ft_putstr_fd("cub3D: PLAYER char missing from map\n", 2);
+	return (-1);
+}
+
+/*
+returns 0 (success) after finding the first occurrence of a valid ENEMY char, 'X'
+SIDE EFFECT: load coordinates into (t_point) scene->pos_xeno
+*/
+int load_xeno_pos(char **map, t_scene *scene)
+{
+	int		i;
+	int		j;
+	char 	*enemy;
+	
+	enemy = "X";
+	i = 0;
+	while (map[i] != NULL)
+	{
+		j = 0;
+		while (map[i][j] != '\0')
+		{
+			if (ft_strchr(enemy, map[i][j]))
+			{
+				scene->pos_xeno.x = i;
+				scene->pos_xeno.y = j;
+				return (0);
+			}
+			j++;
+		}
+		i++;
+	}
+	ft_putstr_fd("cub3D: ENEMY char missing from map\n", 2);
+	return (-1);
+}
+
+/*
+returns 0 (success) after finding the first occurrence of a valid ENEMY char, 'X'
+SIDE EFFECT: load coordinates into (t_point) scene->pos_xeno
+*/
+int load_powerloader_pos(char **map, t_scene *scene)
+{
+	int		i;
+	int		j;
+	char 	*armor;
+	
+	armor = "P";
+	i = 0;
+	while (map[i] != NULL)
+	{
+		j = 0;
+		while (map[i][j] != '\0')
+		{
+			if (ft_strchr(armor, map[i][j]))
+			{
+				scene->pos_powerloader.x = i;
+				scene->pos_powerloader.y = j;
+				return (0);
+			}
+			j++;
+		}
+		i++;
+	}
+	ft_putstr_fd("cub3D: ARMOR char missing from map\n", 2);
+	return (-1);
+}
