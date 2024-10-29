@@ -31,6 +31,7 @@ void	print_scene_struct(t_scene *scene)
 	printf("tmp_map_buf (char *) will begin on next line:\n%s\n", scene->tmp_map_buf);
 	printf("map ptr (char **): %p\n", scene->map);
 	print_2d_map(scene->map);
+	printf("map_bak ptr (char **): %p\n", scene->map_bak);
 	print_2d_map(scene->map_bak);
 	printf("map_width: %d\n", scene->map_width);
 	printf("map_height: %d\n", scene->map_height);
@@ -692,16 +693,12 @@ int	init_map_array(char **map_temp, t_scene *scene)
 	t_point	index;
 	
 	count_map_area(map_temp, scene);
-	//map_size = count_map_area(map_temp, scene);
-	//scene->map = ft_calloc(map_size.y + 1, sizeof(char *));
 	scene->map = ft_calloc(scene->map_height + 1, sizeof(char *));
 	if (!scene->map)
 		return (-1);
 	index.y = 0;
-	//while (index.y < map_size.y)
 	while (index.y < scene->map_height)
 	{
-		//scene->map[index.y] = ft_calloc (map_size.x + 1, sizeof(char));
 		scene->map[index.y] = ft_calloc (scene->map_width + 1, sizeof(char));
 		if (!scene->map[index.y])
 			return (-1);
@@ -711,10 +708,43 @@ int	init_map_array(char **map_temp, t_scene *scene)
 	while (scene->map[index.y])
 	{
 		index.x = 0;
-		//while (index.x < map_size.x)
 		while (index.x < scene->map_width)
 		{
 			scene->map[index.y][index.x] = '0';
+			index.x++;
+		}
+		index.y++;
+	}
+	return (0);
+}
+
+/*
+accepts a (char **)tmp_map, and ptr to scene struct
+callocs space for (char **) for scene->map_bak
+*/
+int	init_map_bak_array(char **map_temp, t_scene *scene)
+{
+	t_point	index;
+	
+	count_map_area(map_temp, scene);
+	scene->map_bak = ft_calloc(scene->map_height + 1, sizeof(char *));
+	if (!scene->map_bak)
+		return (-1);
+	index.y = 0;
+	while (index.y < scene->map_height)
+	{
+		scene->map_bak[index.y] = ft_calloc (scene->map_width + 1, sizeof(char));
+		if (!scene->map_bak[index.y])
+			return (-1);
+		index.y++;
+	}
+	index.y = 0;
+	while (scene->map_bak[index.y])
+	{
+		index.x = 0;
+		while (index.x < scene->map_width)
+		{
+			scene->map_bak[index.y][index.x] = '0';
 			index.x++;
 		}
 		index.y++;
@@ -747,6 +777,33 @@ void	load_map_data(char **s, t_scene *scene)
 		i++;
 	}
 }
+
+/*
+copy data from src, (char **)tmp map
+to dst: scene->map_bak
+*/
+void	load_map_bak_data (char **s, t_scene *scene)
+{
+	char	**dst;
+	int 	i;
+	int		j;
+	int		len;
+	
+	dst = scene->map_bak;
+	i = 0;
+	while (s[i] != NULL)
+	{
+		j = 0;
+		len = ft_strlen(s[i]);
+		while (j < len)
+		{
+			dst[i][j] = s[i][j];
+			j++;
+		}	
+		i++;
+	}
+}
+
 
 /*
 returns the count of chars 'ch' found in (char **)map
@@ -844,7 +901,7 @@ int is_fill_char_at_toprow(t_scene *s)
 	char	*tmp;
 	
 	i = 0;
-	tmp = s->map[0];
+	tmp = s->map_bak[0];
 	while(tmp[i] != '\0')
 	{
 		if (tmp[i] == 'F')
@@ -866,7 +923,7 @@ int is_fill_char_at_botrow(t_scene *s)
 	char	*tmp;
 	
 	i = 0;
-	tmp = s->map[s->map_height - 1];
+	tmp = s->map_bak[s->map_height - 1];
 	while(tmp[i] != '\0')
 	{
 		if (tmp[i] == 'F')
@@ -888,7 +945,7 @@ int is_fill_char_at_lcol(t_scene *s)
 	i = 0;
 	while(s->map[i] != NULL)
 	{
-		if (s->map[i][0] == 'F')
+		if (s->map_bak[i][0] == 'F')
 			return (0);
 		i++;
 	}
@@ -907,7 +964,7 @@ int is_fill_char_at_rcol(t_scene *s)
 	i = 0;
 	while(s->map[i] != NULL)
 	{
-		if (s->map[i][s->map_width - 1] == 'F')
+		if (s->map_bak[i][s->map_width - 1] == 'F')
 			return (0);
 		i++;
 	}
@@ -948,10 +1005,10 @@ void	ff_mandatory(int i, int j, t_scene *s)
 		return ;
 	if (j < 0 || j > s->map_width - 1)
 		return ;
-	if (s->map[i][j] == '1' || s->map[i][j] == 'F')
+	if (s->map_bak[i][j] == '1' || s->map_bak[i][j] == 'F')
 		return ;
-	if (s->map[i][j] == '0' || ft_strchr("NSEW", s->map[i][j]))
-		s->map[i][j] = 'F';
+	if (s->map_bak[i][j] == '0' || ft_strchr("NSEW", s->map_bak[i][j]))
+		s->map_bak[i][j] = 'F';
 	ff_mandatory(i + 1, j, s);
 	ff_mandatory(i - 1, j, s);
 	ff_mandatory(i, j + 1, s);
@@ -968,10 +1025,10 @@ void	ff_bonus(int i, int j, t_scene *s)
 		return ;
 	if (j < 0 || j > s->map_width - 1)
 		return ;
-	if (s->map[i][j] == '1' || s->map[i][j] == 'F')
+	if (s->map_bak[i][j] == '1' || s->map_bak[i][j] == 'F')
 		return ;
-	if (s->map[i][j] == '0' || ft_strchr("NSEWCDXP", s->map[i][j]))
-		s->map[i][j] = 'F';
+	if (s->map_bak[i][j] == '0' || ft_strchr("NSEWCDXP", s->map_bak[i][j]))
+		s->map_bak[i][j] = 'F';
 	ff_bonus(i - 1, j, s);
 	ff_bonus(i + 1, j, s);
 	ff_bonus(i, j - 1, s);
@@ -1020,20 +1077,23 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 	replace_space_with_zero(scene->tmp_map_buf);
 	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
 		return (-1);
+	
 	tmp = ft_split(scene->tmp_map_buf, '\n');
+	
 	if (!tmp)
 	{
 		ft_putstr_fd("cub3D: Error ft_split tmp_map_buf\n", 2);
 		return (-1);
 	}
-	if (init_map_array(tmp, scene) == -1)
+	if (init_map_array(tmp, scene) == -1 || \
+		init_map_bak_array(tmp, scene) == -1)
 	{
 		ft_putstr_fd("cub3D: Error in malloc map\n", 2);
 		return (-1);
 	}
 	load_map_data(tmp, scene);
+	load_map_bak_data(tmp, scene);
 	
-	print_2d_map(tmp);
 	free_char_map(tmp);
 	
 	if (is_num_player_valid(scene->map) == -1)

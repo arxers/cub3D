@@ -58,7 +58,9 @@ int		is_tmp_map_buf_split_by_empty_line(char *s);
 
 void	count_map_area(char **map_temp, t_scene *scene);
 int		init_map_array(char **map_temp, t_scene *scene);
+int		init_map_bak_array(char **map_temp, t_scene *scene);
 void	load_map_data(char **s, t_scene *scene);
+void	load_map_bak_data (char **s, t_scene *scene);
 
 // CHECK map
 int		count_char_in_map(char **map, char ch);
