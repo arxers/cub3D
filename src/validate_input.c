@@ -27,7 +27,9 @@ void	print_scene_struct(t_scene *scene)
 	printf("EA:%s\n", scene->ea);
 	printf("WE:%s\n", scene->we);
 	printf("F:%s\n", scene->floor);
+	printf("hex_floor:%x\n", scene->hex_floor);
 	printf("C:%s\n", scene->ceiling);
+	printf("hex_ceiling:%x\n", scene->hex_ceiling);
 	printf("tmp_map_buf (char *) will begin on next line:\n%s\n", scene->tmp_map_buf);
 	printf("map ptr (char **): %p\n", scene->map);
 	print_2d_map(scene->map);
@@ -425,12 +427,25 @@ int is_valid_rgb_array(char *s)
 	return (0);
 }
 
-unsigned int	convert_rgb_array_to_int(char *s)
+/*
+converts an assumed VALID (char *) rgb array, eg. "0,42,255", to an unsigned int, and returns this value
+returns -1 (error)
+*/
+int	convert_rgb_array_to_int(char *s)
 {
-	unsigned int	res;
+	int				r;
+	int				g;
+	int				b;
+	char			**arr;
 
-
-	return (res);
+	arr = ft_split(s, ',');
+	if (!arr)
+		return (-1);
+	r = ft_atoi(arr[0]);
+	g = ft_atoi(arr[1]);
+	b = ft_atoi(arr[2]);
+	free_char_map(arr);
+	return ((r << 16) | (g << 8) | b);
 }
 
 /*
@@ -1074,6 +1089,8 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 		return (-1);
 	if (is_six_details_valid(scene) == -1)
 		return (-1);
+	scene->hex_floor = convert_rgb_array_to_int(scene->floor);
+	scene->hex_ceiling = convert_rgb_array_to_int(scene->ceiling);
 	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
 		return (-1);
 /*
@@ -1127,16 +1144,6 @@ if (is_map_char_valid_mandatory(scene->tmp_map_buf) == -1)	// swap with is_map_c
 //# DONE above
 //##############################################################################
 //# pending below
-
-/*
-to do 29 Oct 2024
-
-in t_scene struct, add: 
-floor_hex
-ceiling_hex
-*/
-
-
 
 /*
 returns 0 (success) after finding the first occurrence of a valid PLAYER char, 'N'/'S'/'E'/'W'

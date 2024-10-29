@@ -10,8 +10,8 @@ typedef struct s_scene
 	char *we;
 	char *floor;   // temp
 	char *ceiling; // temp
-	unsigned int hex_floor; // to do 
-	unsigned int hex_ceiling; // to do
+	unsigned int hex_floor;
+	unsigned int hex_ceiling;
 	char *tmp_map_buf; // temp
 	char **map;
 	char **map_bak;		// temp
