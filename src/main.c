@@ -6,11 +6,12 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/25 17:33:58 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/29 21:44:28 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3D.h"
+#include "../inc/validate_input.h"
 
 int	g_map_x = 40;
 int	g_map_y = 28;

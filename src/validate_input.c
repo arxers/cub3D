@@ -1,10 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   validate_input.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/29 21:20:28 by jsu               #+#    #+#             */
+/*   Updated: 2024/10/29 22:12:35 by jaslim           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../inc/validate_input.h"
 
 void	print_2d_map(char **s)
 {
-	int i;
+	int	i;
 	int	j;
-	
+
 	i = 0;
 	while (s[i] != NULL)
 	{
@@ -47,8 +59,8 @@ void	print_scene_struct(t_scene *scene)
 
 void	print_arr(char **arr)
 {
-	int i;
-	
+	int	i;
+
 	i = 0;
 	printf("print_arr() eg. result of ft_split()\n");
 	while (arr[i] != NULL)
@@ -58,21 +70,19 @@ void	print_arr(char **arr)
 	}
 }
 
-void flush_gnl(char *line, int map_fd)
+void	flush_gnl(char **line, int map_fd)
 {
-	while (line)
-	{
-		free(line);
-		line = get_next_line(map_fd);
-	}
+	if (*line)
+		free(*line);
+	get_next_line(-1);
 	close(map_fd);
-	line = NULL;
+	*line = NULL;
 }
 
-void free_char_map(char **arr)
+void	free_char_map(char **arr)
 {
-	int i;
-	
+	int	i;
+
 	i = 0;
 	while (arr[i] != NULL)
 	{
@@ -88,7 +98,7 @@ checks if alloc~ed elements are present, and if so, free() them!
 
 NOTE. no need to free() the t_scene elements that are NOT alloc~ed
 */
-void free_scene_struct(t_scene *s)
+void	free_scene_struct(t_scene *s)
 {
 	if (s->no != NULL)
 		free(s->no);
@@ -110,20 +120,18 @@ void free_scene_struct(t_scene *s)
 		free_char_map(s->map_bak);
 }
 
-
-
 /* 
 check num of cmdline args
 if argc != 2, return -1 (error)
 else return 0
 */
-int check_n_cmdline_args(int ac)
+int	check_n_cmdline_args(int ac)
 {
 	if (ac != 2)
 	{
 		ft_putstr_fd("cub3D: Invalid number of arguments\n", 2);
 		ft_putstr_fd("cub3D: usage: cub3D [*.cub]\n", 2);
-		return(-1);
+		return (-1);
 	}
 	return (0);
 }
@@ -136,7 +144,7 @@ else return -1
 int	is_map_a_dot_cub_file(char *s)
 {
 	int	len;
-	
+
 	len = ft_strlen(s);
 	if ((s[len - 1] == 'b') && \
 		(s[len - 2] == 'u') && \
@@ -158,8 +166,8 @@ else return -1
 */
 int	is_map_file_openable(char *mapfile)
 {
-	int map_fd;
-	
+	int	map_fd;
+
 	map_fd = open(mapfile, O_RDONLY);
 	if (map_fd == -1)
 	{
@@ -176,13 +184,12 @@ else return -1 (error, line does NOT start with an expected identifier)
 */
 int	is_start_with_expected_identifier(char *s)
 {
-	if (!ft_strncmp(s, "NO ", 3) 
+	if (!ft_strncmp(s, "NO ", 3)
 		|| !ft_strncmp(s, "SO ", 3)
 		|| !ft_strncmp(s, "EA ", 3)
 		|| !ft_strncmp(s, "WE ", 3)
 		|| !ft_strncmp(s, "F ", 2)
-		|| !ft_strncmp(s, "C ", 2)
-		)
+		|| !ft_strncmp(s, "C ", 2))
 		return (0);
 	else
 		return (-1);
@@ -197,7 +204,7 @@ else return (-1) for failure
 */
 int	is_first_detail(char *s, t_scene *scene)
 {
-	if ( (ft_strncmp(s, "NO ", 3) == 0 && scene->no == NULL) || \
+	if ((ft_strncmp(s, "NO ", 3) == 0 && scene->no == NULL) || \
 		(ft_strncmp(s, "SO ", 3) == 0 && scene->so == NULL) || \
 		(ft_strncmp(s, "EA ", 3) == 0 && scene->ea == NULL) || \
 		(ft_strncmp(s, "WE ", 3) == 0 && scene->we == NULL) || \
@@ -212,12 +219,12 @@ int	assign_f_or_c_to_scene_struct(char *s, t_scene **scene)
 	if (ft_strncmp(s, "F ", 2) == 0 && (*scene)->floor == NULL)
 	{
 		(*scene)->floor = ft_strdup(s);
-		return (0);	
+		return (0);
 	}
 	else if (ft_strncmp(s, "C ", 2) == 0 && (*scene)->ceiling == NULL)
 	{
 		(*scene)->ceiling = ft_strdup(s);
-		return (0);	
+		return (0);
 	}
 	return (-1);
 }
@@ -244,12 +251,12 @@ int	assign_wall_to_scene_struct(char *s, t_scene **scene)
 	else if (ft_strncmp(s, "EA ", 3) == 0 && (*scene)->ea == NULL)
 	{
 		(*scene)->ea = ft_strdup(s);
-		return (0);	
+		return (0);
 	}
 	else if (ft_strncmp(s, "WE ", 3) == 0 && (*scene)->we == NULL)
 	{
 		(*scene)->we = ft_strdup(s);
-		return (0);	
+		return (0);
 	}
 	return (-1);
 }
@@ -260,18 +267,16 @@ else return -1 (error; one or more of the details are missing)
 */
 int	is_all_six_scene_details_present(t_scene *scene)
 {
-	if ((scene->no != NULL) 	
-		&& (scene->so != NULL) 
-		&& (scene->ea != NULL) 
-		&& (scene->we != NULL) 
-		&& (scene->floor != NULL) 
+	if ((scene->no != NULL)
+		&& (scene->so != NULL)
+		&& (scene->ea != NULL)
+		&& (scene->we != NULL)
+		&& (scene->floor != NULL)
 		&& (scene->ceiling != NULL))
 		return (0);
 	else
 		return (-1);
 }
-
-
 
 /* 
 ft_split, the passed in arg // to discard identifiers at start of line
@@ -282,10 +287,10 @@ credits to @filim, for helping me "over the hump"!
 */
 char	*prepare_a_wall(char *s)
 {
-	char **arr;
-	char *tmp;
-	char *res;
-	
+	char	**arr;
+	char	*tmp;
+	char	*res;
+
 	tmp = NULL;
 	arr = NULL;
 	res = NULL;
@@ -295,7 +300,7 @@ char	*prepare_a_wall(char *s)
 	free(s);
 	tmp = ft_strdup(arr[1]);
 	if (!tmp)
-		return (NULL);	
+		return (NULL);
 	free_char_map(arr);
 	res = ft_strtrim(tmp, "\n");
 	if (!res)
@@ -320,17 +325,16 @@ int	prepare_walls(t_scene **scene)
 		(*scene)->ea == NULL || \
 		(*scene)->we == NULL || \
 		(*scene)->floor == NULL || \
-		(*scene)->ceiling == NULL
-		)
+		(*scene)->ceiling == NULL)
 		return (-1);
 	return (0);
 }
 
 // ft_strcmp(&(s1[len - 4]), ".xpm")
-int is_end_with_xpm(char *s)
+int	is_end_with_xpm(char *s)
 {
 	int	len;
-	
+
 	len = ft_strlen(s);
 	if ((s[len - 1] == 'm') && \
 		(s[len - 2] == 'p') && \
@@ -344,8 +348,8 @@ int is_end_with_xpm(char *s)
 
 int	ft_arr_len(char **arr)
 {
-	int i;
-	
+	int	i;
+
 	i = 0;
 	while (arr[i] != NULL)
 		i++;
@@ -366,9 +370,9 @@ else
 */
 int	is_valid_rgb_value(char *s)
 {
-	int i;
+	int	i;
 	int	len;
-	
+
 	len = ft_strlen(s);
 	if (len == 0 || len > 3)
 		return (-1);
@@ -385,7 +389,6 @@ int	is_valid_rgb_value(char *s)
 	return (-1);
 }
 
-
 /*
 arr = ft_split(), passed in string argument (char *), comma as delimiter 
 
@@ -399,18 +402,18 @@ check if int is between 0 to 255 inclusive
 return -1 (error)
 else return 0 (success)
 */
-int is_valid_rgb_array(char *s)
+int	is_valid_rgb_array(char *s)
 {
-	char 	**arr;
+	char	**arr;
 	int		i;
-	
+
 	arr = ft_split(s, ',');
 	if (!arr)
 		return (-1);
 	i = ft_arr_len(arr);
 	if (i != 3)
 	{
-		free_char_map(arr);	
+		free_char_map(arr);
 		return (-1);
 	}
 	i = 0;
@@ -418,7 +421,7 @@ int is_valid_rgb_array(char *s)
 	{
 		if ((is_valid_rgb_value(arr[i])) == -1)
 		{
-			free_char_map(arr);	
+			free_char_map(arr);
 			return (-1);
 		}
 		i++;
@@ -428,7 +431,8 @@ int is_valid_rgb_array(char *s)
 }
 
 /*
-converts an assumed VALID (char *) rgb array, eg. "0,42,255", to an unsigned int, and returns this value
+converts an assumed VALID (char *) rgb array, eg. "0,42,255",
+to an unsigned int, and returns this value
 returns -1 (error)
 */
 int	convert_rgb_array_to_int(char *s)
@@ -456,7 +460,7 @@ TWO colors, are 3 integers, ranging from 0 to 255 inclusive
 if any error, return (-1)
 else return (0), success
 */
-int is_six_details_valid(t_scene *scene)
+int	is_six_details_valid(t_scene *scene)
 {
 	if (is_end_with_xpm(scene->no) == -1 || \
 		is_end_with_xpm(scene->so) == -1 || \
@@ -469,7 +473,7 @@ int is_six_details_valid(t_scene *scene)
 	if (is_valid_rgb_array(scene->floor) == -1 || \
 		is_valid_rgb_array(scene->ceiling) == -1)
 	{
-		ft_putstr_fd("cub3D: Problematic RGB array value(s)\n", 2);	
+		ft_putstr_fd("cub3D: Problematic RGB array value(s)\n", 2);
 		return (-1);
 	}	
 	return (0);
@@ -496,7 +500,7 @@ int	load_map_buffer(char *line, int map_fd, t_scene **scene)
 		if ((*scene)->tmp_map_buf == NULL)
 		{
 			ft_putstr_fd("cub3D: Cannot load map section)\n", 2);
-			flush_gnl(line, map_fd);
+			flush_gnl(&line, map_fd);
 			return (-1);
 		}
 		free(line);
@@ -505,7 +509,6 @@ int	load_map_buffer(char *line, int map_fd, t_scene **scene)
 	close(map_fd);
 	return (0);
 }
-
 
 /*
 read map.cub line by line, with gnl()
@@ -519,9 +522,34 @@ read map.cub line by line, with gnl()
 	err msg, flush_gnl(), return (-1)
 
 */
+
+int	load_scene_details_to_struct(char **line, int map_fd, t_scene **scene)
+{
+	if (ft_strcmp(*line, "\n") == 0)
+	{
+		free(*line);
+		*line = get_next_line(map_fd);
+		return (1);
+	}
+	else if (is_start_with_expected_identifier(*line) == 0 && \
+		is_first_detail(*line, *scene) == 0)
+	{
+		assign_wall_to_scene_struct(*line, scene);
+		assign_f_or_c_to_scene_struct(*line, scene);
+		return (0);
+	}
+	else
+	{
+		ft_putstr_fd("cub3D: Error in line for scene details\n", 2);
+		flush_gnl(line, map_fd);
+		return (-1);
+	}		
+}
+
 int	load_scene_details(int map_fd, t_scene **scene)
 {
-	char 	*line;
+	char	*line;
+	int		res;
 
 	line = get_next_line(map_fd);
 	while (line)
@@ -531,28 +559,15 @@ int	load_scene_details(int map_fd, t_scene **scene)
 			if (load_map_buffer(line, map_fd, scene) == -1)
 			{
 				ft_putstr_fd("cub3D: Cannot load map\n", 2);
-				return (-1);			
+				return (-1);
 			}
 			return (0);
 		}
-		if (ft_strcmp(line, "\n") == 0)
-		{
-			free(line);
-			line = get_next_line(map_fd);
+		res = load_scene_details_to_struct(&line, map_fd, scene);
+		if (res == 1)
 			continue ;
-		}
-		else if (is_start_with_expected_identifier(line) == 0 && \
-			is_first_detail(line, *scene) == 0)
-		{
-			assign_wall_to_scene_struct(line, scene);
-			assign_f_or_c_to_scene_struct(line, scene);
-		}
-		else
-		{
-			ft_putstr_fd("cub3D: Error in line for scene details\n", 2);
-			flush_gnl(line, map_fd);
+		else if (res == -1)
 			return (-1);
-		}		
 		free(line);
 		line = get_next_line(map_fd);
 	}
@@ -580,41 +595,39 @@ X: Xeno
 */
 int	is_map_char_valid_bonus(char *s)
 {
-	int 	i;
-	char	ref[] = " \n10NSEWCDPX";
-	
+	const char	ref[] = " \n10NSEWCDPX";
+	int			i;
+
 	i = 0;
 	while (s[i] != '\0')
 	{
 		if (ft_strchr(ref, s[i]) == NULL)
 		{
-			ft_putstr_fd("cub3D: Invalid map char\n", 2);		
+			ft_putstr_fd("cub3D: Invalid map char\n", 2);
 			return (-1);
 		}
-		i++;	
+		i++;
 	}
 	return (0);
 }
 
 int	is_map_char_valid_mandatory(char *s)
 {
-	int 	i;
-	char	ref[] = " \n10NSEW";
-	
+	const char	ref[] = " \n10NSEW";
+	int			i;
+
 	i = 0;
 	while (s[i] != '\0')
 	{
 		if (ft_strchr(ref, s[i]) == NULL)
 		{
-			ft_putstr_fd("cub3D: Invalid map char\n", 2);		
+			ft_putstr_fd("cub3D: Invalid map char\n", 2);
 			return (-1);
 		}
-		i++;	
+		i++;
 	}
 	return (0);
 }
-
-
 
 /*
 trim away:
@@ -625,12 +638,12 @@ int	trim_tmp_map_buf(t_scene **scene)
 {
 	char	*tmp;
 	char	*res;
-	
+
 	tmp = (*scene)->tmp_map_buf;
 	res = ft_strtrim(tmp, "\n");
 	if (!res)
 	{
-		ft_putstr_fd("cub3D: Problem while preparing map\n", 2);	
+		ft_putstr_fd("cub3D: Problem while preparing map\n", 2);
 		return (-1);
 	}
 	(*scene)->tmp_map_buf = res;
@@ -649,7 +662,7 @@ so the next check, is_tmp_map_buf_split_by_empty_line(), will work
 void	replace_space_with_zero(char *s)
 {
 	int		i;
-	
+
 	i = 0;
 	while (s[i] != '\0')
 	{
@@ -666,12 +679,12 @@ then return -1 (error)
 */
 int	is_tmp_map_buf_split_by_empty_line(char *s)
 {
-	int len;
-	
+	int	len;
+
 	len = ft_strlen(s);
 	if (ft_strnstr(s, "\n\n", len) != NULL)
 	{
-		ft_putstr_fd("cub3D: empty line found in between map lines\n", 2);	
+		ft_putstr_fd("cub3D: empty line found in between map lines\n", 2);
 		return (-1);
 	}
 	return (0);
@@ -711,31 +724,20 @@ void	count_map_area(char **map_temp, t_scene *scene)
 accepts a (char **)tmp_map, and ptr to scene struct
 callocs space for (char **) for scene->map
 */
-int	init_map_array(char **map_temp, t_scene *scene)
+int	init_map_array(char ***map, char **map_temp, t_scene *scene)
 {
 	t_point	index;
-	
+
 	count_map_area(map_temp, scene);
-	scene->map = ft_calloc(scene->map_dim.y + 1, sizeof(char *));
-	if (!scene->map)
+	*map = ft_calloc(scene->map_dim.y + 1, sizeof(char *));
+	if (!*map)
 		return (-1);
 	index.y = 0;
 	while (index.y < scene->map_dim.y)
 	{
-		scene->map[index.y] = ft_calloc (scene->map_dim.x + 1, sizeof(char));
-		if (!scene->map[index.y])
+		(*map)[index.y] = ft_calloc (scene->map_dim.x + 1, sizeof(char));
+		if (!(*map)[index.y])
 			return (-1);
-		index.y++;
-	}
-	index.y = 0;
-	while (scene->map[index.y])
-	{
-		index.x = 0;
-		while (index.x < scene->map_dim.x)
-		{
-			scene->map[index.y][index.x] = '0';
-			index.x++;
-		}
 		index.y++;
 	}
 	return (0);
@@ -745,35 +747,35 @@ int	init_map_array(char **map_temp, t_scene *scene)
 accepts a (char **)tmp_map, and ptr to scene struct
 callocs space for (char **) for scene->map_bak
 */
-int	init_map_bak_array(char **map_temp, t_scene *scene)
-{
-	t_point	index;
-	
-	count_map_area(map_temp, scene);
-	scene->map_bak = ft_calloc(scene->map_dim.y + 1, sizeof(char *));
-	if (!scene->map_bak)
-		return (-1);
-	index.y = 0;
-	while (index.y < scene->map_dim.y)
-	{
-		scene->map_bak[index.y] = ft_calloc (scene->map_dim.x + 1, sizeof(char));
-		if (!scene->map_bak[index.y])
-			return (-1);
-		index.y++;
-	}
-	index.y = 0;
-	while (scene->map_bak[index.y])
-	{
-		index.x = 0;
-		while (index.x < scene->map_dim.x)
-		{
-			scene->map_bak[index.y][index.x] = '0';
-			index.x++;
-		}
-		index.y++;
-	}
-	return (0);
-}
+// int	init_map_bak_array(char **map_temp, t_scene *scene)
+// {
+// 	t_point	index;
+
+// 	count_map_area(map_temp, scene);
+// 	scene->map_bak = ft_calloc(scene->map_dim.y + 1, sizeof(char *));
+// 	if (!scene->map_bak)
+// 		return (-1);
+// 	index.y = 0;
+// 	while (index.y < scene->map_dim.y)
+// 	{
+// 		scene->map_bak[index.y] = ft_calloc(scene->map_dim.x + 1, sizeof(char));
+// 		if (!scene->map_bak[index.y])
+// 			return (-1);
+// 		index.y++;
+// 	}
+// 	index.y = 0;
+// 	while (scene->map_bak[index.y])
+// 	{
+// 		index.x = 0;
+// 		while (index.x < scene->map_dim.x)
+// 		{
+// 			scene->map_bak[index.y][index.x] = '0';
+// 			index.x++;
+// 		}
+// 		index.y++;
+// 	}
+// 	return (0);
+// }
 
 /*
 copy data from src, (char **)tmp map
@@ -782,10 +784,10 @@ to scene->map
 void	load_map_data(char **s, t_scene *scene)
 {
 	char	**dst;
-	int 	i;
+	int		i;
 	int		j;
 	int		len;
-	
+
 	dst = scene->map;
 	i = 0;
 	while (s[i] != NULL)
@@ -805,13 +807,13 @@ void	load_map_data(char **s, t_scene *scene)
 copy data from src, (char **)tmp map
 to dst: scene->map_bak
 */
-void	load_map_bak_data (char **s, t_scene *scene)
+void	load_map_bak_data(char **s, t_scene *scene)
 {
 	char	**dst;
-	int 	i;
+	int		i;
 	int		j;
 	int		len;
-	
+
 	dst = scene->map_bak;
 	i = 0;
 	while (s[i] != NULL)
@@ -827,7 +829,6 @@ void	load_map_bak_data (char **s, t_scene *scene)
 	}
 }
 
-
 /*
 returns the count of chars 'ch' found in (char **)map
 */
@@ -836,13 +837,13 @@ int	count_char_in_map(char **map, char ch)
 	int	i;
 	int	j;
 	int	res;
-	
+
 	res = 0;
 	i = 0;
 	while (map[i] != NULL)
 	{
 		j = 0;
-		while(map[i][j] != '\0')
+		while (map[i][j] != '\0')
 		{
 			if (map[i][j] == ch)
 				res += 1;
@@ -862,16 +863,16 @@ else return 0 (success)
 */
 int	is_num_player_valid(char **map)
 {
-	int num_N;
-	int num_S;
-	int num_E;
-	int num_W;
-	
-	num_N = count_char_in_map(map, 'N');
-	num_S = count_char_in_map(map, 'S');
-	num_E = count_char_in_map(map, 'E');
-	num_W = count_char_in_map(map, 'W');
-	if (num_N + num_S + num_E + num_W != 1)
+	int	num_n;
+	int	num_s;
+	int	num_e;
+	int	num_w;
+
+	num_n = count_char_in_map(map, 'N');
+	num_s = count_char_in_map(map, 'S');
+	num_e = count_char_in_map(map, 'E');
+	num_w = count_char_in_map(map, 'W');
+	if (num_n + num_s + num_e + num_w != 1)
 	{
 		ft_putstr_fd("cub3D: Incorrect number of PLAYER char in map\n", 2);
 		return (-1);
@@ -879,7 +880,7 @@ int	is_num_player_valid(char **map)
 	return (0);
 }
 
-int is_num_xeno_valid(char **map)
+int	is_num_xeno_valid(char **map)
 {
 	int	num_enemy;
 
@@ -905,23 +906,20 @@ int	is_num_powerloader_valid(char **map)
 	return (0);
 }
 
-
-
-
 /*
 set a tmp (char *) ptr to the TOP row of map
 iterate thru chars in the row,
 if fill char 'F' found, return 0 (success)
 else return -1 (failure)
 */
-int is_fill_char_at_toprow(t_scene *s)
+int	is_fill_char_at_toprow(t_scene *s)
 {
-	int 	i;
+	int		i;
 	char	*tmp;
-	
+
 	i = 0;
 	tmp = s->map_bak[0];
-	while(tmp[i] != '\0')
+	while (tmp[i] != '\0')
 	{
 		if (tmp[i] == 'F')
 			return (0);
@@ -936,14 +934,14 @@ iterate thru chars in the row,
 if fill char 'F' found, return 0 (success)
 else return -1 (failure)
 */
-int is_fill_char_at_botrow(t_scene *s)
+int	is_fill_char_at_botrow(t_scene *s)
 {
-	int 	i;
+	int		i;
 	char	*tmp;
-	
+
 	i = 0;
 	tmp = s->map_bak[s->map_dim.y - 1];
-	while(tmp[i] != '\0')
+	while (tmp[i] != '\0')
 	{
 		if (tmp[i] == 'F')
 			return (0);
@@ -957,12 +955,12 @@ iterate thru rows in the map
 if fill char 'F' found in LEFT col, return 0 (success)
 else return -1 (failure)
 */
-int is_fill_char_at_lcol(t_scene *s)
+int	is_fill_char_at_lcol(t_scene *s)
 {
-	int 	i;
-	
+	int	i;
+
 	i = 0;
-	while(s->map[i] != NULL)
+	while (s->map[i] != NULL)
 	{
 		if (s->map_bak[i][0] == 'F')
 			return (0);
@@ -976,12 +974,12 @@ iterate thru rows in the map
 if fill char 'F' found in RIGHT col, return 0 (success)
 else return -1 (failure)
 */
-int is_fill_char_at_rcol(t_scene *s)
+int	is_fill_char_at_rcol(t_scene *s)
 {
-	int 	i;
-	
+	int	i;
+
 	i = 0;
-	while(s->map[i] != NULL)
+	while (s->map[i] != NULL)
 	{
 		if (s->map_bak[i][s->map_dim.x - 1] == 'F')
 			return (0);
@@ -1003,7 +1001,7 @@ int	is_fill_char_at_map_border(t_scene *s)
 		(is_fill_char_at_lcol(s) == 0) || \
 		(is_fill_char_at_rcol(s) == 0))
 	{
-		ft_putstr_fd("cub3D: Flood fill char found at border wall\n", 2);	
+		ft_putstr_fd("cub3D: Flood fill char found at border wall\n", 2);
 		return (0);
 	}
 	return (-1);
@@ -1076,25 +1074,23 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 {
 	int		map_fd;
 	char	**tmp;
-	
+
 	map_fd = open(mapfile, O_RDONLY);
 	if (map_fd == -1)
 	{
 		ft_putstr_fd("cub3D: Map cannot be opened\n", 2);
 		return (-1);
 	}
-	if (load_scene_details(map_fd, &scene) == -1)
-		return (-1);
-	if (prepare_walls(&scene) == -1)
-		return (-1);
-	if (is_six_details_valid(scene) == -1)
+	if (load_scene_details(map_fd, &scene) == -1 || prepare_walls(&scene) == -1
+		|| is_six_details_valid(scene) == -1)
 		return (-1);
 	scene->hex_floor = convert_rgb_array_to_int(scene->floor);
 	scene->hex_ceiling = convert_rgb_array_to_int(scene->ceiling);
 	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
 		return (-1);
 /*
-if (is_map_char_valid_mandatory(scene->tmp_map_buf) == -1)	// swap with is_map_char_valid_bonus()
+if (is_map_char_valid_mandatory(scene->tmp_map_buf) == -1)
+// swap with is_map_char_valid_bonus()
 		return (-1);
 */	
 	if (trim_tmp_map_buf(&scene) == -1)
@@ -1102,42 +1098,31 @@ if (is_map_char_valid_mandatory(scene->tmp_map_buf) == -1)	// swap with is_map_c
 	replace_space_with_zero(scene->tmp_map_buf);
 	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
 		return (-1);
-	
 	tmp = ft_split(scene->tmp_map_buf, '\n');
-	
 	if (!tmp)
 	{
 		ft_putstr_fd("cub3D: Error ft_split tmp_map_buf\n", 2);
 		return (-1);
 	}
-	if (init_map_array(tmp, scene) == -1 || \
-		init_map_bak_array(tmp, scene) == -1)
+	if (init_map_array(&scene->map, tmp, scene) == -1 || \
+		init_map_array(&scene->map_bak, tmp, scene) == -1)
 	{
 		ft_putstr_fd("cub3D: Error in malloc map\n", 2);
 		return (-1);
 	}
 	load_map_data(tmp, scene);
 	load_map_bak_data(tmp, scene);
-	
 	free_char_map(tmp);
-	
-	if (is_num_player_valid(scene->map) == -1)
+	if (is_num_player_valid(scene->map) == -1
+		|| load_player_pos(scene->map, scene) == -1
+		|| is_num_xeno_valid(scene->map) == -1
+		|| load_xeno_pos(scene->map, scene) == -1
+		|| is_num_powerloader_valid(scene->map) == -1
+		|| load_powerloader_pos(scene->map, scene) == -1)
 		return (-1);
-	if (load_player_pos(scene->map, scene) == -1)
-		return (-1);
-	if (is_num_xeno_valid(scene->map) == -1)
-		return (-1);
-	if (load_xeno_pos(scene->map, scene) == -1)
-		return (-1);
-	if (is_num_powerloader_valid(scene->map) == -1)
-		return (-1);	
-	if (load_powerloader_pos(scene->map, scene) == -1)
-		return (-1);
-
 	ff_bonus(scene->pos_player.x, scene->pos_player.y, scene);
 	if (is_fill_char_at_map_border(scene) == 0)
 		return (-1);
-	
 	return (0);
 }
 
@@ -1146,15 +1131,16 @@ if (is_map_char_valid_mandatory(scene->tmp_map_buf) == -1)	// swap with is_map_c
 //# pending below
 
 /*
-returns 0 (success) after finding the first occurrence of a valid PLAYER char, 'N'/'S'/'E'/'W'
+returns 0 (success) after finding the first occurrence of a valid PLAYER char,
+'N'/'S'/'E'/'W'
 SIDE EFFECT: load its coordinates into (t_point) scene->pos_player
 */
-int load_player_pos(char **map, t_scene *scene)
+int	load_player_pos(char **map, t_scene *scene)
 {
 	int		i;
 	int		j;
-	char 	*player;
-	
+	char	*player;
+
 	player = "NSEW";
 	i = 0;
 	while (map[i] != NULL)
@@ -1180,12 +1166,12 @@ int load_player_pos(char **map, t_scene *scene)
 returns 0 (success) after finding the first occurrence of a valid ENEMY char, 'X'
 SIDE EFFECT: load coordinates into (t_point) scene->pos_xeno
 */
-int load_xeno_pos(char **map, t_scene *scene)
+int	load_xeno_pos(char **map, t_scene *scene)
 {
 	int		i;
 	int		j;
-	char 	*enemy;
-	
+	char	*enemy;
+
 	enemy = "X";
 	i = 0;
 	while (map[i] != NULL)
@@ -1211,12 +1197,12 @@ int load_xeno_pos(char **map, t_scene *scene)
 returns 0 (success) after finding the first occurrence of a valid ENEMY char, 'X'
 SIDE EFFECT: load coordinates into (t_point) scene->pos_xeno
 */
-int load_powerloader_pos(char **map, t_scene *scene)
+int	load_powerloader_pos(char **map, t_scene *scene)
 {
 	int		i;
 	int		j;
-	char 	*armor;
-	
+	char	*armor;
+
 	armor = "P";
 	i = 0;
 	while (map[i] != NULL)

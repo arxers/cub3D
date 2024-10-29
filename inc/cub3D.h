@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/09 20:15:01 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/29 21:07:06 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@
 # include <stdio.h>
 # include <sys/time.h>
 # include <fcntl.h>
-
-# include "./validate_input.h"
 
 // UI
 # define UI_PWL_TRUE "ENTER P-5000 POWERED WORK LOADER"
