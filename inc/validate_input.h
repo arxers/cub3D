@@ -8,6 +8,7 @@ typedef struct s_scene
 	char	*ceiling;
 	char	*tmp_map_buf;
 	char	**map;
+	char	**map_bak;
 	int		map_width;
 	int		map_height;
 	int		player_start_x;

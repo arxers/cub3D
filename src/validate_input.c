@@ -31,6 +31,7 @@ void	print_scene_struct(t_scene *scene)
 	printf("tmp_map_buf (char *) will begin on next line:\n%s\n", scene->tmp_map_buf);
 	printf("map ptr (char **): %p\n", scene->map);
 	print_2d_map(scene->map);
+	print_2d_map(scene->map_bak);
 	printf("map_width: %d\n", scene->map_width);
 	printf("map_height: %d\n", scene->map_height);
 	printf("player_start_x: %d\n", scene->player_start_x);
@@ -98,6 +99,8 @@ void free_scene_struct(t_scene *s)
 		free(s->tmp_map_buf);
 	if (s->map != NULL)
 		free_char_map(s->map);
+	if (s->map_bak != NULL)
+		free_char_map(s->map_bak);
 }
 
 
@@ -1029,14 +1032,25 @@ int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
 		return (-1);
 	}
 	load_map_data(tmp, scene);
+	
+	print_2d_map(tmp);
 	free_char_map(tmp);
+	
 	if (is_num_player_valid(scene->map) == -1)
 		return (-1);
 	if (load_player_pos(scene->map, scene) == -1)
 		return (-1);
 	ff_mandatory(scene->player_start_x, scene->player_start_y, scene);
 	if (is_fill_char_at_map_border(scene) == 0)
-		return (-1);	
+		return (-1);
+	/*
+	currently, scene->map contains the flood-filled version of the map
+	
+	OPTION #1: call load_map_data(tmp, scene) again, free_char_map(tmp) after
+	
+	OPTION #2: duplicate scene->map, for flood fill, and free_char_map(ff~ed map) after
+	
+	*/
 	return (0);
 }
 
