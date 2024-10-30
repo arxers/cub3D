@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/31 01:19:09 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/31 01:28:50 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -300,10 +300,10 @@ int	load_pwl_xpms(t_game *game)
 
 int	load_xpms(t_game *game)
 {
-	if (load_xpm(game->mlx, "textures/wall/wall1.xpm", &game->img[T_NORTH])
-		|| load_xpm(game->mlx, "textures/wall/wall2.xpm", &game->img[T_SOUTH])
-		|| load_xpm(game->mlx, "textures/wall/wall3.xpm", &game->img[T_EAST])
-		|| load_xpm(game->mlx, "textures/wall/wall4.xpm", &game->img[T_WEST])
+	if (load_xpm(game->mlx, game->scene.no, &game->img[T_NORTH])
+		|| load_xpm(game->mlx, game->scene.so, &game->img[T_SOUTH])
+		|| load_xpm(game->mlx, game->scene.ea, &game->img[T_EAST])
+		|| load_xpm(game->mlx, game->scene.we, &game->img[T_WEST])
 		|| load_xpm(game->mlx, "textures/door.xpm", &game->img[T_DOOR_CLOSE])
 		|| load_xpm(game->mlx, "textures/shift_tab.xpm", &game->img[T_PAUSE])
 		|| load_xpm(game->mlx, "textures/bg_dither.xpm", &game->img[T_DITHER])
@@ -2071,9 +2071,6 @@ int	init_game(t_game *game, t_scene scene)
 	if (game->mlx == NULL)
 		return (1);
 	mlx_do_key_autorepeatoff(game->mlx);
-	game->win = mlx_new_window(game->mlx, RES_X, RES_Y, "cub3D");
-	if (game->win == NULL)
-		return (1);
 	if (init_img(game->mlx, &game->img[T_WIN], RES_X, RES_Y) == -1)
 		return (2);
 	if (init_minimap(game, scene.map_dim) == -1
@@ -2089,6 +2086,9 @@ int	init_game(t_game *game, t_scene scene)
 	game->light.min = 0.25;
 	game->light.max = 2.5;
 	game->light.ambient = 0.15;
+	game->win = mlx_new_window(game->mlx, RES_X, RES_Y, "cub3D");
+	if (game->win == NULL)
+		return (1);
 	mlx_mouse_move(game->mlx, game->win, RES_X2, RES_Y2);
 	return (0);
 }
