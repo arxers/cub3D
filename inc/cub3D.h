@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/29 21:07:06 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/31 01:20:41 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@
 # define WALL 64
 
 // map
-# define MAP_CELL_SIZE 24
+# define MAP_CELL_SIZE 16
 # define MAP_COLOR 0x0ADAF3
 
 // Colors
@@ -231,7 +231,7 @@ typedef struct s_frame_data
 
 typedef struct s_map
 {
-	int				**grid;
+	int				**arr;
 	t_point			size;
 	t_point			offset;
 	char			update;
@@ -283,8 +283,28 @@ typedef struct s_item
 	int				collected;
 }					t_item;
 
+typedef struct s_scene
+{
+	char			*no;
+	char			*so;
+	char			*ea;
+	char			*we;
+	char			*floor;
+	char			*ceiling;
+	unsigned int	hex_floor;
+	unsigned int	hex_ceiling;
+	char			*tmp_map_buf;
+	char			**map;
+	char			**map_bak;
+	t_point			map_dim;
+	t_point			pos_player;
+	t_point			pos_xeno;
+	t_point			pos_powerloader;
+}					t_scene;
+
 typedef struct s_game
 {
+	t_scene			scene;
 	t_img			img[IMG_MAX];
 	char			state[STATE_MAX];
 	struct timeval	timer[TIMER_MAX];

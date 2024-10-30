@@ -2,25 +2,6 @@
 # define VALIDATE_INPUT_H
 # include "cub3D.h"
 
-typedef struct s_scene
-{
-	char			*no;
-	char			*so;
-	char			*ea;
-	char			*we;
-	char			*floor;
-	char			*ceiling;
-	unsigned int	hex_floor;
-	unsigned int	hex_ceiling;
-	char			*tmp_map_buf;
-	char			**map;
-	char			**map_bak;
-	t_point			map_dim;
-	t_point			pos_player;
-	t_point			pos_xeno;
-	t_point			pos_powerloader;
-}					t_scene;
-
 // for debugging only
 void				print_2d_map(char **s);
 void				print_scene_struct(t_scene *scene);

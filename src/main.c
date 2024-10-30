@@ -6,51 +6,31 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/29 21:44:28 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/31 01:19:09 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3D.h"
 #include "../inc/validate_input.h"
 
-int	g_map_x = 40;
-int	g_map_y = 28;
-int	g_map[28][40] = {
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,3,0,1,1,-3,1,-3,2,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,2,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,2,-3,1},
-{1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,1,0,0,1,1,1},
-{1,1,1,1,0,0,-3,0,0,0,0,0,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1,1},
-{1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-{1,0,0,1,0,0,0,2,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-{1,0,0,1,0,0,0,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-{1,0,0,2,0,0,0,1,1,1,1,0,0,1,1,2,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-{1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,-3,1,1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1},
-{1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,0,0,2,0,1,0,2,0,0,0,0,0,0,0,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,1,2,1,1,1,0,1,1,0,0,0,0,1,0,0,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,2,0,0,1,0,1,1,1,2,1,1,1,0,0,0,1,0,0,2,0,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,1,1,1,1,0,0,0,1,1,0,0,0,1,0,0,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1,-3,2,0,0,0,0,0,0,0,0,1,0,0,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,2,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-};
-
 void	ft_destroy_image(void *mlx_ptr, t_img *img)
 {
 	if (mlx_ptr && img->img)
 		mlx_destroy_image(mlx_ptr, img->img);
 	img->img = NULL;
+}
+
+void	free_int_array(int	**output, int size)
+{
+	int	i;
+
+	i = 0;
+	while (i < size)
+	{
+		ft_free_void((void **)&output[i]);
+		i++;
+	}
+	free(output);
 }
 
 int	cleanup(t_game *game, unsigned char status, char *msg)
@@ -72,6 +52,7 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 	ft_free_void(&game->mlx);
 	ft_free_void((void **)&game->item.arr);
 	ft_free(&game->frame.fps_str);
+	free_int_array(game->map.arr, game->map.size.y);
 	if (msg)
 		ft_putstr_fd(msg, 2);
 	exit(status);
@@ -498,9 +479,8 @@ int	validate_input(int ac, char **av, t_scene *scene)
 		return (-1);
 	if (load_scene(av[1], scene) == -1)
 		return (-1);
-	
-
-
+	return (0);
+}
 /*
 last updated 24 Oct 2024
 restart at trim_tmp_map_buf() in validate_input.c
@@ -509,8 +489,6 @@ next task: check for empty line(s) in between map lines, in tmp_map_buf
 with ft_strnstr
 
 */
-	return (0); // successfully validated input file, map.cub
-}
 
 // void	ft_destroy_image(void *mlx_ptr, void **img)
 // {
@@ -590,13 +568,14 @@ void	update_map_tiles(t_game *game)
 		game->img[T_MAP_TILES].size, MAP_COLOR);
 	count.y = 0;
 	origin.y = 0;
-	while (count.y < g_map_y)
+	while (count.y < game->map.size.y)
 	{
 		origin.x = 0;
 		count.x = 0;
-		while (count.x < g_map_x)
+		while (count.x < game->map.size.x)
 		{
-			draw_tile(&game->img[T_MAP_TILES], origin, g_map[count.y][count.x]);
+			draw_tile(&game->img[T_MAP_TILES], origin,
+				game->map.arr[count.y][count.x]);
 			count.x++;
 			origin.x += MAP_CELL_SIZE;
 		}
@@ -625,6 +604,52 @@ void	fill_img(t_img *img, unsigned int color)
 	}
 }
 
+void	convert_row_to_ints(int *output_row, char *input_row)
+{
+	int	x;
+
+	x = 0;
+	while (input_row[x])
+	{
+		if (input_row[x] == '1')
+			output_row[x] = 1;
+		else if (input_row[x] == 'D')
+			output_row[x] = 2;
+		else if (input_row[x] == 'P')
+			output_row[x] = 3;
+		else if (input_row[x] == 'C')
+			output_row[x] = -3;
+		else
+			output_row[x] = 0;
+		x++;
+	}
+}
+
+int	**char_to_int_map(char **input)
+{
+	t_point	it;
+	int		num_strings;
+	int		**output;
+
+	num_strings = ft_count_strings(input);
+	output = ft_calloc(num_strings, sizeof(int *));
+	if (!output)
+		return (NULL);
+	it.y = 0;
+	while (it.y < num_strings)
+	{
+		output[it.y] = ft_calloc(ft_strlen(input[it.y]), sizeof(int));
+		if (!output[it.y])
+		{
+			free_int_array(output, it.y);
+			return (NULL);
+		}
+		convert_row_to_ints(output[it.y], input[it.y]);
+		it.y++;
+	}
+	return (output);
+}
+
 int	init_minimap(t_game *game, t_point map_grid_size)
 {
 	t_point	map;
@@ -640,6 +665,9 @@ int	init_minimap(t_game *game, t_point map_grid_size)
 		|| init_img(game->mlx, &game->img[T_MAP_MASK], mask.x, mask.y) == -1
 		|| init_img(game->mlx, &game->img[T_MAP_BG], mask.x, mask.y) == -1)
 		return (-1);
+	game->map.arr = char_to_int_map(game->scene.map);
+	game->map.size.x = game->scene.map_dim.x;
+	game->map.size.y = game->scene.map_dim.y;
 	fill_img(&game->img[T_MAP_ENEMY_PATH], MAGENTA);
 	game->map.offset.x = RES_X2 - game->img[T_MAP_MASK].size.x * 0.5;
 	game->map.offset.y = RES_Y - game->img[T_MAP_MASK].size.x - MAP_CELL_SIZE;
@@ -712,9 +740,10 @@ int	key_release(unsigned int key, t_game *game)
 	return (0);
 }
 
-int	out_of_bounds(t_fpoint map)
+int	out_of_bounds(t_fpoint map, t_game *game)
 {
-	if (map.x < 0 || map.y < 0 || map.x >= g_map_x || map.y >= g_map_y)
+	if (map.x < 0 || map.y < 0
+		|| map.x >= game->map.size.x || map.y >= game->map.size.y)
 		return (1);
 	return (0);
 }
@@ -737,7 +766,7 @@ void	set_dda_step_side(t_ray *r)
 	}
 }
 
-int	dda_interact(t_ray *r)
+int	dda_interact(t_ray *r, t_game *game)
 {
 	int	i;
 	int	tile_hit;
@@ -746,15 +775,15 @@ int	dda_interact(t_ray *r)
 	while (i < 3)
 	{
 		set_dda_step_side(r);
-		if (out_of_bounds(r->map))
+		if (out_of_bounds(r->map, game))
 			return (0);
-		tile_hit = g_map[(int)r->map.y][(int)r->map.x];
+		tile_hit = game->map.arr[(int)r->map.y][(int)r->map.x];
 		if (tile_hit == TILE_WALL)
 			return (0);
-		if (!out_of_bounds(r->map)
+		if (!out_of_bounds(r->map, game)
 			&& (tile_hit == TILE_PWL || tile_hit == TILE_DOOR
 				|| tile_hit == TILE_DOOR_OPEN))
-			return (g_map[(int)r->map.y][(int)r->map.x]);
+			return (game->map.arr[(int)r->map.y][(int)r->map.x]);
 		i++;
 	}
 	return (0);
@@ -856,7 +885,8 @@ void	display_ui_msg(t_game *game, char *key, char *msg)
 
 void	interact_door(t_game *game, t_ray r)
 {
-	g_map[(int)r.map.y][(int)r.map.x] = -g_map[(int)r.map.y][(int)r.map.x];
+	game->map.arr[(int)r.map.y][(int)r.map.x]
+		= -game->map.arr[(int)r.map.y][(int)r.map.x];
 	if (r.wall_dist <= PLAYER_RADIUS)
 		unstuck_player(game, r);
 	game->state[S_INTERACT] = 0;
@@ -867,7 +897,7 @@ void	interact_pwl(t_game *game)
 {
 	if (game->item.collected < REQUIRED_ITEMS)
 		return ;
-	g_map[(int)game->pwl.item.pos.y][(int)game->pwl.item.pos.x] = 0;
+	game->map.arr[(int)game->pwl.item.pos.y][(int)game->pwl.item.pos.x] = 0;
 	game->player.pos = game->pwl.item.pos;
 	game->player.dir.x = -0.7071;
 	game->player.dir.y = 0.7071;
@@ -883,7 +913,7 @@ void	check_interact(t_game *game, int *tile_hit, t_ray *r)
 {
 	set_ray_direction(game, r, 0, 0);
 	set_ray_step_direction(game, r);
-	*tile_hit = dda_interact(r);
+	*tile_hit = dda_interact(r, game);
 	if (*tile_hit == 0)
 		return ;
 	if (r->side == VERTICAL)
@@ -1022,7 +1052,7 @@ void	normalize_movement(float *move_x, float *move_y)
 	}
 }
 
-int	check_collision(t_fpoint *pos, t_fpoint new_pos, float radius)
+int	check_collision(t_fpoint *pos, t_fpoint new_pos, float radius, t_game *game)
 {
 	t_fpoint	side;
 	int			collision;
@@ -1036,15 +1066,15 @@ int	check_collision(t_fpoint *pos, t_fpoint new_pos, float radius)
 		side.y = -radius;
 	else
 		side.y = radius;
-	if (g_map[(int)(pos->y)][(int)(new_pos.x - radius)] < 1
-		&& g_map[(int)(pos->y - radius)][(int)(new_pos.x + side.x)] < 1
-		&& g_map[(int)(pos->y + radius)][(int)(new_pos.x + side.x)] < 1)
+	if (game->map.arr[(int)(pos->y)][(int)(new_pos.x - radius)] < 1
+		&& game->map.arr[(int)(pos->y - radius)][(int)(new_pos.x + side.x)] < 1
+		&& game->map.arr[(int)(pos->y + radius)][(int)(new_pos.x + side.x)] < 1)
 		pos->x = new_pos.x;
 	else
 		collision = 1;
-	if (g_map[(int)(new_pos.y - radius)][(int)(pos->x)] < 1
-		&& g_map[(int)(new_pos.y + side.y)][(int)(pos->x - radius)] < 1
-		&& g_map[(int)(new_pos.y + side.y)][(int)(pos->x + radius)] < 1)
+	if (game->map.arr[(int)(new_pos.y - radius)][(int)(pos->x)] < 1
+		&& game->map.arr[(int)(new_pos.y + side.y)][(int)(pos->x - radius)] < 1
+		&& game->map.arr[(int)(new_pos.y + side.y)][(int)(pos->x + radius)] < 1)
 		pos->y = new_pos.y;
 	else
 		collision = 1;
@@ -1065,7 +1095,7 @@ void	handle_movement_xy(t_game *game, float speed)
 	normalize_movement(&move.x, &move.y);
 	new_pos.x = game->player.pos.x + move.x * speed;
 	new_pos.y = game->player.pos.y + move.y * speed;
-	check_collision(&game->player.pos, new_pos, PLAYER_RADIUS);
+	check_collision(&game->player.pos, new_pos, PLAYER_RADIUS, game);
 }
 
 void	handle_yaw(t_game *game, float speed, float old_dir_x,
@@ -1270,10 +1300,10 @@ void	assign_wall_textures(t_game *game, t_ray *r, t_texture_map *tex)
 void	assign_tile_textures(t_game *game, t_ray *r, t_texture_map *tex)
 {
 	tex->wall_tex = NULL;
-	if (g_map[(int)r->map.y][(int)r->map.x] < 1
-		|| g_map[(int)r->map.y][(int)r->map.x] == TILE_PWL)
+	if (game->map.arr[(int)r->map.y][(int)r->map.x] < 1
+		|| game->map.arr[(int)r->map.y][(int)r->map.x] == TILE_PWL)
 		return ;
-	if (g_map[(int)r->map.y][(int)r->map.x] == 2)
+	if (game->map.arr[(int)r->map.y][(int)r->map.x] == 2)
 	{
 		if ((r->side == VERTICAL && r->dir.x <= 0)
 			|| (r->side == HORIZONTAL && r->dir.y >= 0))
@@ -1285,15 +1315,15 @@ void	assign_tile_textures(t_game *game, t_ray *r, t_texture_map *tex)
 }
 
 // Shoots a ray until it has hit a value in the array larger than 0.
-int	dda(t_ray *r)
+int	dda(t_ray *r, t_game *game)
 {
 	while (1)
 	{
 		set_dda_step_side(r);
-		if (out_of_bounds(r->map))
+		if (out_of_bounds(r->map, game))
 			return (-1);
-		if (g_map[(int)r->map.y][(int)r->map.x] > 0
-			&& g_map[(int)r->map.y][(int)r->map.x] != TILE_PWL)
+		if (game->map.arr[(int)r->map.y][(int)r->map.x] > 0
+			&& game->map.arr[(int)r->map.y][(int)r->map.x] != TILE_PWL)
 			return (0);
 	}
 }
@@ -1361,14 +1391,14 @@ void	render_walls(t_game *game)
 	const float		camera_x_factor = 2.0 / RES_X;
 
 	draw_bg(game);
-	if (out_of_bounds(game->player.pos))
+	if (out_of_bounds(game->player.pos, game))
 		return ;
 	r.pix.x = 0;
 	while (r.pix.x < RES_X)
 	{
 		set_ray_direction(game, &r, r.pix.x * camera_x_factor - 1, 1);
 		set_ray_step_direction(game, &r);
-		if (dda(&r) == -1)
+		if (dda(&r, game) == -1)
 			return ;
 		calculate_wall_projection(game, &r, &tex);
 		assign_tile_textures(game, &r, &tex);
@@ -1421,16 +1451,16 @@ void	set_player_look_at(t_player *player, t_fpoint enemy_pos)
 
 void	enemy_open_door(t_game *game)
 {
-	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x] == 2)
-		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x] = -2;
-	if (g_map[(int)game->enemy.pos.y - 1][(int)game->enemy.pos.x] == 2)
-		g_map[(int)game->enemy.pos.y - 1][(int)game->enemy.pos.x] = -2;
-	if (g_map[(int)game->enemy.pos.y + 1][(int)game->enemy.pos.x] == 2)
-		g_map[(int)game->enemy.pos.y + 1][(int)game->enemy.pos.x] = -2;
-	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x - 1] == 2)
-		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x - 1] = -2;
-	if (g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x + 1] == 2)
-		g_map[(int)game->enemy.pos.y][(int)game->enemy.pos.x + 1] = -2;
+	if (game->map.arr[(int)game->enemy.pos.y][(int)game->enemy.pos.x] == 2)
+		game->map.arr[(int)game->enemy.pos.y][(int)game->enemy.pos.x] = -2;
+	if (game->map.arr[(int)game->enemy.pos.y - 1][(int)game->enemy.pos.x] == 2)
+		game->map.arr[(int)game->enemy.pos.y - 1][(int)game->enemy.pos.x] = -2;
+	if (game->map.arr[(int)game->enemy.pos.y + 1][(int)game->enemy.pos.x] == 2)
+		game->map.arr[(int)game->enemy.pos.y + 1][(int)game->enemy.pos.x] = -2;
+	if (game->map.arr[(int)game->enemy.pos.y][(int)game->enemy.pos.x - 1] == 2)
+		game->map.arr[(int)game->enemy.pos.y][(int)game->enemy.pos.x - 1] = -2;
+	if (game->map.arr[(int)game->enemy.pos.y][(int)game->enemy.pos.x + 1] == 2)
+		game->map.arr[(int)game->enemy.pos.y][(int)game->enemy.pos.x + 1] = -2;
 	game->map.update = 1;
 }
 
@@ -1511,7 +1541,7 @@ void	hunt(t_game *game)
 		}
 	}
 	move_enemy(game, &new_pos);
-	if (check_collision(&game->enemy.pos, new_pos, ENEMY_RADIUS))
+	if (check_collision(&game->enemy.pos, new_pos, ENEMY_RADIUS, game))
 	{
 		game->enemy.move_seed = 0;
 		game->enemy.move_inc = 0;
@@ -1550,7 +1580,8 @@ void	chase(t_game *game, float dist_sq, float speed)
 	enemy_open_door(game);
 	if (((int)game->enemy.pos.x == (int)game->enemy.last_seen.x
 			&& (int)game->enemy.pos.y == (int)game->enemy.last_seen.y)
-		|| check_collision(&game->enemy.pos, game->enemy.memory, ENEMY_RADIUS))
+		|| check_collision(&game->enemy.pos,
+			game->enemy.memory, ENEMY_RADIUS, game))
 	{
 		game->enemy.last_seen.x = 0;
 		game->enemy.last_seen.y = 0;
@@ -1603,8 +1634,9 @@ int	dda_to_target(t_game *game, t_ray *r, t_fpoint target_pos)
 	while (1)
 	{
 		set_dda_step_side(r);
-		if (out_of_bounds(r->map) || (g_map[(int)r->map.y][(int)r->map.x] > 0
-			&& g_map[(int)r->map.y][(int)r->map.x] != TILE_PWL))
+		if (out_of_bounds(r->map, game)
+			|| (game->map.arr[(int)r->map.y][(int)r->map.x] > 0
+			&& game->map.arr[(int)r->map.y][(int)r->map.x] != TILE_PWL))
 			return (0);
 		if ((int)r->map.x == (int)target_pos.x
 			&& (int)r->map.y == (int)target_pos.y)
@@ -1743,7 +1775,8 @@ void	pickup_item(t_game *game)
 {
 	int	i;
 
-	if (g_map[(int)game->player.pos.y][(int)game->player.pos.x] == TILE_ITEM)
+	if (game->map.arr[(int)game->player.pos.y][(int)game->player.pos.x]
+		== TILE_ITEM)
 	{
 		i = 0;
 		while (i < game->item.count)
@@ -1752,7 +1785,8 @@ void	pickup_item(t_game *game)
 			{
 				game->item.collected++;
 				game->item.arr[i].collected = 1;
-				g_map[(int)game->player.pos.y][(int)game->player.pos.x] = 0;
+				game->map.arr[(int)game->player.pos.y][(int)game->player.pos.x]
+					= 0;
 				game->map.update = 1;
 				return ;
 			}
@@ -1921,14 +1955,10 @@ int	game_loop(t_game *game)
 	return (0);
 }
 
-void	init_player(t_player *player)
+void	init_player(t_player *player, t_point starting_pos)
 {
-	t_fpoint	pos;
-
-	pos.x = 6;
-	pos.y = 12;
-	player->pos.x = pos.x + 0.5;
-	player->pos.y = pos.y + 0.5;
+	player->pos.x = starting_pos.x + 0.5;
+	player->pos.y = starting_pos.y + 0.5;
 	player->dir.x = 0;
 	player->dir.y = -1;
 	player->plane.x = -player->dir.y * 0.66;
@@ -1945,8 +1975,8 @@ void	init_framedata(t_frame_data *frame)
 
 void	init_enemy(t_game *game)
 {
-	game->enemy.pos.x = 37.5;
-	game->enemy.pos.y = 12.5;
+	game->enemy.pos.x = game->scene.pos_xeno.x + 0.5;
+	game->enemy.pos.y = game->scene.pos_xeno.y + 0.5;
 	game->enemy.frame = T_XENO0;
 	game->enemy.img = game->img[T_XENO0];
 }
@@ -1959,12 +1989,12 @@ int	count_tile(t_game *game, int n)
 
 	y = 0;
 	count = 0;
-	while (y < g_map_y - 1)
+	while (y < game->map.size.y - 1)
 	{
 		x = 0;
-		while (x < g_map_x - 1)
+		while (x < game->map.size.x - 1)
 		{
-			if (g_map[y][x] == n)
+			if (game->map.arr[y][x] == n)
 				count++;
 			x++;
 		}
@@ -1984,12 +2014,12 @@ void	init_items(t_game *game)
 	game->item.arr = ft_calloc(game->item.count, sizeof(t_coin));
 	i = 0;
 	y = 0;
-	while (y < g_map_y - 1)
+	while (y < game->map.size.y - 1)
 	{
 		x = 0;
-		while (x < g_map_x - 1)
+		while (x < game->map.size.x - 1)
 		{
-			if (g_map[y][x] == -3)
+			if (game->map.arr[y][x] == -3)
 			{
 				game->item.arr[i].pos.x = (float)x + 0.5;
 				game->item.arr[i].pos.y = (float)y + 0.5;
@@ -2008,12 +2038,12 @@ t_fpoint	get_unique_char_pos(t_game *game, int n)
 	t_fpoint	pos;
 
 	pos.y = 0;
-	while (pos.y < g_map_y - 1)
+	while (pos.y < game->map.size.y - 1)
 	{
 		pos.x = 0;
-		while (pos.x < g_map_x - 1)
+		while (pos.x < game->map.size.x - 1)
 		{
-			if (g_map[(int)pos.y][(int)pos.x] == n)
+			if (game->map.arr[(int)pos.y][(int)pos.x] == n)
 			{
 				pos.x += 0.5;
 				pos.y += 0.5;
@@ -2029,14 +2059,14 @@ t_fpoint	get_unique_char_pos(t_game *game, int n)
 
 void	init_pwl(t_game *game)
 {
-	game->pwl.item.pos = get_unique_char_pos(game, TILE_PWL);
+	game->pwl.item.pos.x = game->scene.pos_powerloader.x + 0.5;
+	game->pwl.item.pos.y = game->scene.pos_powerloader.y + 0.5;
 	game->pwl.overlay_img = game->img[T_PWL_ARM0];
 	game->pwl.frame = T_PWL_ARM0;
 }
 
-int	init_game(t_game *game)
+int	init_game(t_game *game, t_scene scene)
 {
-	ft_memset(game, 0, sizeof(t_game));
 	game->mlx = mlx_init();
 	if (game->mlx == NULL)
 		return (1);
@@ -2046,13 +2076,13 @@ int	init_game(t_game *game)
 		return (1);
 	if (init_img(game->mlx, &game->img[T_WIN], RES_X, RES_Y) == -1)
 		return (2);
-	if (init_minimap(game, (t_point){g_map_x, g_map_y}) == -1
-		|| init_bg(game, BLACK, 0x2C2E33) == -1)
+	if (init_minimap(game, scene.map_dim) == -1
+		|| init_bg(game, scene.hex_ceiling, scene.hex_floor) == -1)
 		return (2);
 	if (load_xpms(game))
 		return (3);
 	init_framedata(&game->frame);
-	init_player(&game->player);
+	init_player(&game->player, scene.pos_player);
 	init_enemy(game);
 	init_items(game);
 	init_pwl(game);
@@ -2122,20 +2152,12 @@ int	main(int ac, char **av)
 {
 	int		status;
 	t_game	game;
-	t_scene	scene;
 
-	ft_memset((void *)&scene, 0, sizeof(t_scene));
-	if (validate_input(ac, av, &scene) == -1) // use this wrapper, to call the entire suite of checks
-	{
-		free_scene_struct(&scene); // keep in final
+	ft_memset(&game, 0, sizeof(t_game));
+	if (validate_input(ac, av, &game.scene) == -1)
 		return (1);
-	}
-	
-	print_scene_struct(&scene); // for debug only
-	free_scene_struct(&scene);	// for debug only
-	
-	
-	status = init_game(&game);
+	status = init_game(&game, game.scene);
+	free_scene_struct(&game.scene);
 	if (status)
 		error_handler(&game, status);
 	mlx_do_key_autorepeatoff(game.mlx);

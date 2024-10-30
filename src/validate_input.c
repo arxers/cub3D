@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/29 21:20:28 by jsu               #+#    #+#             */
-/*   Updated: 2024/10/29 22:12:35 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/31 00:48:18 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1150,8 +1150,8 @@ int	load_player_pos(char **map, t_scene *scene)
 		{
 			if (ft_strchr(player, map[i][j]))
 			{
-				scene->pos_player.x = i;
-				scene->pos_player.y = j;
+				scene->pos_player.x = j;
+				scene->pos_player.y = i;
 				return (0);
 			}
 			j++;
@@ -1181,8 +1181,8 @@ int	load_xeno_pos(char **map, t_scene *scene)
 		{
 			if (ft_strchr(enemy, map[i][j]))
 			{
-				scene->pos_xeno.x = i;
-				scene->pos_xeno.y = j;
+				scene->pos_xeno.x = j;
+				scene->pos_xeno.y = i;
 				return (0);
 			}
 			j++;
@@ -1212,8 +1212,8 @@ int	load_powerloader_pos(char **map, t_scene *scene)
 		{
 			if (ft_strchr(armor, map[i][j]))
 			{
-				scene->pos_powerloader.x = i;
-				scene->pos_powerloader.y = j;
+				scene->pos_powerloader.x = j;
+				scene->pos_powerloader.y = i;
 				return (0);
 			}
 			j++;
