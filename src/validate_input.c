@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/29 21:20:28 by jsu               #+#    #+#             */
-/*   Updated: 2024/10/31 00:48:18 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/10/31 16:33:21 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -738,6 +738,7 @@ int	init_map_array(char ***map, char **map_temp, t_scene *scene)
 		(*map)[index.y] = ft_calloc (scene->map_dim.x + 1, sizeof(char));
 		if (!(*map)[index.y])
 			return (-1);
+		ft_memset((*map)[index.y], '1', scene->map_dim.x);
 		index.y++;
 	}
 	return (0);
@@ -798,7 +799,7 @@ void	load_map_data(char **s, t_scene *scene)
 		{
 			dst[i][j] = s[i][j];
 			j++;
-		}	
+		}
 		i++;
 	}
 }
