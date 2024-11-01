@@ -42,7 +42,7 @@ void	print_scene_struct(t_scene *scene)
 	printf("hex_floor:%x\n", scene->hex_floor);
 	printf("C:%s\n", scene->ceiling);
 	printf("hex_ceiling:%x\n", scene->hex_ceiling);
-	printf("tmp_map_buf (char *) will begin on next line:\n%s\n", scene->tmp_map_buf);
+	printf("tmp_map_buf (char *) begin on next line:\n%s\n", scene->tmp_map_buf);
 	printf("map ptr (char **): %p\n", scene->map);
 	print_2d_map(scene->map);
 	printf("map_bak ptr (char **): %p\n", scene->map_bak);
@@ -279,9 +279,12 @@ int	is_all_six_scene_details_present(t_scene *scene)
 }
 
 /* 
-ft_split, the passed in arg // to discard identifiers at start of line
+ft_split the line that begins with the expected identifiers at start of line
+replace the last char, should be a '\n' char, with '\0'
+this will handle the case where ft_split "xxx"<space>'\n', returns 3 rows
+
+ensure that the ft_split result only has 2 rows! with ft_count_strings()
 ft_strdup, the second array from the ft_split result
-ft_strtrim, the ft_strdup result
 	
 credits to @filim, for helping me "over the hump"!
 */
@@ -289,24 +292,26 @@ char	*prepare_a_wall(char *s)
 {
 	char	**arr;
 	char	*tmp;
-	char	*res;
 
-	tmp = NULL;
-	arr = NULL;
-	res = NULL;
+	s[ft_strlen(s) - 1] = '\0';
 	arr = ft_split(s, ' ');
 	if (!arr)
 		return (NULL);
 	free(s);
+	if (ft_count_strings(arr) != 2)
+	{
+		free_char_map(arr);	
+		return (NULL);
+	}
 	tmp = ft_strdup(arr[1]);
 	if (!tmp)
 		return (NULL);
 	free_char_map(arr);
-	res = ft_strtrim(tmp, "\n");
-	if (!res)
-		return (NULL);
-	free(tmp);
-	return (res);
+	// res = ft_strtrim(tmp, "\n");
+	// if (!res)
+	// 	return (NULL);
+	// free(tmp);
+	return (tmp);
 }
 
 /* 
@@ -326,7 +331,10 @@ int	prepare_walls(t_scene **scene)
 		(*scene)->we == NULL || \
 		(*scene)->floor == NULL || \
 		(*scene)->ceiling == NULL)
-		return (-1);
+		{
+			ft_putstr_fd("Error\nProblem with scene details\n", 2);
+			return (-1);
+		}
 	return (0);
 }
 
@@ -346,15 +354,15 @@ int	is_end_with_xpm(char *s)
 		return (-1);
 }
 
-int	ft_arr_len(char **arr)
-{
-	int	i;
+// int	ft_arr_len(char **arr)
+// {
+// 	int	i;
 
-	i = 0;
-	while (arr[i] != NULL)
-		i++;
-	return (i);
-}
+// 	i = 0;
+// 	while (arr[i] != NULL)
+// 		i++;
+// 	return (i);
+// }
 
 /*
 accepts a (char *) argument
@@ -389,42 +397,47 @@ int	is_valid_rgb_value(char *s)
 	return (-1);
 }
 
+int	ft_count_char(char *s, char c)
+{
+	int	count;
+
+	count = 0;
+	while (*s)
+	{
+		if (*s == c)
+			count++;
+		s++;
+	}
+	return (count);
+}
+
 /*
-arr = ft_split(), passed in string argument (char *), comma as delimiter 
+ft_split() the line, that starts with the expected identifier 'F'/'C'
 
-CHECK #1. ft_split() result, has 3 elements only
+CHECK #1. count the number of comma chars in the line
 
-CHECK #2. 
-for each element in ft_split() result:
+CHECK #2. ft_split() result, should only have 3 rows
+
+CHECK #3. for each element in ft_split() result:
 convert char array to int
 check if int is between 0 to 255 inclusive
-
-return -1 (error)
-else return 0 (success)
 */
 int	is_valid_rgb_array(char *s)
 {
 	char	**arr;
-	int		i;
 
+	if (ft_count_char(s, ',') != 2)
+		return (-1);
 	arr = ft_split(s, ',');
 	if (!arr)
 		return (-1);
-	i = ft_arr_len(arr);
-	if (i != 3)
+	if (ft_count_strings(arr) != 3
+		|| is_valid_rgb_value(arr[0]) == -1
+		|| is_valid_rgb_value(arr[1]) == -1
+		|| is_valid_rgb_value(arr[2]) == -1)
 	{
 		free_char_map(arr);
 		return (-1);
-	}
-	i = 0;
-	while (i < 3)
-	{
-		if ((is_valid_rgb_value(arr[i])) == -1)
-		{
-			free_char_map(arr);
-			return (-1);
-		}
-		i++;
 	}
 	free_char_map(arr);
 	return (0);
@@ -467,13 +480,13 @@ int	is_six_details_valid(t_scene *scene)
 		is_end_with_xpm(scene->ea) == -1 || \
 		is_end_with_xpm(scene->we) == -1)
 	{
-		ft_putstr_fd("cub3D: Not .xpm extension\n", 2);
+		ft_putstr_fd("Error\nWall texture file not .xpm extension\n", 2);
 		return (-1);
 	}	
 	if (is_valid_rgb_array(scene->floor) == -1 || \
 		is_valid_rgb_array(scene->ceiling) == -1)
 	{
-		ft_putstr_fd("cub3D: Problematic RGB array value(s)\n", 2);
+		ft_putstr_fd("Error\nProblematic RGB array value(s)\n", 2);
 		return (-1);
 	}	
 	return (0);
@@ -932,13 +945,11 @@ else return -1 (failure)
 int	is_fill_char_at_toprow(t_scene *s)
 {
 	int		i;
-	char	*tmp;
 
 	i = 0;
-	tmp = s->map_bak[0];
-	while (tmp[i] != '\0')
+	while (s->map_bak[0][i] != '\0')
 	{
-		if (tmp[i] == 'F')
+		if (s->map_bak[0][i] == 'F')
 			return (0);
 		i++;
 	}
@@ -954,13 +965,11 @@ else return -1 (failure)
 int	is_fill_char_at_botrow(t_scene *s)
 {
 	int		i;
-	char	*tmp;
 
 	i = 0;
-	tmp = s->map_bak[s->map_dim.y - 1];
-	while (tmp[i] != '\0')
+	while (s->map_bak[s->map_dim.y - 1][i] != '\0')
 	{
-		if (tmp[i] == 'F')
+		if (s->map_bak[s->map_dim.y - 1][i] == 'F')
 			return (0);
 		i++;
 	}
@@ -977,7 +986,7 @@ int	is_fill_char_at_lcol(t_scene *s)
 	int	i;
 
 	i = 0;
-	while (s->map[i] != NULL)
+	while (s->map_bak[i] != NULL)
 	{
 		if (s->map_bak[i][0] == 'F')
 			return (0);
@@ -996,7 +1005,7 @@ int	is_fill_char_at_rcol(t_scene *s)
 	int	i;
 
 	i = 0;
-	while (s->map[i] != NULL)
+	while (s->map_bak[i] != NULL)
 	{
 		if (s->map_bak[i][s->map_dim.x - 1] == 'F')
 			return (0);
@@ -1068,86 +1077,6 @@ void	ff_bonus(int i, int j, t_scene *s)
 	ff_bonus(i, j - 1, s);
 	ff_bonus(i, j + 1, s);
 }
-
-/* 
-IMPT! for bonus implementation
-need to replace TWO functions, in load_scene()
-
-#1:
-replace, is_map_char_valid_mandatory(),
-with, is_map_char_valid_bonus()
-
-#2:
-replace, ff_mandatory(),
-with, ff_bonus()
-
-key difference is that in the bonus versions, they consider FOUR extra chars:
-C, D, X, P
-
-TO DO? maybe need to add another version of 
-is_num_player_is_valid() to account for num of C D X P chars ???
-*/
-// TO DO: rename as load_scene
-int	load_scene(char *mapfile, t_scene *scene)
-{
-	int		map_fd;
-	char	**tmp;
-
-	map_fd = open(mapfile, O_RDONLY);
-	if (map_fd == -1)
-	{
-		ft_putstr_fd("cub3D: Map cannot be opened\n", 2);
-		return (-1);
-	}
-	if (load_scene_details(map_fd, &scene) == -1 || prepare_walls(&scene) == -1
-		|| is_six_details_valid(scene) == -1)
-		return (-1);
-	scene->hex_floor = convert_rgb_array_to_int(scene->floor);
-	scene->hex_ceiling = convert_rgb_array_to_int(scene->ceiling);
-	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
-		return (-1);
-/*
-if (is_map_char_valid_mandatory(scene->tmp_map_buf) == -1)
-// swap with is_map_char_valid_bonus()
-		return (-1);
-*/	
-	if (trim_tmp_map_buf(&scene) == -1)
-		return (-1);
-	replace_space_with_zero(scene->tmp_map_buf);
-	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
-		return (-1);
-	tmp = ft_split(scene->tmp_map_buf, '\n');
-	if (!tmp)
-	{
-		ft_putstr_fd("cub3D: Error ft_split tmp_map_buf\n", 2);
-		return (-1);
-	}
-	if (init_map_array(&scene->map, tmp, scene) == -1 || \
-		init_map_array(&scene->map_bak, tmp, scene) == -1)
-	{
-		ft_putstr_fd("cub3D: Error in malloc map\n", 2);
-		return (-1);
-	}
-	load_map_data(tmp, scene);
-	load_map_bak_data(tmp, scene);
-	free_char_map(tmp);
-	if (is_num_player_valid(scene->map) == -1
-		|| load_player_pos(scene->map, scene) == -1
-		|| is_num_xeno_valid(scene->map) == -1
-		|| load_xeno_pos(scene->map, scene) == -1
-		|| is_num_powerloader_valid(scene->map) == -1
-		|| load_powerloader_pos(scene->map, scene) == -1
-		|| is_num_collectibles_valid(scene->map) == -1)
-		return (-1);
-	ff_bonus(scene->p_pos.x, scene->p_pos.y, scene);
-	if (is_fill_char_at_map_border(scene) == 0)
-		return (-1);
-	return (0);
-}
-
-//# DONE above
-//##############################################################################
-//# pending below
 
 /*
 returns 0 (success) after finding the first occurrence of a valid PLAYER char,
@@ -1242,3 +1171,86 @@ int	load_powerloader_pos(char **map, t_scene *scene)
 	ft_putstr_fd("cub3D: ARMOR char missing from map\n", 2);
 	return (-1);
 }
+
+//# DONE above
+//##############################################################################
+//# pending below
+
+/* 
+IMPT! for bonus implementation
+need to replace TWO functions, in load_scene()
+
+#1:
+replace, is_map_char_valid_mandatory(),
+with, is_map_char_valid_bonus()
+
+#2:
+replace, ff_mandatory(),
+with, ff_bonus()
+
+key difference is that in the bonus versions, they consider FOUR extra chars:
+C, D, X, P
+*/
+int	load_scene(char *mapfile, t_scene *scene)
+{
+	int		map_fd;
+	char	**tmp;
+
+	map_fd = open(mapfile, O_RDONLY);
+	if (map_fd == -1)
+	{
+		ft_putstr_fd("cub3D: Map cannot be opened\n", 2);
+		return (-1);
+	}
+	if (load_scene_details(map_fd, &scene) == -1 || prepare_walls(&scene) == -1
+		|| is_six_details_valid(scene) == -1)
+		return (-1);
+	scene->hex_floor = convert_rgb_array_to_int(scene->floor);
+	scene->hex_ceiling = convert_rgb_array_to_int(scene->ceiling);
+	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
+		return (-1);
+	if (trim_tmp_map_buf(&scene) == -1)
+		return (-1);
+	replace_space_with_zero(scene->tmp_map_buf);
+	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
+		return (-1);
+	tmp = ft_split(scene->tmp_map_buf, '\n');
+	if (!tmp)
+	{
+		ft_putstr_fd("cub3D: Error ft_split tmp_map_buf\n", 2);
+		return (-1);
+	}
+	if (init_map_array(&scene->map, tmp, scene) == -1 || \
+		init_map_array(&scene->map_bak, tmp, scene) == -1)
+	{
+		ft_putstr_fd("cub3D: Error in malloc map\n", 2);
+		return (-1);
+	}
+	load_map_data(tmp, scene);
+	load_map_bak_data(tmp, scene);
+	free_char_map(tmp);
+	if (is_num_player_valid(scene->map) == -1
+		|| load_player_pos(scene->map, scene) == -1
+		|| is_num_xeno_valid(scene->map) == -1
+		|| load_xeno_pos(scene->map, scene) == -1
+		|| is_num_powerloader_valid(scene->map) == -1
+		|| load_powerloader_pos(scene->map, scene) == -1
+		|| is_num_collectibles_valid(scene->map) == -1)
+		return (-1);
+	ff_bonus(scene->p_pos.y, scene->p_pos.x, scene);
+	if (is_fill_char_at_map_border(scene) == 0)
+		return (-1);
+	return (0);
+}
+
+/*
+to do 01 Nov 2024
+
+# refactor load_scene(), function has >25 lines 
+
+# split functions in validate_input.c into separate .c files
+
+DONE # reject wall textures if != 2 args after ft_split() with space as delimiter
+
+# reject F/C line if != 2 commas, in line
+*/
