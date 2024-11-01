@@ -129,8 +129,8 @@ int	check_n_cmdline_args(int ac)
 {
 	if (ac != 2)
 	{
-		ft_putstr_fd("cub3D: Invalid number of arguments\n", 2);
-		ft_putstr_fd("cub3D: usage: cub3D [*.cub]\n", 2);
+		ft_putstr_fd("Error\nInvalid number of arguments\n", 2);
+		ft_putstr_fd("Error\nUsage: cub3D [*.cub]\n", 2);
 		return (-1);
 	}
 	return (0);
@@ -154,8 +154,7 @@ int	is_map_a_dot_cub_file(char *s)
 		return (0);
 	else
 	{
-		ft_putstr_fd("cub3D: Map does not end in .cub\n", 2);
-		ft_putstr_fd("cub3D: usage: cub3D [*.cub]\n", 2);
+		ft_putstr_fd("Error\nMap does not end in .cub\n", 2);
 		return (-1);
 	}
 }
@@ -171,7 +170,7 @@ int	is_map_file_openable(char *mapfile)
 	map_fd = open(mapfile, O_RDONLY);
 	if (map_fd == -1)
 	{
-		ft_putstr_fd("cub3D: Map cannot be opened\n", 2);
+		ft_putstr_fd("Error\nMap cannot be opened\n", 2);
 		return (-1);
 	}
 	close(map_fd);
@@ -486,7 +485,7 @@ int	is_six_details_valid(t_scene *scene)
 	if (is_valid_rgb_array(scene->floor) == -1 || \
 		is_valid_rgb_array(scene->ceiling) == -1)
 	{
-		ft_putstr_fd("Error\nProblematic RGB array value(s)\n", 2);
+		ft_putstr_fd("Error\nProblematic RGB array value\n", 2);
 		return (-1);
 	}	
 	return (0);
@@ -512,7 +511,7 @@ int	load_map_buffer(char *line, int map_fd, t_scene **scene)
 		(*scene)->tmp_map_buf = safe_strjoin((*scene)->tmp_map_buf, line);
 		if ((*scene)->tmp_map_buf == NULL)
 		{
-			ft_putstr_fd("cub3D: Cannot load map section)\n", 2);
+			ft_putstr_fd("Error\nCannot load map section)\n", 2);
 			flush_gnl(&line, map_fd);
 			return (-1);
 		}
@@ -553,7 +552,7 @@ int	load_scene_details_to_struct(char **line, int map_fd, t_scene **scene)
 	}
 	else
 	{
-		ft_putstr_fd("cub3D: Error in line for scene details\n", 2);
+		ft_putstr_fd("Error\nProblem with line for scene details\n", 2);
 		flush_gnl(line, map_fd);
 		return (-1);
 	}		
@@ -571,7 +570,7 @@ int	load_scene_details(int map_fd, t_scene **scene)
 		{
 			if (load_map_buffer(line, map_fd, scene) == -1)
 			{
-				ft_putstr_fd("cub3D: Cannot load map\n", 2);
+				ft_putstr_fd("Error\nCannot load map\n", 2);
 				return (-1);
 			}
 			return (0);
@@ -616,7 +615,7 @@ int	is_map_char_valid_bonus(char *s)
 	{
 		if (ft_strchr(ref, s[i]) == NULL)
 		{
-			ft_putstr_fd("cub3D: Invalid map char\n", 2);
+			ft_putstr_fd("Error\nInvalid map char\n", 2);
 			return (-1);
 		}
 		i++;
@@ -634,7 +633,7 @@ int	is_map_char_valid_mandatory(char *s)
 	{
 		if (ft_strchr(ref, s[i]) == NULL)
 		{
-			ft_putstr_fd("cub3D: Invalid map char\n", 2);
+			ft_putstr_fd("Error\nInvalid map char\n", 2);
 			return (-1);
 		}
 		i++;
@@ -656,7 +655,7 @@ int	trim_tmp_map_buf(t_scene **scene)
 	res = ft_strtrim(tmp, "\n");
 	if (!res)
 	{
-		ft_putstr_fd("cub3D: Problem while preparing map\n", 2);
+		ft_putstr_fd("Error\nProblem while preparing map\n", 2);
 		return (-1);
 	}
 	(*scene)->tmp_map_buf = res;
@@ -697,7 +696,7 @@ int	is_tmp_map_buf_split_by_empty_line(char *s)
 	len = ft_strlen(s);
 	if (ft_strnstr(s, "\n\n", len) != NULL)
 	{
-		ft_putstr_fd("cub3D: empty line found in between map lines\n", 2);
+		ft_putstr_fd("Error\nEmpty line found in between map lines\n", 2);
 		return (-1);
 	}
 	return (0);
@@ -888,7 +887,7 @@ int	is_num_player_valid(char **map)
 	num_w = count_char_in_map(map, 'W');
 	if (num_n + num_s + num_e + num_w != 1)
 	{
-		ft_putstr_fd("cub3D: Incorrect number of PLAYER char in map\n", 2);
+		ft_putstr_fd("Error\nIncorrect number of PLAYER char in map\n", 2);
 		return (-1);
 	}
 	return (0);
@@ -901,7 +900,7 @@ int	is_num_xeno_valid(char **map)
 	num_enemy = count_char_in_map(map, 'X');
 	if (num_enemy != 1)
 	{
-		ft_putstr_fd("cub3D: Incorrect number of ENEMY char in map\n", 2);
+		ft_putstr_fd("Error\nIncorrect number of ENEMY char in map\n", 2);
 		return (-1);
 	}
 	return (0);
@@ -914,7 +913,7 @@ int	is_num_powerloader_valid(char **map)
 	num_armor = count_char_in_map(map, 'P');
 	if (num_armor != 1)
 	{
-		ft_putstr_fd("cub3D: Incorrect number of ARMOR char in map\n", 2);
+		ft_putstr_fd("Error\nIncorrect number of ARMOR char in map\n", 2);
 		return (-1);
 	}
 	return (0);
@@ -927,7 +926,7 @@ int	is_num_collectibles_valid(char **map)
 	num_collectible = count_char_in_map(map, 'C');
 	if (num_collectible < REQUIRED_ITEMS)
 	{
-		ft_putstr_fd("cub3D: Incorrect number of COLLECTIBLE char in map, ", 2);
+		ft_putstr_fd("Error\nIncorrect number of COLLECTIBLE char in map, ", 2);
 		ft_putstr_fd("expected ", 2);
 		ft_putnbr_fd(REQUIRED_ITEMS, 2);
 		ft_putstr_fd("\n", 2);
@@ -1027,7 +1026,7 @@ int	is_fill_char_at_map_border(t_scene *s)
 		(is_fill_char_at_lcol(s) == 0) || \
 		(is_fill_char_at_rcol(s) == 0))
 	{
-		ft_putstr_fd("cub3D: Flood fill char found at border wall\n", 2);
+		ft_putstr_fd("Error\nFlood fill char found at border wall\n", 2);
 		return (0);
 	}
 	return (-1);
@@ -1106,7 +1105,7 @@ int	load_player_pos(char **map, t_scene *scene)
 		}
 		i++;
 	}
-	ft_putstr_fd("cub3D: PLAYER char missing from map\n", 2);
+	ft_putstr_fd("Error\nPLAYER char missing from map\n", 2);
 	return (-1);
 }
 
@@ -1137,7 +1136,7 @@ int	load_xeno_pos(char **map, t_scene *scene)
 		}
 		i++;
 	}
-	ft_putstr_fd("cub3D: ENEMY char missing from map\n", 2);
+	ft_putstr_fd("Error\nENEMY char missing from map\n", 2);
 	return (-1);
 }
 
@@ -1168,7 +1167,7 @@ int	load_powerloader_pos(char **map, t_scene *scene)
 		}
 		i++;
 	}
-	ft_putstr_fd("cub3D: ARMOR char missing from map\n", 2);
+	ft_putstr_fd("Error\nARMOR char missing from map\n", 2);
 	return (-1);
 }
 
@@ -1199,7 +1198,7 @@ int	load_scene(char *mapfile, t_scene *scene)
 	map_fd = open(mapfile, O_RDONLY);
 	if (map_fd == -1)
 	{
-		ft_putstr_fd("cub3D: Map cannot be opened\n", 2);
+		ft_putstr_fd("Error\nMap cannot be opened\n", 2);
 		return (-1);
 	}
 	if (load_scene_details(map_fd, &scene) == -1 || prepare_walls(&scene) == -1
@@ -1217,13 +1216,13 @@ int	load_scene(char *mapfile, t_scene *scene)
 	tmp = ft_split(scene->tmp_map_buf, '\n');
 	if (!tmp)
 	{
-		ft_putstr_fd("cub3D: Error ft_split tmp_map_buf\n", 2);
+		ft_putstr_fd("Error\nProblem with ft_split tmp_map_buf\n", 2);
 		return (-1);
 	}
 	if (init_map_array(&scene->map, tmp, scene) == -1 || \
 		init_map_array(&scene->map_bak, tmp, scene) == -1)
 	{
-		ft_putstr_fd("cub3D: Error in malloc map\n", 2);
+		ft_putstr_fd("Error\nmalloc for map, fail\n", 2);
 		return (-1);
 	}
 	load_map_data(tmp, scene);
@@ -1249,8 +1248,4 @@ to do 01 Nov 2024
 # refactor load_scene(), function has >25 lines 
 
 # split functions in validate_input.c into separate .c files
-
-DONE # reject wall textures if != 2 args after ft_split() with space as delimiter
-
-# reject F/C line if != 2 commas, in line
 */
