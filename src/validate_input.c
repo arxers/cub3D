@@ -1175,6 +1175,40 @@ int	load_powerloader_pos(char **map, t_scene *scene)
 //##############################################################################
 //# pending below
 
+int	is_mandatory_map_valid(t_scene *scene)
+{
+	if (is_num_player_valid(scene->map) == -1 || load_player_pos(scene->map, scene) == -1)
+		return (-1);
+	ff_mandatory(scene->p_pos.y, scene->p_pos.x, scene);
+	if (is_fill_char_at_map_border(scene) == 0)
+		return (-1);
+	return (0);
+}
+
+int	is_bonus_map_valid(t_scene *scene)
+{
+	if (is_num_player_valid(scene->map) == -1
+		|| load_player_pos(scene->map, scene) == -1
+		|| is_num_xeno_valid(scene->map) == -1
+		|| load_xeno_pos(scene->map, scene) == -1
+		|| is_num_powerloader_valid(scene->map) == -1
+		|| load_powerloader_pos(scene->map, scene) == -1
+		|| is_num_collectibles_valid(scene->map) == -1)
+		return (-1);
+	ff_bonus(scene->p_pos.y, scene->p_pos.x, scene);
+	if (is_fill_char_at_map_border(scene) == 0)
+		return (-1);
+	return (0);
+}
+
+/*
+int process_map()
+{
+
+
+}
+*/
+
 /* 
 IMPT! for bonus implementation
 need to replace TWO functions, in load_scene()
@@ -1189,6 +1223,8 @@ with, ff_bonus()
 
 key difference is that in the bonus versions, they consider FOUR extra chars:
 C, D, X, P
+
+for mandatory, replace: is_bonus_map_valid() with is_mandatory_map_valid()
 */
 int	load_scene(char *mapfile, t_scene *scene)
 {
@@ -1206,6 +1242,7 @@ int	load_scene(char *mapfile, t_scene *scene)
 		return (-1);
 	scene->hex_floor = convert_rgb_array_to_int(scene->floor);
 	scene->hex_ceiling = convert_rgb_array_to_int(scene->ceiling);
+	
 	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
 		return (-1);
 	if (trim_tmp_map_buf(&scene) == -1)
@@ -1228,16 +1265,8 @@ int	load_scene(char *mapfile, t_scene *scene)
 	load_map_data(tmp, scene);
 	load_map_bak_data(tmp, scene);
 	free_char_map(tmp);
-	if (is_num_player_valid(scene->map) == -1
-		|| load_player_pos(scene->map, scene) == -1
-		|| is_num_xeno_valid(scene->map) == -1
-		|| load_xeno_pos(scene->map, scene) == -1
-		|| is_num_powerloader_valid(scene->map) == -1
-		|| load_powerloader_pos(scene->map, scene) == -1
-		|| is_num_collectibles_valid(scene->map) == -1)
-		return (-1);
-	ff_bonus(scene->p_pos.y, scene->p_pos.x, scene);
-	if (is_fill_char_at_map_border(scene) == 0)
+	
+	if (is_bonus_map_valid(scene) == -1)
 		return (-1);
 	return (0);
 }
@@ -1248,4 +1277,29 @@ to do 01 Nov 2024
 # refactor load_scene(), function has >25 lines 
 
 # split functions in validate_input.c into separate .c files
+
+
+
+	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
+		return (-1);
+	if (trim_tmp_map_buf(&scene) == -1)
+		return (-1);
+	replace_space_with_zero(scene->tmp_map_buf);
+	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
+		return (-1);
+	tmp = ft_split(scene->tmp_map_buf, '\n');
+	if (!tmp)
+	{
+		ft_putstr_fd("Error\nProblem with ft_split tmp_map_buf\n", 2);
+		return (-1);
+	}
+	if (init_map_array(&scene->map, tmp, scene) == -1 || \
+		init_map_array(&scene->map_bak, tmp, scene) == -1)
+	{
+		ft_putstr_fd("Error\nmalloc for map, fail\n", 2);
+		return (-1);
+	}
+	load_map_data(tmp, scene);
+	load_map_bak_data(tmp, scene);
+	free_char_map(tmp);
 */
