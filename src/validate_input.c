@@ -299,17 +299,13 @@ char	*prepare_a_wall(char *s)
 	free(s);
 	if (ft_count_strings(arr) != 2)
 	{
-		free_char_map(arr);	
+		free_char_map(arr);
 		return (NULL);
 	}
 	tmp = ft_strdup(arr[1]);
 	if (!tmp)
 		return (NULL);
 	free_char_map(arr);
-	// res = ft_strtrim(tmp, "\n");
-	// if (!res)
-	// 	return (NULL);
-	// free(tmp);
 	return (tmp);
 }
 
@@ -330,10 +326,10 @@ int	prepare_walls(t_scene **scene)
 		(*scene)->we == NULL || \
 		(*scene)->floor == NULL || \
 		(*scene)->ceiling == NULL)
-		{
-			ft_putstr_fd("Error\nProblem with scene details\n", 2);
-			return (-1);
-		}
+	{
+		ft_putstr_fd("Error\nProblem with scene details\n", 2);
+		return (-1);
+	}
 	return (0);
 }
 
@@ -605,7 +601,7 @@ D: Door
 P: Powerloader
 X: Xeno
 */
-int	is_map_char_valid_bonus(char *s)
+int	is_bonus_map_char_valid(char *s)
 {
 	const char	ref[] = " \n10NSEWCDPX";
 	int			i;
@@ -1177,7 +1173,8 @@ int	load_powerloader_pos(char **map, t_scene *scene)
 
 int	is_mandatory_map_valid(t_scene *scene)
 {
-	if (is_num_player_valid(scene->map) == -1 || load_player_pos(scene->map, scene) == -1)
+	if (is_num_player_valid(scene->map) == -1 || \
+		load_player_pos(scene->map, scene) == -1)
 		return (-1);
 	ff_mandatory(scene->p_pos.y, scene->p_pos.x, scene);
 	if (is_fill_char_at_map_border(scene) == 0)
@@ -1201,13 +1198,32 @@ int	is_bonus_map_valid(t_scene *scene)
 	return (0);
 }
 
-/*
-int process_map()
+int	process_map(t_scene *scene)
 {
+	char	**tmp;
 
-
+	if (trim_tmp_map_buf(&scene) == -1)
+		return (-1);
+	replace_space_with_zero(scene->tmp_map_buf);
+	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
+		return (-1);
+	tmp = ft_split(scene->tmp_map_buf, '\n');
+	if (!tmp)
+	{
+		ft_putstr_fd("Error\nProblem with ft_split tmp_map_buf\n", 2);
+		return (-1);
+	}
+	if (init_map_array(&scene->map, tmp, scene) == -1 || \
+		init_map_array(&scene->map_bak, tmp, scene) == -1)
+	{
+		ft_putstr_fd("Error\nmalloc for map, fail\n", 2);
+		return (-1);
+	}
+	load_map_data(tmp, scene);
+	load_map_bak_data(tmp, scene);
+	free_char_map(tmp);
+	return (0);
 }
-*/
 
 /* 
 IMPT! for bonus implementation
@@ -1224,12 +1240,13 @@ with, ff_bonus()
 key difference is that in the bonus versions, they consider FOUR extra chars:
 C, D, X, P
 
-for mandatory, replace: is_bonus_map_valid() with is_mandatory_map_valid()
+for mandatory, replace TWO functions: 
+is_bonus_map_char_valid, with is map_char_valid()
+is_bonus_map_valid(), with is_mandatory_map_valid()
 */
 int	load_scene(char *mapfile, t_scene *scene)
 {
 	int		map_fd;
-	char	**tmp;
 
 	map_fd = open(mapfile, O_RDONLY);
 	if (map_fd == -1)
@@ -1242,31 +1259,9 @@ int	load_scene(char *mapfile, t_scene *scene)
 		return (-1);
 	scene->hex_floor = convert_rgb_array_to_int(scene->floor);
 	scene->hex_ceiling = convert_rgb_array_to_int(scene->ceiling);
-	
-	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
-		return (-1);
-	if (trim_tmp_map_buf(&scene) == -1)
-		return (-1);
-	replace_space_with_zero(scene->tmp_map_buf);
-	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
-		return (-1);
-	tmp = ft_split(scene->tmp_map_buf, '\n');
-	if (!tmp)
-	{
-		ft_putstr_fd("Error\nProblem with ft_split tmp_map_buf\n", 2);
-		return (-1);
-	}
-	if (init_map_array(&scene->map, tmp, scene) == -1 || \
-		init_map_array(&scene->map_bak, tmp, scene) == -1)
-	{
-		ft_putstr_fd("Error\nmalloc for map, fail\n", 2);
-		return (-1);
-	}
-	load_map_data(tmp, scene);
-	load_map_bak_data(tmp, scene);
-	free_char_map(tmp);
-	
-	if (is_bonus_map_valid(scene) == -1)
+	if (is_bonus_map_char_valid(scene->tmp_map_buf) == -1 || \
+		process_map(scene) == -1 || \
+		is_bonus_map_valid(scene) == -1)
 		return (-1);
 	return (0);
 }
@@ -1274,32 +1269,5 @@ int	load_scene(char *mapfile, t_scene *scene)
 /*
 to do 01 Nov 2024
 
-# refactor load_scene(), function has >25 lines 
-
 # split functions in validate_input.c into separate .c files
-
-
-
-	if (is_map_char_valid_bonus(scene->tmp_map_buf) == -1)
-		return (-1);
-	if (trim_tmp_map_buf(&scene) == -1)
-		return (-1);
-	replace_space_with_zero(scene->tmp_map_buf);
-	if (is_tmp_map_buf_split_by_empty_line(scene->tmp_map_buf) == -1)
-		return (-1);
-	tmp = ft_split(scene->tmp_map_buf, '\n');
-	if (!tmp)
-	{
-		ft_putstr_fd("Error\nProblem with ft_split tmp_map_buf\n", 2);
-		return (-1);
-	}
-	if (init_map_array(&scene->map, tmp, scene) == -1 || \
-		init_map_array(&scene->map_bak, tmp, scene) == -1)
-	{
-		ft_putstr_fd("Error\nmalloc for map, fail\n", 2);
-		return (-1);
-	}
-	load_map_data(tmp, scene);
-	load_map_bak_data(tmp, scene);
-	free_char_map(tmp);
 */
