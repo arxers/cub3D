@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/31 01:20:41 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/01 17:49:14 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 # define UI_DOOR "OPEN/CLOSE"
 
 // Gameplay
-# define REQUIRED_ITEMS 0
+# define REQUIRED_ITEMS 3
 
 // Movement Constants
 # define MOUSE_SEN 0.0025
@@ -297,7 +297,7 @@ typedef struct s_scene
 	char			**map;
 	char			**map_bak;
 	t_point			map_dim;
-	t_point			pos_player;
+	t_point			p_pos;
 	t_point			pos_xeno;
 	t_point			pos_powerloader;
 }					t_scene;

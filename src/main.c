@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/10/31 01:28:50 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/01 17:47:08 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -551,6 +551,8 @@ void	draw_tile(t_img *map, t_point origin, int tile)
 		draw_rectangle(map, (t_point){origin.x + MAP_CELL_SIZE * 0.1,
 			origin.y + MAP_CELL_SIZE * 0.1},
 			(t_point){MAP_CELL_SIZE * 0.8, MAP_CELL_SIZE * 0.8}, BLACK);
+	else if (tile == 3)
+		draw_rectangle(map, origin, size, 0xFFAD1A);
 	else if (tile <= 0)
 		draw_rectangle(map, origin, size, BLACK);
 	if (tile == -3)
@@ -1277,10 +1279,10 @@ void	assign_wall_textures(t_game *game, t_ray *r, t_texture_map *tex)
 {
 	if (r->side == VERTICAL)
 	{
-		tex->wall_tex = &game->img[T_EAST];
+		tex->wall_tex = &game->img[T_WEST];
 		if (r->dir.x <= 0)
 		{
-			tex->wall_tex = &game->img[T_WEST];
+			tex->wall_tex = &game->img[T_EAST];
 			tex->coords.x = WALL - tex->coords.x - 1;
 		}
 	}
@@ -1955,15 +1957,41 @@ int	game_loop(t_game *game)
 	return (0);
 }
 
-void	init_player(t_player *player, t_point starting_pos)
+void	init_player_dir(t_game *game)
 {
-	player->pos.x = starting_pos.x + 0.5;
-	player->pos.y = starting_pos.y + 0.5;
-	player->dir.x = 0;
-	player->dir.y = -1;
-	player->plane.x = -player->dir.y * 0.66;
-	player->plane.y = player->dir.x * 0.66;
-	player->zoom = 1.0;
+	char	c;
+
+	c = game->scene.map[game->scene.p_pos.y][game->scene.p_pos.x];
+	if (c == 'N')
+	{
+		game->player.dir.x = 0;
+		game->player.dir.y = -1;
+	}
+	else if (c == 'S')
+	{
+		game->player.dir.x = 0;
+		game->player.dir.y = 1;
+	}
+	else if (c == 'E')
+	{
+		game->player.dir.x = 1;
+		game->player.dir.y = 0;
+	}
+	else if (c == 'W')
+	{
+		game->player.dir.x = -1;
+		game->player.dir.y = 0;
+	}
+}
+
+void	init_player(t_game *game)
+{
+	init_player_dir(game);
+	game->player.pos.x = game->scene.p_pos.x + 0.5;
+	game->player.pos.y = game->scene.p_pos.y + 0.5;
+	game->player.plane.x = -game->player.dir.y * 0.66;
+	game->player.plane.y = game->player.dir.x * 0.66;
+	game->player.zoom = 1.0;
 }
 
 void	init_framedata(t_frame_data *frame)
@@ -2079,7 +2107,7 @@ int	init_game(t_game *game, t_scene scene)
 	if (load_xpms(game))
 		return (3);
 	init_framedata(&game->frame);
-	init_player(&game->player, scene.pos_player);
+	init_player(game);
 	init_enemy(game);
 	init_items(game);
 	init_pwl(game);
@@ -2155,8 +2183,12 @@ int	main(int ac, char **av)
 
 	ft_memset(&game, 0, sizeof(t_game));
 	if (validate_input(ac, av, &game.scene) == -1)
+	{
+		free_scene_struct(&game.scene);
 		return (1);
+	}
 	status = init_game(&game, game.scene);
+	print_2d_map(game.scene.map);
 	free_scene_struct(&game.scene);
 	if (status)
 		error_handler(&game, status);

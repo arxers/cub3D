@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/29 21:20:28 by jsu               #+#    #+#             */
-/*   Updated: 2024/10/31 16:33:21 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/01 17:47:22 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,8 @@ void	print_scene_struct(t_scene *scene)
 	print_2d_map(scene->map_bak);
 	printf("map_width: %d\n", scene->map_dim.x);
 	printf("map_height: %d\n", scene->map_dim.y);
-	printf("pos_player.x: %d\n", scene->pos_player.x);
-	printf("pos_player.y: %d\n", scene->pos_player.y);
+	printf("pos_player.x: %d\n", scene->p_pos.x);
+	printf("pos_player.y: %d\n", scene->p_pos.y);
 	printf("pos_xeno.x: %d\n", scene->pos_xeno.x);
 	printf("pos_xeno.y: %d\n", scene->pos_xeno.y);
 	printf("pos_powerloader.x: %d\n", scene->pos_powerloader.x);
@@ -738,7 +738,7 @@ int	init_map_array(char ***map, char **map_temp, t_scene *scene)
 		(*map)[index.y] = ft_calloc (scene->map_dim.x + 1, sizeof(char));
 		if (!(*map)[index.y])
 			return (-1);
-		ft_memset((*map)[index.y], '1', scene->map_dim.x);
+		ft_memset((*map)[index.y], '0', scene->map_dim.x);
 		index.y++;
 	}
 	return (0);
@@ -902,6 +902,22 @@ int	is_num_powerloader_valid(char **map)
 	if (num_armor != 1)
 	{
 		ft_putstr_fd("cub3D: Incorrect number of ARMOR char in map\n", 2);
+		return (-1);
+	}
+	return (0);
+}
+
+int	is_num_collectibles_valid(char **map)
+{
+	int	num_collectible;
+
+	num_collectible = count_char_in_map(map, 'C');
+	if (num_collectible < REQUIRED_ITEMS)
+	{
+		ft_putstr_fd("cub3D: Incorrect number of COLLECTIBLE char in map, ", 2);
+		ft_putstr_fd("expected ", 2);
+		ft_putnbr_fd(REQUIRED_ITEMS, 2);
+		ft_putstr_fd("\n", 2);
 		return (-1);
 	}
 	return (0);
@@ -1071,7 +1087,8 @@ C, D, X, P
 TO DO? maybe need to add another version of 
 is_num_player_is_valid() to account for num of C D X P chars ???
 */
-int	load_scene(char *mapfile, t_scene *scene) // TO DO: rename as load_scene
+// TO DO: rename as load_scene
+int	load_scene(char *mapfile, t_scene *scene)
 {
 	int		map_fd;
 	char	**tmp;
@@ -1119,9 +1136,10 @@ if (is_map_char_valid_mandatory(scene->tmp_map_buf) == -1)
 		|| is_num_xeno_valid(scene->map) == -1
 		|| load_xeno_pos(scene->map, scene) == -1
 		|| is_num_powerloader_valid(scene->map) == -1
-		|| load_powerloader_pos(scene->map, scene) == -1)
+		|| load_powerloader_pos(scene->map, scene) == -1
+		|| is_num_collectibles_valid(scene->map) == -1)
 		return (-1);
-	ff_bonus(scene->pos_player.x, scene->pos_player.y, scene);
+	ff_bonus(scene->p_pos.x, scene->p_pos.y, scene);
 	if (is_fill_char_at_map_border(scene) == 0)
 		return (-1);
 	return (0);
@@ -1151,8 +1169,8 @@ int	load_player_pos(char **map, t_scene *scene)
 		{
 			if (ft_strchr(player, map[i][j]))
 			{
-				scene->pos_player.x = j;
-				scene->pos_player.y = i;
+				scene->p_pos.x = j;
+				scene->p_pos.y = i;
 				return (0);
 			}
 			j++;
