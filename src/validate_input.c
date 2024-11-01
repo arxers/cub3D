@@ -619,7 +619,7 @@ int	is_bonus_map_char_valid(char *s)
 	return (0);
 }
 
-int	is_map_char_valid_mandatory(char *s)
+int	is_mandatory_map_char_valid(char *s)
 {
 	const char	ref[] = " \n10NSEW";
 	int			i;
@@ -1225,26 +1225,40 @@ int	process_map(t_scene *scene)
 	return (0);
 }
 
+int	load_mandatory_scene(char *mapfile, t_scene *scene)
+{
+	int		map_fd;
+
+	map_fd = open(mapfile, O_RDONLY);
+	if (map_fd == -1)
+	{
+		ft_putstr_fd("Error\nMap cannot be opened\n", 2);
+		return (-1);
+	}
+	if (load_scene_details(map_fd, &scene) == -1 || prepare_walls(&scene) == -1
+		|| is_six_details_valid(scene) == -1)
+		return (-1);
+	scene->hex_floor = convert_rgb_array_to_int(scene->floor);
+	scene->hex_ceiling = convert_rgb_array_to_int(scene->ceiling);
+	if (is_mandatory_map_char_valid(scene->tmp_map_buf) == -1 || \
+		process_map(scene) == -1 || \
+		is_mandatory_map_valid(scene) == -1)
+		return (-1);
+	return (0);
+}
+
 /* 
-IMPT! for bonus implementation
-need to replace TWO functions, in load_scene()
+NOTE. load_bonus_scene() differs from load_mandatory_scene() 
+for TWO function calls
 
-#1:
-replace, is_map_char_valid_mandatory(),
-with, is_map_char_valid_bonus()
-
-#2:
-replace, ff_mandatory(),
-with, ff_bonus()
+BONUS / MANDATORY
+is_bonus_map_char_valid()	/ is map_char_valid()
+is_bonus_map_valid()		/ is_mandatory_map_char_valid()
 
 key difference is that in the bonus versions, they consider FOUR extra chars:
 C, D, X, P
-
-for mandatory, replace TWO functions: 
-is_bonus_map_char_valid, with is map_char_valid()
-is_bonus_map_valid(), with is_mandatory_map_valid()
 */
-int	load_scene(char *mapfile, t_scene *scene)
+int	load_bonus_scene(char *mapfile, t_scene *scene)
 {
 	int		map_fd;
 
