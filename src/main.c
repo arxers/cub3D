@@ -6,7 +6,7 @@
 /*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 06:16:07 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 06:19:41 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -470,7 +470,7 @@ void	draw_map_player(t_img *img, t_player p)
 }
 
 int	validate_input(int ac, char **av, t_scene *scene)
-{	
+{
 	if (check_n_cmdline_args(ac) == -1)
 		return (-1);
 	if (is_map_a_dot_cub_file(av[1]) == -1)
