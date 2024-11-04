@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   validate_input.h                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jsu <marvin@42.fr>                         +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 15:10:57 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/04 15:10:59 by jsu              ###   ########.fr       */
+/*   Updated: 2024/11/04 19:26:16 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int		check_n_cmdline_args(int ac);
 int		is_map_a_dot_cub_file(char *s);
 int		is_map_file_openable(char *mapfile);
 int		load_bonus_scene(char *mapfile, t_scene *scene);
-//int	load_mandatory_scene(char *mapfile, t_scene *scene);
+// int	load_mandatory_scene(char *mapfile, t_scene *scene);
 void	free_scene_struct(t_scene *s);
 
 // load_scene_details.c
@@ -54,8 +54,8 @@ int		is_valid_rgb_value(char *s);
 int		convert_rgb_array_to_int(char *s);
 
 // is_bonus_map_char_valid.c // swap 1 function: is_x_map_char_valid()
-int		is_bonus_map_char_valid(char *s);
-//int	is_mandatory_map_char_valid(char *s);
+// int		is_bonus_map_char_valid(char *s);
+int		is_mandatory_map_char_valid(char *s);
 int		process_map(t_scene *scene);
 int		trim_tmp_map_buf(t_scene **scene);
 void	replace_space_with_zero(char *s);
@@ -68,13 +68,13 @@ void	load_map_data(char **s, t_scene *scene);
 void	load_map_bak_data(char **s, t_scene *scene);
 
 // is_bonus_map_valid.c // swap 2 functions: is_x_map_valid(), ff_x())
-int		is_bonus_map_valid(t_scene *scene);
-//int	is_mandatory_map_valid(t_scene *scene);
+// int		is_bonus_map_valid(t_scene *scene);
+int		is_mandatory_map_valid(t_scene *scene);
 int		is_num_player_valid(char **map);
 int		count_char_in_map(char **map, char ch);
 int		load_player_pos(char **map, t_scene *scene);
-void	ff_bonus(int i, int j, t_scene *s);
-//void	ff_mandatory(int i, int j, t_scene *s);
+// void	ff_bonus(int i, int j, t_scene *s);
+void	ff_mandatory(int i, int j, t_scene *s);
 
 // load_bonus_chars.c (REMOVE FOR MANDATORY)
 int		is_num_xeno_valid(char **map);
@@ -89,4 +89,11 @@ int		is_fill_char_at_toprow(t_scene *s);
 int		is_fill_char_at_botrow(t_scene *s);
 int		is_fill_char_at_lcol(t_scene *s);
 int		is_fill_char_at_rcol(t_scene *s);
+
+// validate_input.c
+int		load_mandatory_scene(char *mapfile, t_scene *scene);
+int		is_mandatory_map_char_valid(char *s);
+int		is_mandatory_map_valid(t_scene *scene);
+void	ff_mandatory(int i, int j, t_scene *s);
+
 #endif

@@ -3,30 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   is_bonus_map_valid.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jsu <marvin@42.fr>                         +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 14:12:23 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/04 14:12:25 by jsu              ###   ########.fr       */
+/*   Updated: 2024/11/04 19:27:04 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/validate_input.h"
 
-int	is_bonus_map_valid(t_scene *scene)
-{
-	if (is_num_player_valid(scene->map) == -1
-		|| load_player_pos(scene->map, scene) == -1
-		|| is_num_xeno_valid(scene->map) == -1
-		|| load_xeno_pos(scene->map, scene) == -1
-		|| is_num_powerloader_valid(scene->map) == -1
-		|| load_powerloader_pos(scene->map, scene) == -1
-		|| is_num_collectibles_valid(scene->map) == -1)
-		return (-1);
-	ff_bonus(scene->p_pos.y, scene->p_pos.x, scene);
-	if (is_fill_char_at_map_border(scene) == 0)
-		return (-1);
-	return (0);
-}
+// int	is_bonus_map_valid(t_scene *scene)
+// {
+// 	if (is_num_player_valid(scene->map) == -1
+// 		|| load_player_pos(scene->map, scene) == -1
+// 		|| is_num_xeno_valid(scene->map) == -1
+// 		|| load_xeno_pos(scene->map, scene) == -1
+// 		|| is_num_powerloader_valid(scene->map) == -1
+// 		|| load_powerloader_pos(scene->map, scene) == -1
+// 		|| is_num_collectibles_valid(scene->map) == -1)
+// 		return (-1);
+// 	ff_bonus(scene->p_pos.y, scene->p_pos.x, scene);
+// 	if (is_fill_char_at_map_border(scene) == 0)
+// 		return (-1);
+// 	return (0);
+// }
 
 /*
 wrapper for count_char_in_map()

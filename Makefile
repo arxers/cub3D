@@ -35,7 +35,8 @@ SRC =   src/main.c \
 		src/process_map.c \
 		src/is_bonus_map_valid.c \
 		src/load_bonus_chars.c \
-		src/is_fill_char_at_map_border.c
+		src/is_fill_char_at_map_border.c \
+		src/validate_input.c
 		
 OBJ = $(SRC:.c=.o)
 

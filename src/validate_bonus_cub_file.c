@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   validate_cub_file.c                                :+:      :+:    :+:   */
+/*   validate_bonus_cub_file.c                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jsu <marvin@42.fr>                         +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 12:59:58 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/04 13:00:04 by jsu              ###   ########.fr       */
+/*   Updated: 2024/11/04 19:26:50 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,27 +80,27 @@ is_bonus_map_valid()		/ is_mandatory_map_char_valid()
 key difference is that in the bonus versions, they consider FOUR extra chars:
 C, D, X, P
 */
-int	load_bonus_scene(char *mapfile, t_scene *scene)
-{
-	int		map_fd;
+// int	load_bonus_scene(char *mapfile, t_scene *scene)
+// {
+// 	int		map_fd;
 
-	map_fd = open(mapfile, O_RDONLY);
-	if (map_fd == -1)
-	{
-		ft_putstr_fd("Error\nMap cannot be opened\n", 2);
-		return (-1);
-	}
-	if (load_scene_details(map_fd, &scene) == -1 || prepare_walls(&scene) == -1
-		|| is_six_details_valid(scene) == -1)
-		return (-1);
-	scene->hex_floor = convert_rgb_array_to_int(scene->floor);
-	scene->hex_ceiling = convert_rgb_array_to_int(scene->ceiling);
-	if (is_bonus_map_char_valid(scene->tmp_map_buf) == -1 || \
-		process_map(scene) == -1 || \
-		is_bonus_map_valid(scene) == -1)
-		return (-1);
-	return (0);
-}
+// 	map_fd = open(mapfile, O_RDONLY);
+// 	if (map_fd == -1)
+// 	{
+// 		ft_putstr_fd("Error\nMap cannot be opened\n", 2);
+// 		return (-1);
+// 	}
+// 	if (load_scene_details(map_fd, &scene) == -1 || prepare_walls(&scene) == -1
+// 		|| is_six_details_valid(scene) == -1)
+// 		return (-1);
+// 	scene->hex_floor = convert_rgb_array_to_int(scene->floor);
+// 	scene->hex_ceiling = convert_rgb_array_to_int(scene->ceiling);
+// 	if (is_bonus_map_char_valid(scene->tmp_map_buf) == -1 || \
+// 		process_map(scene) == -1 || \
+// 		is_bonus_map_valid(scene) == -1)
+// 		return (-1);
+// 	return (0);
+// }
 
 /*
 for t_scene struct,

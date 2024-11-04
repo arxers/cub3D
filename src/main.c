@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 17:51:04 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 19:26:35 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ int	validate_input(int ac, char **av, t_scene *scene)
 		return (-1);
 	if (is_map_file_openable(av[1]) == -1)
 		return (-1);
-	if (load_bonus_scene(av[1], scene) == -1)
+	if (load_mandatory_scene(av[1], scene) == -1)
 		return (-1);
 	return (0);
 }
@@ -34,17 +34,17 @@ int	main_loop(t_game *game)
 	{
 		if (display_pause_screen(game))
 			return (0);
-		update_enemy_pos(game);
+		// update_enemy_pos(game);
 		handle_movement(game);
 		render_walls(game);
-		render_enemy_sprite(game);
-		pickup_item(game);
-		render_item(game);
-		render_pwl(game);
+		// render_enemy_sprite(game);
+		// pickup_item(game);
+		// render_item(game);
+		// render_pwl(game);
 		draw_minimap(game);
 		mlx_put_image_to_window(game->mlx, game->win, game->img[T_WIN].img, 0,
 			0);
-		interact(game);
+		// interact(game);
 		display_fps_counter(game);
 		display_msg(game);
 	}
