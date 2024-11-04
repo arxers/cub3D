@@ -12,6 +12,17 @@ SRC =   src/main.c src/validate_input.c src/cleanup.c \
 		src/raycasting.c src/dda.c src/dda_special.c \
 		src/pwl_render.c src/item.c \
 		src/utils.c
+		src/validate_bonus_cub_file.c \
+		src/load_scene_details.c \
+		load_scene_details_to_struct.c \
+		prepare_walls.c \
+		is_valid_rgb_array.c \
+		is_bonus_map_char_valid.c \
+		process_map.c \
+		is_bonus_map_valid.c \
+		load_bonus_chars.c \
+		is_fill_char_at_map_border.c
+		
 OBJ = $(SRC:.c=.o)
 
 LIBFT = libft/libft.a
