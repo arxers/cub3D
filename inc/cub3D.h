@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 08:33:23 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 23:29:23 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,9 @@
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
 # define PLAYER_SPD 0.002
-# define ENEMY_SPD 0.0025
+// # define ENEMY_SPD 0.0025
 # define PLAYER_RADIUS 0.20
-# define ENEMY_RADIUS 0
+// # define ENEMY_RADIUS 0
 
 // Raycasting
 # define VERTICAL 0
@@ -183,7 +183,6 @@ typedef struct s_img
 	void			*img;
 	char			*addr;
 	t_vec			size;
-	float			intensity;
 	int				bits_per_pixel;
 	int				line_len;
 	int				endian;
@@ -238,12 +237,12 @@ typedef struct s_map
 	char			update;
 }					t_map;
 
-typedef struct s_light
-{
-	float			ambient;
-	float			min;
-	float			max;
-}					t_light;
+// typedef struct s_light
+// {
+// 	float			ambient;
+// 	float			min;
+// 	float			max;
+// }					t_light;
 
 typedef struct s_ray
 {
@@ -313,11 +312,7 @@ typedef struct s_game
 	void			*win;
 	t_frame_data	frame;
 	t_player		player;
-	t_enemy			enemy;
-	t_light			light;
 	t_map			map;
-	t_pwl			pwl;
-	t_item			item;
 }					t_game;
 
 // cleanup.c
@@ -327,8 +322,8 @@ int					cleanup(t_game *game, unsigned char status, char *msg);
 void				error_handler(t_game *game, int status);
 
 // image_utils.c
-unsigned int		darken(unsigned int color, float factor);
-float				set_intensity(t_light light, float dist);
+// unsigned int		darken(unsigned int color, float factor);
+// float				set_intensity(t_light light, float dist);
 void				draw_diagonal_lines(t_img *img, t_vec size,
 						unsigned int color);
 void				fill_img(t_img *img, unsigned int color);
@@ -351,14 +346,6 @@ void				draw_line(t_img *img, t_vec start, t_vec end,
 						unsigned int color);
 
 // image_copy_paste.c
-void				put_img_scale_darken(t_vec ofs, t_img *src, t_img *dst,
-						t_fvec scale);
-void				put_img_scale_mid_bot(t_vec ofs, t_img *src, t_img *dst,
-						t_fvec scale);
-void				put_img_scale_mid(t_vec ofs, t_img *src, t_img *dst,
-						t_fvec scale);
-void				put_img_scale(t_vec offset, t_img *src, t_img *dst,
-						t_fvec scale);
 void				put_img(t_vec offset, t_img *src, t_img *dst);
 
 // draw_primitives.c
@@ -372,17 +359,12 @@ void				draw_line(t_img *img, t_vec start, t_vec end,
 						unsigned int color);
 
 // minimap.c
-void				draw_tile(t_img *map, t_vec origin, int tile);
 void				update_map_tiles(t_game *game);
-void				draw_map_enemy(t_game *game);
 void				draw_map_player(t_img *img, t_player p);
 void				draw_minimap(t_game *game);
 
 // init_game.c
 void				init_player(t_game *game);
-void				init_enemy(t_game *game);
-void				init_items(t_game *game);
-void				init_pwl(t_game *game);
 int					init_game(t_game *game, t_scene scene);
 
 // init_game_utils.c
@@ -400,19 +382,6 @@ void				convert_row_to_ints(int *output_row, char *input_row);
 int					**char_to_int_map(char **input);
 int					init_minimap(t_game *game, t_vec map_grid_size);
 
-// pwl_render.c
-void				set_pwl_view(t_game *game, t_ray r);
-void				render_pwl_sprite(t_game *game, t_ray r);
-void				pwl_hit_check(t_game *game);
-void				render_pwl_overlay(t_game *game);
-void				render_pwl(t_game *game);
-
-// item.c
-void				render_item_sprite(t_game *game, t_coin item);
-void				render_item(t_game *game);
-int					same_position(t_fvec p1, t_fvec p2);
-void				pickup_item(t_game *game);
-
 // key_hooks.c
 void				handle_keystate(unsigned int key, int state, t_game *game);
 int					key_press(unsigned int key, t_game *game);
@@ -426,26 +395,6 @@ int					exit_game(t_game *game);
 // mouse_event.c
 int					mwheel(unsigned int key, t_game *game);
 int					mouse_event(unsigned int key, int x, int y, t_game *game);
-
-// enemy_hunt.c
-void				move_enemy_cardinal(t_game *game, int direction,
-						t_fvec *new_pos);
-void				move_enemy_diagonal(t_game *game, int direction,
-						t_fvec *new_pos);
-void				move_enemy(t_game *game, t_fvec *new_pos);
-void				enemy_hunt(t_game *game);
-
-// enemy_chase.c
-void				set_player_look_at(t_player *player, t_fvec enemy_pos);
-void				enemy_game_over(t_game *game);
-void				enemy_open_door(t_game *game);
-void				enemy_chase(t_game *game, float dist_sq, float speed);
-void				update_enemy_pos(t_game *game);
-
-// enemy_render.c
-void				update_enemy_sprite(t_game *game);
-void				render_enemy(t_game *game);
-void				render_enemy_sprite(t_game *game);
 
 // player_movement.c
 void				calculate_movement(t_game *game, float *move_x,
@@ -482,23 +431,10 @@ void				set_ray_step_direction(t_game *game, t_ray *r);
 void				set_dda_step_side(t_ray *r);
 int					dda(t_ray *r, t_game *game);
 
-// dda_special.c
-void				init_ray_to_target(t_game *game, t_ray *r,
-						t_fvec target_pos);
-int					dda_to_target(t_game *game, t_ray *r, t_fvec target_pos);
-int					dda_interact(t_ray *r, t_game *game);
-
 // display_ui.c
 void				display_fps_counter(t_game *game);
 void				display_msg(t_game *game);
 int					display_pause_screen(t_game *game);
-
-// interact.c
-void				display_ui_msg(t_game *game, char *key, char *msg);
-void				interact_door(t_game *game, t_ray r);
-void				interact_pwl(t_game *game);
-void				check_interact(t_game *game, int *tile_hit, t_ray *r);
-void				interact(t_game *game);
 
 // background.c
 int					init_bg(t_game *game, int ceiling, int floor);
@@ -507,6 +443,5 @@ void				draw_bg(t_game *game);
 // utils.c
 int					delay_ms(unsigned int ms, struct timeval *timer);
 int					should_render_frame(t_game *game);
-float				dot_product(t_fvec a, t_fvec b);
 
 #endif

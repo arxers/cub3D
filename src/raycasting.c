@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 07:52:38 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 19:30:47 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 23:23:37 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,6 @@
 // Draws vertical slices of the wall projections, from left to right.
 void	draw_wall_slices(t_game *game, t_ray *r, t_tex *tex)
 {
-	tex->wall_tex->intensity = set_intensity(game->light, r->wall_dist
-			* game->player.zoom);
 	tex->tex_step = 1.0 * WALL / r->line_height;
 	r->pix.y = r->draw_start;
 	tex->hit.y = (r->draw_start + game->player.pitch - (r->line_height

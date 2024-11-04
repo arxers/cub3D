@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   keyhook.c                                          :+:      :+:    :+:   */
+/*   key_hooks.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 07:28:56 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 07:29:49 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 23:30:04 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,6 @@ int	key_press(unsigned int key, t_game *game)
 		game->state[S_MAP_DISABLE] = 0;
 		game->state[S_MAP_BIG] = !game->state[S_MAP_BIG];
 	}
-	if (key == XK_2)
-		game->state[S_ENEMY_PATH] = !game->state[S_ENEMY_PATH];
-	if (game->pwl.item.collected == 1 && key == XK_space)
-		game->state[S_PUNCHING] = 1;
 	return (0);
 }
 

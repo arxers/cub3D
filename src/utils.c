@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 08:12:10 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 08:12:20 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 23:28:52 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,9 +53,4 @@ int	should_render_frame(t_game *game)
 		return (1);
 	}
 	return (0);
-}
-
-float	dot_product(t_fvec a, t_fvec b)
-{
-	return (a.x * b.x + a.y * b.y);
 }

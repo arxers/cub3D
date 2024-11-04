@@ -6,69 +6,11 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/29 21:20:28 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/04 19:25:56 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 23:28:13 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/validate_input.h"
-
-// void	print_2d_map(char **s)
-// {
-// 	int	i;
-// 	int	j;
-
-// 	i = 0;
-// 	while (s[i] != NULL)
-// 	{
-// 		j = 0;
-// 		while (s[i][j] != '\0')
-// 		{
-// 			write(1, &(s[i][j]), 1);
-// 			j++;
-// 		}
-// 		write(1, "\n", 1);
-// 		i++;
-// 	}
-// }
-
-// void	print_scene_struct(t_scene *scene)
-// {
-// 	printf("\nCurrent state of t_scene struct:\n");
-// 	printf("NO:%s\n", scene->no);
-// 	printf("SO:%s\n", scene->so);
-// 	printf("EA:%s\n", scene->ea);
-// 	printf("WE:%s\n", scene->we);
-// 	printf("F:%s\n", scene->floor);
-// 	printf("hex_floor:%x\n", scene->hex_floor);
-// 	printf("C:%s\n", scene->ceiling);
-// 	printf("hex_ceiling:%x\n", scene->hex_ceiling);
-// 	printf("tmp_map_buf (char *) begin on new line:\n%s\n", scene->tmp_map_buf);
-// 	printf("map ptr (char **): %p\n", scene->map);
-// 	print_2d_map(scene->map);
-// 	printf("map_bak ptr (char **): %p\n", scene->map_bak);
-// 	print_2d_map(scene->map_bak);
-// 	printf("map_width: %d\n", scene->map_dim.x);
-// 	printf("map_height: %d\n", scene->map_dim.y);
-// 	printf("pos_player.x: %d\n", scene->p_pos.x);
-// 	printf("pos_player.y: %d\n", scene->p_pos.y);
-// 	printf("pos_xeno.x: %d\n", scene->pos_xeno.x);
-// 	printf("pos_xeno.y: %d\n", scene->pos_xeno.y);
-// 	printf("pos_powerloader.x: %d\n", scene->pos_powerloader.x);
-// 	printf("pos_powerloader.y: %d\n", scene->pos_powerloader.y);
-// }
-
-// void	print_arr(char **arr)
-// {
-// 	int	i;
-
-// 	i = 0;
-// 	printf("print_arr() eg. result of ft_split()\n");
-// 	while (arr[i] != NULL)
-// 	{
-// 		printf("%d: %s\n", i, arr[i]);
-// 		i++;
-// 	}
-// }
 
 int	load_mandatory_scene(char *mapfile, t_scene *scene)
 {

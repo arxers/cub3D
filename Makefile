@@ -19,8 +19,7 @@ SRC =   src/main.c \
 		src/player_look.c \
 		src/player_utils.c \
 		src/display_ui.c \
-		src/interact.c \
-		src/raycasting.c src/dda.c src/dda_special.c \
+		src/raycasting.c src/dda.c \
 		src/utils.c \
 		src/validate_bonus_cub_file.c \
 		src/load_scene_details.c \

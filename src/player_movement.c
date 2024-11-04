@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   player_movement.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 07:40:32 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 07:44:23 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 23:30:35 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void	handle_movement(t_game *game)
 	if (game->state[S_CAUGHT])
 		return ;
 	run_speed = 1;
-	if (game->state[S_RUN] == 1 && !game->pwl.item.collected)
+	if (game->state[S_RUN] == 1)
 	{
 		game->state[S_MAP_BIG] = 0;
 		run_speed = RUN_SPD;

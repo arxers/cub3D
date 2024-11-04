@@ -3,51 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   is_bonus_map_char_valid.c                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jsu <marvin@42.fr>                         +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 13:55:44 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/04 13:55:46 by jsu              ###   ########.fr       */
+/*   Updated: 2024/11/04 23:27:07 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/validate_input.h"
-
-/*
-NOTE. There are TWO versions of this function:
-valid map chars
-" \n10NSEW" (mandatory)
-" \n10NSEWCDPX" (bonus)
-
-checks tmp_map_buf in scene struct, char by char
-if ft_strchr() returns NULL, means it is an invalid char,
-	ie. a char NOT found in (char *)ref literal
-	then return -1 (error)
-else
-	return 0 (success)
-	
-BONUS add 4 chars:
-C: Collectible
-D: Door
-P: Powerloader
-X: Xeno
-*/
-int	is_bonus_map_char_valid(char *s)
-{
-	const char	ref[] = " \n10NSEWCDPX";
-	int			i;
-
-	i = 0;
-	while (s[i] != '\0')
-	{
-		if (ft_strchr(ref, s[i]) == NULL)
-		{
-			ft_putstr_fd("Error\nInvalid map char\n", 2);
-			return (-1);
-		}
-		i++;
-	}
-	return (0);
-}
 
 int	process_map(t_scene *scene)
 {

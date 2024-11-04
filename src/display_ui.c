@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   display_ui.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 08:09:36 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 08:09:48 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 23:19:52 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,30 +26,14 @@ void	display_fps_counter(t_game *game)
 
 void	display_msg(t_game *game)
 {
-	if (game->state[S_ENEMY_DEAD])
-	{
-		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
-			"CONGRATULATIONS! [ESC] to quit");
-		return ;
-	}
-	if (game->state[S_CAUGHT])
-	{
-		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
-			"YOU DIED! [ESC] to quit");
-		return ;
-	}
 	if (game->state[S_MOUSE] == 0)
 		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
 			"MOUSE DISABLED, [CLICK ANYWHERE] to enable");
 	else
 		mlx_string_put(game->mlx, game->win, 4, 26, WHITE,
 			"MOUSE ENABLED, [P] to disable");
-	if (game->pwl.item.collected)
-		mlx_string_put(game->mlx, game->win, 4, 39, WHITE,
-			"[SPACE] or [CLICK] to punch");
-	else
-		mlx_string_put(game->mlx, game->win, 4, 39, WHITE,
-			"[WSAD] or [ARROW KEYS] to move, [SHIFT] to run");
+	mlx_string_put(game->mlx, game->win, 4, 39, WHITE,
+		"[WSAD] or [ARROW KEYS] to move, [SHIFT] to run");
 }
 
 int	display_pause_screen(t_game *game)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   mouse_event.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 06:45:17 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 06:51:10 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 23:30:58 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,6 @@ int	mouse_event(unsigned int key, int x, int y, t_game *game)
 			mlx_mouse_move(game->mlx, game->win, RES_X2, RES_Y2);
 			game->state[S_MOUSE] = 1;
 		}
-		if (game->pwl.item.collected && game->state[S_MOUSE])
-			game->state[S_PUNCHING] = 1;
 	}
 	return (mwheel(key, game));
 }
