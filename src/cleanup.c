@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cleanup.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 06:34:40 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 08:14:38 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 18:42:18 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,9 +60,9 @@ int	cleanup(t_game *game, unsigned char status, char *msg)
 void	error_handler(t_game *game, int status)
 {
 	if (status == 1)
-		cleanup(game, 1, "cub3D: Error: Failed to initialize game\n");
+		cleanup(game, 1, "Error\nFailed to initialize game\n");
 	else if (status == 2)
-		cleanup(game, 1, "cub3D: Error: Failed to create image\n");
+		cleanup(game, 1, "Error\nFailed to create image\n");
 	else if (status == 3)
-		cleanup(game, 1, "cub3D: Error: Missing texture file/files\n");
+		cleanup(game, 1, "Error\nMissing texture file/files\n");
 }
