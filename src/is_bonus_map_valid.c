@@ -110,3 +110,23 @@ int	load_player_pos(char **map, t_scene *scene)
 	ft_putstr_fd("Error\nPLAYER char missing from map\n", 2);
 	return (-1);
 }
+
+/*
+same as mandatory version
+only difference is first arg for ft_strchr() includes 4 extra chars: C D X P
+*/
+void	ff_bonus(int i, int j, t_scene *s)
+{
+	if (i < 0 || i > s->map_dim.y - 1)
+		return ;
+	if (j < 0 || j > s->map_dim.x - 1)
+		return ;
+	if (s->map_bak[i][j] == '1' || s->map_bak[i][j] == 'F')
+		return ;
+	if (s->map_bak[i][j] == '0' || ft_strchr("NSEWCDXP", s->map_bak[i][j]))
+		s->map_bak[i][j] = 'F';
+	ff_bonus(i - 1, j, s);
+	ff_bonus(i + 1, j, s);
+	ff_bonus(i, j - 1, s);
+	ff_bonus(i, j + 1, s);
+}
