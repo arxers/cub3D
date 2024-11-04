@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   raycasting.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 07:52:38 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 07:55:38 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 19:30:47 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,7 @@ void	draw_wall_slices(t_game *game, t_ray *r, t_tex *tex)
 		tex->coords.y = (int)tex->hit.y & (WALL - 1);
 		tex->hit.y += tex->tex_step;
 		set_pixel_alpha(&game->img[T_WIN], r->pix.x, r->pix.y,
-			darken(get_pixel(tex->wall_tex, tex->coords.x, tex->coords.y),
-				tex->wall_tex->intensity));
+			get_pixel(tex->wall_tex, tex->coords.x, tex->coords.y));
 		r->pix.y++;
 	}
 }

@@ -15,16 +15,12 @@ SRC =   src/main.c \
 		src/image_primitives.c \
 		src/image_copy_paste.c \
 		src/minimap.c \
-		src/enemy_hunt.c \
-		src/enemy_chase.c \
-		src/enemy_render.c \
 		src/player_movement.c \
 		src/player_look.c \
 		src/player_utils.c \
 		src/display_ui.c \
 		src/interact.c \
 		src/raycasting.c src/dda.c src/dda_special.c \
-		src/pwl_render.c src/item.c \
 		src/utils.c \
 		src/validate_bonus_cub_file.c \
 		src/load_scene_details.c \

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   background.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 08:16:26 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 08:16:35 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 19:32:24 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	draw_bg(t_game *game)
 	put_img((t_vec){0, 0}, &game->img[T_CEILING], &game->img[T_WIN]);
 	put_img((t_vec){0, RES_Y2 - game->player.pitch}, &game->img[T_FLOOR],
 		&game->img[T_WIN]);
-	put_img_scale((t_vec){0, RES_Y2 - game->player.pitch}, &game->img[T_DITHER],
-		&game->img[T_WIN], (t_fvec){1, (1 - (P_MAX_HEIGHT - game->player.z)
-			/ (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
+	// put_img_scale((t_vec){0, RES_Y2 - game->player.pitch}, &game->img[T_DITHER],
+	// 	&game->img[T_WIN], (t_fvec){1, (1 - (P_MAX_HEIGHT - game->player.z)
+	// 		/ (0.5 + P_MAX_HEIGHT)) * game->player.zoom});
 }
