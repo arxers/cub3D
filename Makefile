@@ -1,7 +1,6 @@
 NAME = cub3D
 CFLAGS = -Wall -Wextra -Werror
 SRC =   src/main.c \
-		src/validate_input.c \
 		src/cleanup.c \
 		src/init_game.c \
 		src/init_game_utils.c \

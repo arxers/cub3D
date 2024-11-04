@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 08:34:04 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 17:51:04 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ int	main(int ac, char **av)
 		return (1);
 	}
 	status = init_game(&game, game.scene);
-	print_2d_map(game.scene.map);
 	free_scene_struct(&game.scene);
 	if (status)
 		error_handler(&game, status);
