@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   validate_cub_file.c                                :+:      :+:    :+:   */
+/*   validate_bonus_cub_file.c                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jsu <marvin@42.fr>                         +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 12:59:58 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/04 13:00:04 by jsu              ###   ########.fr       */
+/*   Updated: 2024/11/04 18:50:12 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int	check_n_cmdline_args(int ac)
 	if (ac != 2)
 	{
 		ft_putstr_fd("Error\nInvalid number of arguments\n", 2);
-		ft_putstr_fd("Error\nUsage: cub3D [*.cub]\n", 2);
+		ft_putstr_fd("Usage: cub3D [*.cub]\n", 2);
 		return (-1);
 	}
 	return (0);
