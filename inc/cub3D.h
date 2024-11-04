@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/01 17:49:14 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 08:33:23 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,10 @@
 # include "../mlx/mlx.h"
 # include <X11/X.h>
 # include <X11/keysym.h>
+# include <fcntl.h>
 # include <math.h>
 # include <stdio.h>
 # include <sys/time.h>
-# include <fcntl.h>
 
 // UI
 # define UI_PWL_TRUE "ENTER P-5000 POWERED WORK LOADER"
@@ -28,6 +28,7 @@
 # define UI_DOOR "OPEN/CLOSE"
 
 // Gameplay
+# define TARGET_FPS 30
 # define REQUIRED_ITEMS 3
 
 // Movement Constants
@@ -50,7 +51,7 @@
 # define RES_Y2 384
 # define WALL 64
 
-// map
+// Map
 # define MAP_CELL_SIZE 16
 # define MAP_COLOR 0x0ADAF3
 
@@ -165,23 +166,23 @@ typedef enum e_timer
 	TIMER_MAX,
 }					t_timer;
 
-typedef struct s_fpoint
+typedef struct s_fvec
 {
 	float			x;
 	float			y;
-}					t_fpoint;
+}					t_fvec;
 
-typedef struct s_point
+typedef struct s_vec
 {
 	int				x;
 	int				y;
-}					t_point;
+}					t_vec;
 
 typedef struct s_img
 {
 	void			*img;
 	char			*addr;
-	t_point			size;
+	t_vec			size;
 	float			intensity;
 	int				bits_per_pixel;
 	int				line_len;
@@ -190,16 +191,16 @@ typedef struct s_img
 
 typedef struct s_coin
 {
-	t_fpoint		pos;
-	t_fpoint		dist;
+	t_fvec			pos;
+	t_fvec			dist;
 	int				collected;
 }					t_coin;
 
 typedef struct s_player
 {
-	t_fpoint		pos;
-	t_fpoint		plane;
-	t_fpoint		dir;
+	t_fvec			pos;
+	t_fvec			plane;
+	t_fvec			dir;
 	float			z;
 	float			zoom;
 	int				pitch;
@@ -207,11 +208,11 @@ typedef struct s_player
 
 typedef struct s_enemy
 {
-	t_fpoint		pos;
-	t_fpoint		dist;
-	t_fpoint		memory;
-	t_fpoint		last_dist;
-	t_fpoint		last_seen;
+	t_fvec			pos;
+	t_fvec			dist;
+	t_fvec			memory;
+	t_fvec			last_dist;
+	t_fvec			last_seen;
 	t_img			img;
 	int				frame;
 	int				move_seed;
@@ -232,8 +233,8 @@ typedef struct s_frame_data
 typedef struct s_map
 {
 	int				**arr;
-	t_point			size;
-	t_point			offset;
+	t_vec			size;
+	t_vec			offset;
 	char			update;
 }					t_map;
 
@@ -247,12 +248,12 @@ typedef struct s_light
 typedef struct s_ray
 {
 	double			line_height;
-	t_fpoint		map;
-	t_fpoint		dir;
-	t_fpoint		side_dist;
-	t_fpoint		delta_dist;
-	t_point			pix;
-	t_point			step;
+	t_fvec			map;
+	t_fvec			dir;
+	t_fvec			side_dist;
+	t_fvec			delta_dist;
+	t_vec			pix;
+	t_vec			step;
 	float			wall_dist;
 	int				draw_start;
 	int				draw_end;
@@ -262,10 +263,10 @@ typedef struct s_ray
 typedef struct s_texture_map
 {
 	t_img			*wall_tex;
-	t_fpoint		hit;
-	t_point			coords;
+	t_fvec			hit;
+	t_vec			coords;
 	float			tex_step;
-}					t_texture_map;
+}					t_tex;
 
 typedef struct s_pwl
 {
@@ -296,10 +297,10 @@ typedef struct s_scene
 	char			*tmp_map_buf;
 	char			**map;
 	char			**map_bak;
-	t_point			map_dim;
-	t_point			p_pos;
-	t_point			pos_xeno;
-	t_point			pos_powerloader;
+	t_vec			map_dim;
+	t_vec			p_pos;
+	t_vec			pos_xeno;
+	t_vec			pos_powerloader;
 }					t_scene;
 
 typedef struct s_game
@@ -318,5 +319,194 @@ typedef struct s_game
 	t_pwl			pwl;
 	t_item			item;
 }					t_game;
+
+// cleanup.c
+void				ft_destroy_image(void *mlx_ptr, t_img *img);
+void				free_int_array(int **output, int size);
+int					cleanup(t_game *game, unsigned char status, char *msg);
+void				error_handler(t_game *game, int status);
+
+// image_utils.c
+unsigned int		darken(unsigned int color, float factor);
+float				set_intensity(t_light light, float dist);
+void				draw_diagonal_lines(t_img *img, t_vec size,
+						unsigned int color);
+void				fill_img(t_img *img, unsigned int color);
+
+// image_pixel_utils.c
+void				set_pixel(t_img *img, int x, int y, unsigned int color);
+void				set_pixel_alpha(t_img *img, int x, int y,
+						unsigned int color);
+unsigned int		get_pixel(t_img *img, int x, int y);
+
+// image_primitives.c
+void				brasenham(int *err, t_vec *start, t_vec d, t_vec s);
+void				draw_rectangle(t_img *dst, t_vec origin, t_vec size,
+						unsigned int color);
+void				draw_circle(t_img *dst, t_vec origin, int radius,
+						unsigned int color);
+void				draw_circle_outline(t_img *dst, t_vec origin, int radius,
+						unsigned int color);
+void				draw_line(t_img *img, t_vec start, t_vec end,
+						unsigned int color);
+
+// image_copy_paste.c
+void				put_img_scale_darken(t_vec ofs, t_img *src, t_img *dst,
+						t_fvec scale);
+void				put_img_scale_mid_bot(t_vec ofs, t_img *src, t_img *dst,
+						t_fvec scale);
+void				put_img_scale_mid(t_vec ofs, t_img *src, t_img *dst,
+						t_fvec scale);
+void				put_img_scale(t_vec offset, t_img *src, t_img *dst,
+						t_fvec scale);
+void				put_img(t_vec offset, t_img *src, t_img *dst);
+
+// draw_primitives.c
+void				draw_rectangle(t_img *dst, t_vec origin, t_vec size,
+						unsigned int color);
+void				draw_circle(t_img *dst, t_vec origin, int radius,
+						unsigned int color);
+void				draw_circle_outline(t_img *dst, t_vec origin, int radius,
+						unsigned int color);
+void				draw_line(t_img *img, t_vec start, t_vec end,
+						unsigned int color);
+
+// minimap.c
+void				draw_tile(t_img *map, t_vec origin, int tile);
+void				update_map_tiles(t_game *game);
+void				draw_map_enemy(t_game *game);
+void				draw_map_player(t_img *img, t_player p);
+void				draw_minimap(t_game *game);
+
+// init_game.c
+void				init_player(t_game *game);
+void				init_enemy(t_game *game);
+void				init_items(t_game *game);
+void				init_pwl(t_game *game);
+int					init_game(t_game *game, t_scene scene);
+
+// init_game_utils.c
+void				init_player_dir(t_game *game);
+int					count_tile(t_game *game, int n);
+
+// init_image.c
+int					init_img(void *mlx_ptr, t_img *img, int width, int height);
+int					load_xpm(void *mlx, char *path, t_img *img);
+int					load_pwl_xpms(t_game *game);
+int					load_xpms(t_game *game);
+
+// init_map.c
+void				convert_row_to_ints(int *output_row, char *input_row);
+int					**char_to_int_map(char **input);
+int					init_minimap(t_game *game, t_vec map_grid_size);
+
+// pwl_render.c
+void				set_pwl_view(t_game *game, t_ray r);
+void				render_pwl_sprite(t_game *game, t_ray r);
+void				pwl_hit_check(t_game *game);
+void				render_pwl_overlay(t_game *game);
+void				render_pwl(t_game *game);
+
+// item.c
+void				render_item_sprite(t_game *game, t_coin item);
+void				render_item(t_game *game);
+int					same_position(t_fvec p1, t_fvec p2);
+void				pickup_item(t_game *game);
+
+// key_hooks.c
+void				handle_keystate(unsigned int key, int state, t_game *game);
+int					key_press(unsigned int key, t_game *game);
+int					key_release(unsigned int key, t_game *game);
+
+// key_specials.c
+void				pause_game(t_game *game);
+void				toggle_mouse(t_game *game);
+int					exit_game(t_game *game);
+
+// mouse_event.c
+int					mwheel(unsigned int key, t_game *game);
+int					mouse_event(unsigned int key, int x, int y, t_game *game);
+
+// enemy_hunt.c
+void				move_enemy_cardinal(t_game *game, int direction,
+						t_fvec *new_pos);
+void				move_enemy_diagonal(t_game *game, int direction,
+						t_fvec *new_pos);
+void				move_enemy(t_game *game, t_fvec *new_pos);
+void				enemy_hunt(t_game *game);
+
+// enemy_chase.c
+void				set_player_look_at(t_player *player, t_fvec enemy_pos);
+void				enemy_game_over(t_game *game);
+void				enemy_open_door(t_game *game);
+void				enemy_chase(t_game *game, float dist_sq, float speed);
+void				update_enemy_pos(t_game *game);
+
+// enemy_render.c
+void				update_enemy_sprite(t_game *game);
+void				render_enemy(t_game *game);
+void				render_enemy_sprite(t_game *game);
+
+// player_movement.c
+void				calculate_movement(t_game *game, float *move_x,
+						float *move_y);
+void				normalize_movement(float *move_x, float *move_y);
+void				handle_movement_xy(t_game *game, float speed);
+void				handle_movement(t_game *game);
+
+// player_look.c
+void				vertical_look(t_game *game, float delta);
+void				handle_mouselook(t_game *game);
+void				handle_yaw(t_game *game, float speed, float old_dir_x,
+						float old_plane_x);
+void				handle_pitch(t_game *game);
+
+// player_utils.c
+int					out_of_bounds(t_fvec map, t_game *game);
+void				unstuck_player(t_game *game, t_ray r);
+int					check_collision(t_fvec *pos, t_fvec new_pos, float radius,
+						t_game *game);
+
+// raycasting.c
+void				draw_wall_slices(t_game *game, t_ray *r, t_tex *tex);
+void				calculate_wall_projection(t_game *game, t_ray *r,
+						t_tex *tex);
+void				assign_wall_textures(t_game *game, t_ray *r, t_tex *tex);
+void				assign_tile_textures(t_game *game, t_ray *r, t_tex *tex);
+void				render_walls(t_game *game);
+
+// dda.c
+void				set_ray_direction(t_game *game, t_ray *r, float camera_x,
+						int incl_zoom);
+void				set_ray_step_direction(t_game *game, t_ray *r);
+void				set_dda_step_side(t_ray *r);
+int					dda(t_ray *r, t_game *game);
+
+// dda_special.c
+void				init_ray_to_target(t_game *game, t_ray *r,
+						t_fvec target_pos);
+int					dda_to_target(t_game *game, t_ray *r, t_fvec target_pos);
+int					dda_interact(t_ray *r, t_game *game);
+
+// display_ui.c
+void				display_fps_counter(t_game *game);
+void				display_msg(t_game *game);
+int					display_pause_screen(t_game *game);
+
+// interact.c
+void				display_ui_msg(t_game *game, char *key, char *msg);
+void				interact_door(t_game *game, t_ray r);
+void				interact_pwl(t_game *game);
+void				check_interact(t_game *game, int *tile_hit, t_ray *r);
+void				interact(t_game *game);
+
+// background.c
+int					init_bg(t_game *game, int ceiling, int floor);
+void				draw_bg(t_game *game);
+
+// utils.c
+int					delay_ms(unsigned int ms, struct timeval *timer);
+int					should_render_frame(t_game *game);
+float				dot_product(t_fvec a, t_fvec b);
 
 #endif

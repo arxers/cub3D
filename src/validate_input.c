@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   validate_input.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/29 21:20:28 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/01 17:47:22 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/04 07:41:56 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -704,7 +704,7 @@ and assign the values to map_width & map_height, in 'scene' struct
 */
 void	count_map_area(char **map_temp, t_scene *scene)
 {
-	t_point	index;
+	t_vec	index;
 	int		count;
 	int		max_x;
 
@@ -734,7 +734,7 @@ callocs space for (char **) for scene->map
 */
 int	init_map_array(char ***map, char **map_temp, t_scene *scene)
 {
-	t_point	index;
+	t_vec	index;
 
 	count_map_area(map_temp, scene);
 	*map = ft_calloc(scene->map_dim.y + 1, sizeof(char *));
