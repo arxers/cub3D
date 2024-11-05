@@ -1,6 +1,7 @@
 *.o
 *.a
 cub3D
+cub3d_bonus
 mlx
 .vscode/settings.json
 raycaster_textured.cpp
