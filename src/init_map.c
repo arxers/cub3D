@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_map.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 07:38:40 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 08:14:22 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 22:17:27 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,6 @@ int	init_minimap(t_game *game, t_vec map_grid_size)
 	mask.x = 16 * MAP_CELL_SIZE * 0.5;
 	mask.y = 16 * MAP_CELL_SIZE * 0.5;
 	if (init_img(game->mlx, &game->img[T_MAP], map.x, map.y) == -1
-		|| init_img(game->mlx, &game->img[T_MAP_ENEMY_PATH], map.x, map.y) == -1
 		|| init_img(game->mlx, &game->img[T_MAP_TILES], map.x, map.y) == -1
 		|| init_img(game->mlx, &game->img[T_MAP_MASK], mask.x, mask.y) == -1
 		|| init_img(game->mlx, &game->img[T_MAP_BG], mask.x, mask.y) == -1)
@@ -76,7 +75,6 @@ int	init_minimap(t_game *game, t_vec map_grid_size)
 	game->map.arr = char_to_int_map(game->scene.map);
 	game->map.size.x = game->scene.map_dim.x;
 	game->map.size.y = game->scene.map_dim.y;
-	fill_img(&game->img[T_MAP_ENEMY_PATH], MAGENTA);
 	game->map.offset.x = RES_X2 - game->img[T_MAP_MASK].size.x * 0.5;
 	game->map.offset.y = RES_Y - game->img[T_MAP_MASK].size.x - MAP_CELL_SIZE;
 	draw_rectangle(&game->img[T_MAP_BG], (t_vec){0, 0},

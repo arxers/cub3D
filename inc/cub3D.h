@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/05 20:31:10 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 22:21:52 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,23 +22,15 @@
 # include <stdio.h>
 # include <sys/time.h>
 
-// UI
-# define UI_PWL_TRUE "ENTER P-5000 POWERED WORK LOADER"
-# define UI_PWL_FALSE "NOT ENOUGH FUEL CELLS!"
-# define UI_DOOR "OPEN/CLOSE"
-
 // Gameplay
 # define TARGET_FPS 60
-# define REQUIRED_ITEMS 3
 
 // Movement Constants
 # define MOUSE_SEN 0.0025
 # define ROT_SPD 0.0025
 # define RUN_SPD 2
 # define PLAYER_SPD 0.002
-// # define ENEMY_SPD 0.0025
 # define PLAYER_RADIUS 0.20
-// # define ENEMY_RADIUS 0
 
 // Raycasting
 # define VERTICAL 0
@@ -63,15 +55,10 @@
 # define WHITE 0xFFFFFF
 # define MAGENTA 0xFF00FF
 
-// Bounds
-# define P_MAX_HEIGHT 0.4
-# define P_MIN_HEIGHT -0.2
-
 typedef enum e_texture
 {
 	T_WIN,
 	T_MAP,
-	T_MAP_ENEMY_PATH,
 	T_MAP_TILES,
 	T_MAP_MASK,
 	T_MAP_BG,
@@ -106,12 +93,8 @@ typedef enum e_state
 
 typedef enum e_tiles
 {
-	TILE_ITEM = -3,
-	TILE_DOOR_OPEN,
 	TILE_FLOOR = 0,
 	TILE_WALL,
-	TILE_DOOR,
-	TILE_PWL
 }					t_tiles;
 
 typedef enum e_direction
@@ -124,12 +107,7 @@ typedef enum e_direction
 
 typedef enum e_timer
 {
-	MS100,
 	MS1000,
-	TIMER_PWL,
-	TIMER_ENEMY,
-	TIMER_ENEMY_MAP,
-	TIMER_ENEMY_PATH,
 	TIMER_MAX,
 }					t_timer;
 
@@ -155,13 +133,6 @@ typedef struct s_img
 	int				endian;
 }					t_img;
 
-typedef struct s_coin
-{
-	t_fvec			pos;
-	t_fvec			dist;
-	int				collected;
-}					t_coin;
-
 typedef struct s_player
 {
 	t_fvec			pos;
@@ -171,19 +142,6 @@ typedef struct s_player
 	float			zoom;
 	int				pitch;
 }					t_player;
-
-typedef struct s_enemy
-{
-	t_fvec			pos;
-	t_fvec			dist;
-	t_fvec			memory;
-	t_fvec			last_dist;
-	t_fvec			last_seen;
-	t_img			img;
-	int				frame;
-	int				move_seed;
-	int				move_inc;
-}					t_enemy;
 
 typedef struct s_frame_data
 {
@@ -227,22 +185,6 @@ typedef struct s_texture_map
 	float			tex_step;
 }					t_tex;
 
-typedef struct s_pwl
-{
-	t_img			item_img;
-	t_img			overlay_img;
-	t_coin			item;
-	int				frame;
-}					t_pwl;
-
-typedef struct s_item
-{
-	t_img			img;
-	t_coin			*arr;
-	int				count;
-	int				collected;
-}					t_item;
-
 typedef struct s_scene
 {
 	char			*no;
@@ -258,8 +200,6 @@ typedef struct s_scene
 	char			**map_bak;
 	t_vec			map_dim;
 	t_vec			p_pos;
-	t_vec			pos_xeno;
-	t_vec			pos_powerloader;
 }					t_scene;
 
 typedef struct s_game

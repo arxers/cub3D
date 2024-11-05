@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   dda.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 07:00:31 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 08:00:58 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 22:19:25 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,8 +91,7 @@ int	dda(t_ray *r, t_game *game)
 		set_dda_step_side(r);
 		if (out_of_bounds(r->map, game))
 			return (-1);
-		if (game->map.arr[(int)r->map.y][(int)r->map.x] > 0
-			&& game->map.arr[(int)r->map.y][(int)r->map.x] != TILE_PWL)
+		if (game->map.arr[(int)r->map.y][(int)r->map.x] > 0)
 			return (0);
 	}
 }

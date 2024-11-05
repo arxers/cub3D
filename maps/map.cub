@@ -3,8 +3,8 @@ SO maps/teletubbies/dipsy.xpm
 EA maps/teletubbies/laalaa.xpm
 WE maps/teletubbies/po.xpm
 
-F 00,00,000
-C 255,255,255
+F 63,155,11
+C 153,204,255
 
 11111111
 1N000001
@@ -20,7 +20,3 @@ C 255,255,255
 100000011111111111111111111111111
 10000001
 11111111
-
-
-
-
