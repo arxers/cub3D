@@ -26,15 +26,15 @@ SRC =   src/main.c \
 		src/raycasting.c src/dda.c src/dda_special.c \
 		src/pwl_render.c src/item.c \
 		src/utils.c \
-		src/validate_bonus_cub_file.c \
+		src/validate_cub_file.c \
 		src/load_scene_details.c \
 		src/load_scene_details_to_struct.c \
 		src/prepare_walls.c \
 		src/is_valid_rgb_array.c \
-		src/is_bonus_map_char_valid.c \
+		src/is_map_char_valid.c \
 		src/process_map.c \
-		src/is_bonus_map_valid.c \
-		src/load_bonus_chars.c \
+		src/is_map_valid.c \
+		src/load_chars.c \
 		src/is_fill_char_at_map_border.c
 		
 OBJ = $(SRC:.c=.o)

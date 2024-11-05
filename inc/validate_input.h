@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 15:10:57 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/04 18:18:08 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 19:30:43 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,11 @@
 # define VALIDATE_INPUT_H
 # include "cub3D.h"
 
-// validate_bonus_cub_file.c
+// validate_cub_file.c
 int		check_n_cmdline_args(int ac);
 int		is_map_a_dot_cub_file(char *s);
 int		is_map_file_openable(char *mapfile);
-int		load_bonus_scene(char *mapfile, t_scene *scene);
+int		load_scene(char *mapfile, t_scene *scene);
 void	free_scene_struct(t_scene *s);
 
 // load_scene_details.c
@@ -47,8 +47,8 @@ int		ft_count_char(char *s, char c);
 int		is_valid_rgb_value(char *s);
 int		convert_rgb_array_to_int(char *s);
 
-// is_bonus_map_char_valid.c
-int		is_bonus_map_char_valid(char *s);
+// is_map_char_valid.c
+int		is_map_char_valid(char *s);
 int		process_map(t_scene *scene);
 int		trim_tmp_map_buf(t_scene **scene);
 void	replace_space_with_zero(char *s);
@@ -60,14 +60,14 @@ void	count_map_area(char **map_temp, t_scene *scene);
 void	load_map_data(char **s, t_scene *scene);
 void	load_map_bak_data(char **s, t_scene *scene);
 
-// is_bonus_map_valid.c
-int		is_bonus_map_valid(t_scene *scene);
+// is_map_valid.c
+int		is_map_valid(t_scene *scene);
 int		is_num_player_valid(char **map);
 int		count_char_in_map(char **map, char ch);
 int		load_player_pos(char **map, t_scene *scene);
 void	ff_bonus(int i, int j, t_scene *s);
 
-// load_bonus_chars.c
+// load_chars.c
 int		is_num_xeno_valid(char **map);
 int		load_xeno_pos(char **map, t_scene *scene);
 int		is_num_powerloader_valid(char **map);

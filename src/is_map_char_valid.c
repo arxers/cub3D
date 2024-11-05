@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   is_bonus_map_char_valid.c                          :+:      :+:    :+:   */
+/*   is_map_char_valid.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jsu <marvin@42.fr>                         +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 13:55:44 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/04 13:55:46 by jsu              ###   ########.fr       */
+/*   Updated: 2024/11/05 19:30:37 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ D: Door
 P: Powerloader
 X: Xeno
 */
-int	is_bonus_map_char_valid(char *s)
+int	is_map_char_valid(char *s)
 {
 	const char	ref[] = " \n10NSEWCDPX";
 	int			i;

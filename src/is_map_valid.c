@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   is_bonus_map_valid.c                               :+:      :+:    :+:   */
+/*   is_map_valid.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jsu <marvin@42.fr>                         +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 14:12:23 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/04 14:12:25 by jsu              ###   ########.fr       */
+/*   Updated: 2024/11/05 19:30:27 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/validate_input.h"
 
-int	is_bonus_map_valid(t_scene *scene)
+int	is_map_valid(t_scene *scene)
 {
 	if (is_num_player_valid(scene->map) == -1
 		|| load_player_pos(scene->map, scene) == -1

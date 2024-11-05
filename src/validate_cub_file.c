@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   validate_bonus_cub_file.c                          :+:      :+:    :+:   */
+/*   validate_cub_file.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 12:59:58 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/04 18:50:12 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 19:30:59 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,18 +69,7 @@ int	is_map_file_openable(char *mapfile)
 	return (0);
 }
 
-/* 
-NOTE. load_bonus_scene() differs from load_mandatory_scene() 
-for TWO function calls
-
-BONUS / MANDATORY
-is_bonus_map_char_valid()	/ is map_char_valid()
-is_bonus_map_valid()		/ is_mandatory_map_char_valid()
-
-key difference is that in the bonus versions, they consider FOUR extra chars:
-C, D, X, P
-*/
-int	load_bonus_scene(char *mapfile, t_scene *scene)
+int	load_scene(char *mapfile, t_scene *scene)
 {
 	int		map_fd;
 
@@ -95,9 +84,9 @@ int	load_bonus_scene(char *mapfile, t_scene *scene)
 		return (-1);
 	scene->hex_floor = convert_rgb_array_to_int(scene->floor);
 	scene->hex_ceiling = convert_rgb_array_to_int(scene->ceiling);
-	if (is_bonus_map_char_valid(scene->tmp_map_buf) == -1 || \
+	if (is_map_char_valid(scene->tmp_map_buf) == -1 || \
 		process_map(scene) == -1 || \
-		is_bonus_map_valid(scene) == -1)
+		is_map_valid(scene) == -1)
 		return (-1);
 	return (0);
 }

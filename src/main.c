@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/05 19:17:28 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 19:29:57 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ int	validate_input(int ac, char **av, t_scene *scene)
 		return (-1);
 	if (is_map_file_openable(av[1]) == -1)
 		return (-1);
-	if (load_bonus_scene(av[1], scene) == -1)
+	if (load_scene(av[1], scene) == -1)
 		return (-1);
 	return (0);
 }
