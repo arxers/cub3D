@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 07:52:38 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/05 19:42:54 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 21:36:46 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,10 +61,10 @@ void	assign_wall_textures(t_game *game, t_ray *r, t_tex *tex)
 {
 	if (r->side == VERTICAL)
 	{
-		tex->wall_tex = &game->img[T_WEST];
+		tex->wall_tex = &game->img[T_EAST];
 		if (r->dir.x <= 0)
 		{
-			tex->wall_tex = &game->img[T_EAST];
+			tex->wall_tex = &game->img[T_WEST];
 			tex->coords.x = WALL - tex->coords.x - 1;
 		}
 	}
