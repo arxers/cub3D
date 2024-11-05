@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 17:51:04 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 19:17:28 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,7 @@ int	main_loop(t_game *game)
 		handle_mouselook(game);
 	if (should_render_frame(game))
 	{
-		if (display_pause_screen(game))
-			return (0);
+		display_pause_screen(game);
 		update_enemy_pos(game);
 		handle_movement(game);
 		render_walls(game);

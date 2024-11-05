@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   display_ui.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 08:09:36 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 08:09:48 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 19:17:11 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,11 +52,10 @@ void	display_msg(t_game *game)
 			"[WSAD] or [ARROW KEYS] to move, [SHIFT] to run");
 }
 
-int	display_pause_screen(t_game *game)
+void	display_pause_screen(t_game *game)
 {
 	if (!game->state[S_PAUSE])
-		return (0);
+		return ;
 	put_img((t_vec){0, 0}, &game->img[T_PAUSE], &game->img[T_WIN]);
 	mlx_put_image_to_window(game->mlx, game->win, game->img[T_WIN].img, 0, 0);
-	return (1);
 }

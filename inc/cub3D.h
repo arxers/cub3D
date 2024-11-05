@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jaslim <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 08:33:23 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 19:17:02 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -491,7 +491,7 @@ int					dda_interact(t_ray *r, t_game *game);
 // display_ui.c
 void				display_fps_counter(t_game *game);
 void				display_msg(t_game *game);
-int					display_pause_screen(t_game *game);
+void				display_pause_screen(t_game *game);
 
 // interact.c
 void				display_ui_msg(t_game *game, char *key, char *msg);
