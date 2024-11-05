@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 07:28:56 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 23:30:04 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 18:31:23 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,6 @@ void	handle_keystate(unsigned int key, int state, t_game *game)
 		game->state[S_ROT_R] = state;
 	if (key == XK_Shift_L)
 		game->state[S_RUN] = state;
-	if (key == XK_Control_L)
-		game->state[S_SPACE] = state;
-	if (key == XK_e)
-		game->state[S_INTERACT] = state;
 }
 
 int	key_press(unsigned int key, t_game *game)

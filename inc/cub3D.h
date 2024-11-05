@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/13 16:23:34 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 23:29:23 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 19:15:48 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,33 +81,8 @@ typedef enum e_texture
 	T_SOUTH,
 	T_EAST,
 	T_WEST,
-	T_DOOR_CLOSE,
 	T_PAUSE,
 	T_DITHER,
-	T_XENO0,
-	T_XENO1,
-	T_XENO2,
-	T_XENO3,
-	T_XENO4,
-	T_XENO5,
-	T_XENO6,
-	T_XENO7,
-	T_PWL0,
-	T_PWL1,
-	T_PWL2,
-	T_PWL3,
-	T_PWL4,
-	T_PWL5,
-	T_PWL6,
-	T_PWL7,
-	T_PWL_ARM0,
-	T_PWL_ARM1,
-	T_PWL_ARM2,
-	T_PWL_ARM3,
-	T_PWL_ARM4,
-	T_PWL_ARM5,
-	T_PWL_ARM6,
-	T_ITEM,
 	IMG_MAX
 }					t_texture;
 
@@ -121,19 +96,11 @@ typedef enum e_state
 	S_ROT_D,
 	S_ROT_L,
 	S_ROT_R,
-	S_INTERACT,
 	S_MAP_DISABLE,
 	S_MAP_BIG,
 	S_MOUSE,
 	S_RUN,
-	S_SPACE,
 	S_PAUSE,
-	S_ENEMY_ICON,
-	S_ENEMY_PATH,
-	S_ENEMY_VISION,
-	S_ENEMY_DEAD,
-	S_CAUGHT,
-	S_PUNCHING,
 	STATE_MAX,
 }					t_state;
 
@@ -237,13 +204,6 @@ typedef struct s_map
 	char			update;
 }					t_map;
 
-// typedef struct s_light
-// {
-// 	float			ambient;
-// 	float			min;
-// 	float			max;
-// }					t_light;
-
 typedef struct s_ray
 {
 	double			line_height;
@@ -322,8 +282,7 @@ int					cleanup(t_game *game, unsigned char status, char *msg);
 void				error_handler(t_game *game, int status);
 
 // image_utils.c
-// unsigned int		darken(unsigned int color, float factor);
-// float				set_intensity(t_light light, float dist);
+void				put_img(t_vec offset, t_img *src, t_img *dst);
 void				draw_diagonal_lines(t_img *img, t_vec size,
 						unsigned int color);
 void				fill_img(t_img *img, unsigned int color);
@@ -336,19 +295,6 @@ unsigned int		get_pixel(t_img *img, int x, int y);
 
 // image_primitives.c
 void				brasenham(int *err, t_vec *start, t_vec d, t_vec s);
-void				draw_rectangle(t_img *dst, t_vec origin, t_vec size,
-						unsigned int color);
-void				draw_circle(t_img *dst, t_vec origin, int radius,
-						unsigned int color);
-void				draw_circle_outline(t_img *dst, t_vec origin, int radius,
-						unsigned int color);
-void				draw_line(t_img *img, t_vec start, t_vec end,
-						unsigned int color);
-
-// image_copy_paste.c
-void				put_img(t_vec offset, t_img *src, t_img *dst);
-
-// draw_primitives.c
 void				draw_rectangle(t_img *dst, t_vec origin, t_vec size,
 						unsigned int color);
 void				draw_circle(t_img *dst, t_vec origin, int radius,
@@ -374,7 +320,6 @@ int					count_tile(t_game *game, int n);
 // init_image.c
 int					init_img(void *mlx_ptr, t_img *img, int width, int height);
 int					load_xpm(void *mlx, char *path, t_img *img);
-int					load_pwl_xpms(t_game *game);
 int					load_xpms(t_game *game);
 
 // init_map.c
@@ -434,13 +379,13 @@ int					dda(t_ray *r, t_game *game);
 // display_ui.c
 void				display_fps_counter(t_game *game);
 void				display_msg(t_game *game);
-int					display_pause_screen(t_game *game);
+void				display_pause_screen(t_game *game);
 
 // background.c
 int					init_bg(t_game *game, int ceiling, int floor);
 void				draw_bg(t_game *game);
 
-// utils.c
+// timers.c
 int					delay_ms(unsigned int ms, struct timeval *timer);
 int					should_render_frame(t_game *game);
 

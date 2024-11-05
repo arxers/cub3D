@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 23:19:33 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 19:16:01 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,19 +21,18 @@ int	validate_input(int ac, char **av, t_scene *scene)
 		return (-1);
 	if (is_map_file_openable(av[1]) == -1)
 		return (-1);
-	if (load_mandatory_scene(av[1], scene) == -1)
+	if (load_scene(av[1], scene) == -1)
 		return (-1);
 	return (0);
 }
 
 int	main_loop(t_game *game)
 {
-	if (game->state[S_MOUSE] && !game->state[S_PAUSE] && !game->state[S_CAUGHT])
+	if (game->state[S_MOUSE] && !game->state[S_PAUSE])
 		handle_mouselook(game);
 	if (should_render_frame(game))
 	{
-		if (display_pause_screen(game))
-			return (0);
+		display_pause_screen(game);
 		handle_movement(game);
 		render_walls(game);
 		draw_minimap(game);

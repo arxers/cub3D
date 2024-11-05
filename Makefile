@@ -13,23 +13,21 @@ SRC =   src/main.c \
 		src/image_utils.c \
 		src/image_pixel_utils.c \
 		src/image_primitives.c \
-		src/image_copy_paste.c \
 		src/minimap.c \
 		src/player_movement.c \
 		src/player_look.c \
 		src/player_utils.c \
 		src/display_ui.c \
 		src/raycasting.c src/dda.c \
-		src/utils.c \
-		src/validate_bonus_cub_file.c \
+		src/timers.c \
+		src/validate_cub_file.c \
 		src/load_scene_details.c \
 		src/load_scene_details_to_struct.c \
 		src/prepare_walls.c \
 		src/is_valid_rgb_array.c \
-		src/is_bonus_map_char_valid.c \
+		src/is_map_char_valid.c \
 		src/process_map.c \
-		src/is_bonus_map_valid.c \
-		src/load_bonus_chars.c \
+		src/is_map_valid.c \
 		src/is_fill_char_at_map_border.c \
 		src/validate_input.c
 		

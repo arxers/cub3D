@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 07:40:32 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 23:30:35 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 18:34:27 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,8 +71,6 @@ void	handle_movement(t_game *game)
 {
 	int	run_speed;
 
-	if (game->state[S_CAUGHT])
-		return ;
 	run_speed = 1;
 	if (game->state[S_RUN] == 1)
 	{

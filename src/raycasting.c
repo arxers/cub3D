@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 07:52:38 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 23:23:37 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 18:42:24 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,17 +81,8 @@ void	assign_wall_textures(t_game *game, t_ray *r, t_tex *tex)
 void	assign_tile_textures(t_game *game, t_ray *r, t_tex *tex)
 {
 	tex->wall_tex = NULL;
-	if (game->map.arr[(int)r->map.y][(int)r->map.x] < 1
-		|| game->map.arr[(int)r->map.y][(int)r->map.x] == TILE_PWL)
+	if (game->map.arr[(int)r->map.y][(int)r->map.x] == 0)
 		return ;
-	if (game->map.arr[(int)r->map.y][(int)r->map.x] == 2)
-	{
-		if ((r->side == VERTICAL && r->dir.x <= 0) || (r->side == HORIZONTAL
-				&& r->dir.y >= 0))
-			tex->coords.x = WALL - tex->coords.x - 1;
-		tex->wall_tex = &game->img[T_DOOR_CLOSE];
-		return ;
-	}
 	assign_wall_textures(game, r, tex);
 }
 

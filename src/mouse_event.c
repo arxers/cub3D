@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 06:45:17 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 23:30:58 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 18:34:14 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,6 @@ int	mouse_event(unsigned int key, int x, int y, t_game *game)
 {
 	(void)x;
 	(void)y;
-	if (game->state[S_CAUGHT])
-		return (0);
 	if (key == 1)
 	{
 		if (game->state[S_MOUSE] == 0)
