@@ -76,12 +76,16 @@ $(BNAME): $(MLX) $(LIBFT) $(BOBJ)
 clean:
 	rm -f $(OBJ) $(BOBJ)
 	make -C libft clean
-	make -C $(MLXDIR) clean
+	@if [ -d $(MLXDIR) ]; then \
+		make -C $(MLXDIR) clean; \
+	fi
 
 fclean: clean
 	rm -f $(NAME) $(BNAME)
 	make -C libft fclean
-	rm -rf $(MLXDIR)
+	@if [ -d $(MLXDIR) ]; then \
+		rm -rf $(MLXDIR); \
+	fi
 
 re: fclean all
 
