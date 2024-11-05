@@ -65,7 +65,9 @@ $(LIBFT):
 $(NAME): $(MLX) $(LIBFT) $(OBJ)
 	cc $(CFLAGS) $(OBJ) $(LIBRARY) $(LIBRARY_FLAGS) -o $(NAME)
 
-bonus: $(MLX) $(LIBFT) $(BOBJ)
+bonus: $(BNAME)
+
+$(BNAME): $(MLX) $(LIBFT) $(BOBJ)
 	cc $(CFLAGS) $(BOBJ) $(LIBRARY) $(LIBRARY_FLAGS) -o $(BNAME)
 
 %.o: %.c

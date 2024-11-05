@@ -6,11 +6,33 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 13:18:14 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/05 19:44:24 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 21:04:30 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/validate_input_bonus.h"
+
+int	load_scene(char *mapfile, t_scene *scene)
+{
+	int		map_fd;
+
+	map_fd = open(mapfile, O_RDONLY);
+	if (map_fd == -1)
+	{
+		ft_putstr_fd("Error\nMap cannot be opened\n", 2);
+		return (-1);
+	}
+	if (load_scene_details(map_fd, &scene) == -1 || prepare_walls(&scene) == -1
+		|| is_six_details_valid(scene) == -1)
+		return (-1);
+	scene->hex_floor = convert_rgb_array_to_int(scene->floor);
+	scene->hex_ceiling = convert_rgb_array_to_int(scene->ceiling);
+	if (is_map_char_valid(scene->tmp_map_buf) == -1 || \
+		process_map(scene) == -1 || \
+		is_map_valid(scene) == -1)
+		return (-1);
+	return (0);
+}
 
 int	load_scene_details(int map_fd, t_scene **scene)
 {

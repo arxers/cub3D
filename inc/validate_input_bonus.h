@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 15:10:57 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/05 20:03:00 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 21:03:16 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,11 @@
 int		check_n_cmdline_args(int ac);
 int		is_map_a_dot_cub_file(char *s);
 int		is_map_file_openable(char *mapfile);
-int		load_scene(char *mapfile, t_scene *scene);
+int		is_map_a_directory(char *mapfile);
 void	free_scene_struct(t_scene *s);
 
 // load_scene_details_bonus.c
+int		load_scene(char *mapfile, t_scene *scene);
 int		load_scene_details(int map_fd, t_scene **scene);
 int		is_all_six_scene_details_present(t_scene *scene);
 int		load_map_buffer(char *line, int map_fd, t_scene **scene);

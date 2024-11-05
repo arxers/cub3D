@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/05 19:46:10 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 21:03:34 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 int	validate_input(int ac, char **av, t_scene *scene)
 {
 	if (check_n_cmdline_args(ac) == -1)
+		return (-1);
+	if (is_map_a_directory(av[1]) == -1)
 		return (-1);
 	if (is_map_a_dot_cub_file(av[1]) == -1)
 		return (-1);

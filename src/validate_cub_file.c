@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 12:59:58 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/05 18:27:52 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 21:11:20 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,21 @@ int	is_map_a_dot_cub_file(char *s)
 	}
 }
 
+int	is_map_a_directory(char *mapfile)
+{
+	int	map_fd;
+
+	map_fd = 0;
+	map_fd = open(mapfile, O_DIRECTORY);
+	if (map_fd != -1)
+	{
+		close(map_fd);
+		ft_putstr_fd("Error\nFile is a directory\n", 2);
+		return (-1);
+	}
+	return (0);
+}
+
 /*
 if file can be opened, then return 0
 else return -1
@@ -59,6 +74,7 @@ int	is_map_file_openable(char *mapfile)
 {
 	int	map_fd;
 
+	map_fd = 0;
 	map_fd = open(mapfile, O_RDONLY);
 	if (map_fd == -1)
 	{
