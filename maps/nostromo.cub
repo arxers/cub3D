@@ -1,7 +1,7 @@
-NO textures/nostromo/wall1.xpm
-SO textures/nostromo/wall2.xpm
-WE textures/nostromo/wall3.xpm
-EA textures/nostromo/wall4.xpm
+NO maps/nostromo/wall1.xpm
+SO maps/nostromo/wall2.xpm
+WE maps/nostromo/wall3.xpm
+EA maps/nostromo/wall4.xpm
 
 F 44,46,51
 C 0,0,0

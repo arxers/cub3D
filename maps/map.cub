@@ -1,11 +1,20 @@
-NO file.xpm
-SO file.xpm
-WE file.xpm
-EA file.xpm
+NO maps/teletubbies/tinkywinky.xpm
+SO maps/teletubbies/dipsy.xpm
+WE maps/teletubbies/laalaa.xpm
+EA maps/teletubbies/po.xpm
 
-F 164,169,20
+F 63,155,11
 C 153,204,255
 
 11111111
-1PCE01X1
+1E000001
+10000001
+10000001
+10000001
+10000001
+10000001
+10000001
+10000001
+10000001
+10000001
 11111111

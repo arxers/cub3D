@@ -1,20 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   is_map_char_valid_bonus.c                          :+:      :+:    :+:   */
+/*   is_map_char_valid.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 13:55:44 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/05 20:06:24 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/05 20:06:02 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/validate_input_bonus.h"
+#include "../inc/validate_input.h"
 
 int	is_map_char_valid(char *s)
 {
-	const char	ref[] = " \n10NSEWCDPX";
+	const char	ref[] = " \n10NSEW";
 	int			i;
 
 	i = 0;
