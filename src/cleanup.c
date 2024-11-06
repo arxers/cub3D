@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 06:34:40 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/04 23:29:40 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/06 15:07:59 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ void	error_handler(t_game *game, int status)
 	if (status == 1)
 		cleanup(game, 1, "Error\nFailed to initialize game\n");
 	else if (status == 2)
-		cleanup(game, 1, "Error\nError: Failed to create image\n");
+		cleanup(game, 1, "Error\nFailed to create image\n");
 	else if (status == 3)
-		cleanup(game, 1, "Error\nError: Missing texture file/files\n");
+		cleanup(game, 1, "Error\nMissing texture file/files\n");
 }
