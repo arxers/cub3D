@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 12:59:58 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/05 21:11:20 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/06 16:20:52 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,24 +85,20 @@ int	is_map_file_openable(char *mapfile)
 	return (0);
 }
 
-void	free_scene_struct(t_scene *s)
+int	is_map_file_empty(char *s)
 {
-	if (s->no != NULL)
-		free(s->no);
-	if (s->so != NULL)
-		free(s->so);
-	if (s->ea != NULL)
-		free(s->ea);
-	if (s->we != NULL)
-		free(s->we);
-	if (s->floor != NULL)
-		free(s->floor);
-	if (s->ceiling != NULL)
-		free(s->ceiling);
-	if (s->tmp_map_buf != NULL)
-		free(s->tmp_map_buf);
-	if (s->map != NULL)
-		free_char_map(s->map);
-	if (s->map_bak != NULL)
-		free_char_map(s->map_bak);
+	int		fd;
+	char	*line;
+
+	fd = 0;
+	fd = open(s, O_RDONLY);
+	line = get_next_line(fd);
+	if (line == NULL)
+	{
+		ft_putstr_fd("Error\nMap is empty\n", 2);
+		flush_gnl(&line, fd);
+		return (-1);
+	}
+	flush_gnl(&line, fd);
+	return (0);
 }

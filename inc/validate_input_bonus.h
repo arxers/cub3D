@@ -6,7 +6,7 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 15:10:57 by jsu               #+#    #+#             */
-/*   Updated: 2024/11/05 21:03:16 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/06 16:23:53 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,15 @@
 # define VALIDATE_INPUT_BONUS_H
 # include "cub3D_bonus.h"
 
+// main.c
+void	free_scene_struct(t_scene *s);
+
 // validate_cub_file_bonus.c
 int		check_n_cmdline_args(int ac);
 int		is_map_a_dot_cub_file(char *s);
 int		is_map_file_openable(char *mapfile);
 int		is_map_a_directory(char *mapfile);
-void	free_scene_struct(t_scene *s);
+int		is_map_file_empty(char *s);
 
 // load_scene_details_bonus.c
 int		load_scene(char *mapfile, t_scene *scene);

@@ -6,12 +6,34 @@
 /*   By: jaslim <jaslim@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 11:44:00 by jaslim            #+#    #+#             */
-/*   Updated: 2024/11/05 20:57:52 by jaslim           ###   ########.fr       */
+/*   Updated: 2024/11/06 16:17:49 by jaslim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/cub3D.h"
 #include "../inc/validate_input.h"
+
+void	free_scene_struct(t_scene *s)
+{
+	if (s->no != NULL)
+		free(s->no);
+	if (s->so != NULL)
+		free(s->so);
+	if (s->ea != NULL)
+		free(s->ea);
+	if (s->we != NULL)
+		free(s->we);
+	if (s->floor != NULL)
+		free(s->floor);
+	if (s->ceiling != NULL)
+		free(s->ceiling);
+	if (s->tmp_map_buf != NULL)
+		free(s->tmp_map_buf);
+	if (s->map != NULL)
+		free_char_map(s->map);
+	if (s->map_bak != NULL)
+		free_char_map(s->map_bak);
+}
 
 int	validate_input(int ac, char **av, t_scene *scene)
 {
@@ -22,6 +44,8 @@ int	validate_input(int ac, char **av, t_scene *scene)
 	if (is_map_a_dot_cub_file(av[1]) == -1)
 		return (-1);
 	if (is_map_file_openable(av[1]) == -1)
+		return (-1);
+	if (is_map_file_empty(av[1]) == -1)
 		return (-1);
 	if (load_scene(av[1], scene) == -1)
 		return (-1);
